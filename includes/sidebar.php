@@ -1,37 +1,106 @@
 <?php
+// جلب عدد الطلبات المعلقة (فقط للأدمن)
 $pending_count = 0;
 if (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) {
-    $pending_count = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as c FROM Pharmacist WHERE IsApproved=0"))['c'];
+    $count_query = mysqli_query($conn, "SELECT COUNT(*) as c FROM Pharmacist WHERE IsApproved=0");
+    if ($count_query) {
+        $pending_count = mysqli_fetch_assoc($count_query)['c'];
+    }
 }
+
+// تحديد لون الثيم بناءً على الدور (أزرق للأدمن، أخضر للصيدلي)
+$role_id = isset($_SESSION['role_id']) ? $_SESSION['role_id'] : 0;
+$theme_color = ($role_id == 1) ? 'text-blue-400' : 'text-emerald-400';
+$hover_color = ($role_id == 1) ? 'hover:bg-blue-600' : 'hover:bg-emerald-600';
 ?>
-<!-- السايدبار ثابت (لا يتحرك مع السكرول) -->
+
+<!-- بداية القائمة الجانبية -->
+<!-- z-20 لضمان بقائها فوق أي عنصر آخر -->
 <aside class="w-64 bg-slate-900 dark:bg-slate-950 text-white flex flex-col p-6 shadow-2xl z-20 flex-shrink-0 transition-colors duration-300">
+
+    <!-- قسم الشعار والعنوان -->
     <div class="mb-10 text-center border-b border-gray-700 pb-4">
-        <h2 class="text-2xl font-black tracking-tight text-blue-400">PharmaSmart</h2>
+        <h2 class="text-2xl font-black tracking-tight <?php echo $theme_color; ?>">
+            PharmaSmart
+        </h2>
+        <p class="text-xs text-gray-400 mt-2 font-medium">
+            <?php echo ($role_id == 1) ? 'لوحة الإدارة العليا' : 'نظام إدارة الصيدلية'; ?>
+        </p>
     </div>
 
-    <nav class="flex-grow space-y-2 overflow-y-auto pr-2">
-        <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1): ?>
-            <a href="../admin/dashboard.php" class="flex items-center gap-3 p-3 rounded-xl transition hover:bg-blue-600">
+    <!-- روابط التنقل (قابلة للسكرول إذا كانت القائمة طويلة) -->
+    <nav class="flex-grow space-y-2 overflow-y-auto pr-2 custom-scrollbar">
+
+        <!-- ========================================== -->
+        <!-- 1. روابط المدير (Admin Links) -->
+        <!-- ========================================== -->
+        <?php if ($role_id == 1): ?>
+
+            <!-- الرئيسية -->
+            <a href="../admin/dashboard.php" class="flex items-center gap-3 p-3 rounded-xl transition duration-200 <?php echo $hover_color; ?>">
                 <i data-lucide="layout-dashboard"></i> <span><?php echo $lang['dashboard']; ?></span>
             </a>
 
-            <a href="../admin/pharmacies.php" class="flex items-center justify-between p-3 rounded-xl transition hover:bg-blue-600">
+            <!-- إدارة الصيدليات (مع العداد الأحمر) -->
+            <a href="../admin/pharmacies.php" class="flex items-center justify-between p-3 rounded-xl transition duration-200 <?php echo $hover_color; ?>">
                 <div class="flex items-center gap-3">
                     <i data-lucide="hospital"></i> <span><?php echo $lang['pharmacies']; ?></span>
                 </div>
                 <?php if ($pending_count > 0): ?>
-                    <span class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse"><?php echo $pending_count; ?></span>
+                    <span class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse shadow-sm shadow-red-900/50">
+                        <?php echo $pending_count; ?>
+                    </span>
                 <?php endif; ?>
             </a>
 
-            <a href="../admin/users.php" class="flex items-center gap-3 p-3 rounded-xl transition hover:bg-blue-600">
+            <!-- إدارة المرضى -->
+            <a href="../admin/users.php" class="flex items-center gap-3 p-3 rounded-xl transition duration-200 <?php echo $hover_color; ?>">
                 <i data-lucide="users"></i> <span><?php echo $lang['patients']; ?></span>
             </a>
+
+            <!-- 💡 الأقسام الجديدة (التقارير، المالية، الصلاحيات) -->
+            <div class="my-3 border-t border-gray-700/50"></div> <!-- فاصل -->
+
+            <a href="#" class="flex items-center gap-3 p-3 rounded-xl transition duration-200 <?php echo $hover_color; ?> text-gray-300 hover:text-white">
+                <i data-lucide="bar-chart-3"></i> <span><?php echo $lang['reports']; ?></span>
+            </a>
+
+            <a href="#" class="flex items-center gap-3 p-3 rounded-xl transition duration-200 <?php echo $hover_color; ?> text-gray-300 hover:text-white">
+                <i data-lucide="wallet"></i> <span><?php echo $lang['finance']; ?></span>
+            </a>
+
+            <a href="#" class="flex items-center gap-3 p-3 rounded-xl transition duration-200 <?php echo $hover_color; ?> text-gray-300 hover:text-white">
+                <i data-lucide="shield-check"></i> <span><?php echo $lang['roles']; ?></span>
+            </a>
+
+            <!-- ========================================== -->
+            <!-- 2. روابط الصيدلي (Pharmacist Links) -->
+            <!-- ========================================== -->
+        <?php elseif ($role_id == 2): ?>
+
+            <a href="../pharmacist/dashboard.php" class="flex items-center gap-3 p-3 rounded-xl transition duration-200 <?php echo $hover_color; ?>">
+                <i data-lucide="layout-dashboard"></i> <span>الرئيسية</span>
+            </a>
+
+            <a href="../pharmacist/medicines.php" class="flex items-center gap-3 p-3 rounded-xl transition duration-200 <?php echo $hover_color; ?>">
+                <i data-lucide="pill"></i> <span>الأدوية والمخزون</span>
+            </a>
+
+            <a href="../pharmacist/orders.php" class="flex items-center gap-3 p-3 rounded-xl transition duration-200 <?php echo $hover_color; ?>">
+                <i data-lucide="shopping-bag"></i> <span>الطلبات</span>
+            </a>
+
+            <a href="../pharmacist/chat.php" class="flex items-center gap-3 p-3 rounded-xl transition duration-200 <?php echo $hover_color; ?>">
+                <i data-lucide="message-square"></i> <span>المحادثات</span>
+            </a>
+
         <?php endif; ?>
+
     </nav>
 
-    <a href="../auth/logout.php" class="flex items-center gap-3 p-3 bg-red-600/10 text-red-400 hover:bg-red-600 hover:text-white rounded-xl transition mt-auto">
-        <i data-lucide="log-out"></i> <span><?php echo $lang['logout']; ?></span>
+    <!-- زر تسجيل الخروج (يظهر للجميع في الأسفل) -->
+    <a href="../auth/logout.php" class="flex items-center gap-3 p-3 bg-red-600/10 text-red-400 hover:bg-red-600 hover:text-white rounded-xl transition duration-200 mt-auto border border-red-600/20 group">
+        <i data-lucide="log-out" class="group-hover:translate-x-1 transition-transform rtl:group-hover:-translate-x-1"></i>
+        <span><?php echo $lang['logout']; ?></span>
     </a>
 </aside>
