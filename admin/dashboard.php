@@ -223,14 +223,38 @@ if ($dir == 'rtl') {
         position: '<?php echo $zoom_pos; ?>'
     }).addTo(map);
 
-    // 2. تحديد شكل الخريطة (TileLayer)
-    // بنفحص إذا الـ HTML فيه كلاس 'dark' (وضع ليلي)، بنجيب خريطة غامقة، وإلا بنجيب خريطة فاتحة
-    var tileUrl = document.documentElement.classList.contains('dark') ?
-        'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' :
-        'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
-    L.tileLayer(tileUrl, {
-        maxZoom: 19 // أقصى حد للزووم
-    }).addTo(map);
+    // 2. تحديد شكل الخريطة (TileLayer) ديناميكياً
+    var lightTileUrl = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+    var darkTileUrl = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+    var currentTileLayer; // متغير لحفظ طبقة الخريطة الحالية
+
+    // دالة لتحديث ثيم الخريطة
+    function updateMapTheme() {
+        var isDark = document.documentElement.classList.contains('dark');
+        var newTileUrl = isDark ? darkTileUrl : lightTileUrl;
+
+        // إذا كانت هناك طبقة مرسومة مسبقاً، قم بإزالتها
+        if (currentTileLayer) {
+            map.removeLayer(currentTileLayer);
+        }
+
+        // ارسم الطبقة الجديدة
+        currentTileLayer = L.tileLayer(newTileUrl, {
+            maxZoom: 19
+        }).addTo(map);
+    }
+
+    // تشغيل الدالة لأول مرة عند تحميل الصفحة
+    updateMapTheme();
+
+    // الاستماع لزر التبديل (Theme Toggle) الموجود في التوب بار
+    var themeToggleBtnMap = document.getElementById('theme-toggle');
+    if (themeToggleBtnMap) {
+        themeToggleBtnMap.addEventListener('click', function() {
+            // ننتظر جزء من الثانية حتى يتم تحديث كلاسات الصفحة ثم نحدث الخريطة
+            setTimeout(updateMapTheme, 50);
+        });
+    }
 
     // 💡 3. مجموعة الطبقات (LayerGroup)
     // عملنا هذي المجموعة عشان لما نفلتر الخريطة، نقدر نمسح كل النقاط القديمة بضغطة واحدة ونرسم نقاط جديدة
