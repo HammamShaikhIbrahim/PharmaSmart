@@ -67,6 +67,7 @@ if ($current_lang == 'ar') {
     $lang['join_date'] = "تاريخ الانضمام";
     $lang['active'] = "نشط";
     $lang['pending'] = "معلق";
+    $lang['search_pharmacy'] = "ابحث عن صيدلية بالاسم...";
 
     // جدول المرضى
     $lang['patient_name'] = "المريض";
@@ -74,6 +75,7 @@ if ($current_lang == 'ar') {
     $lang['age'] = "العمر";
     $lang['years'] = "سنة";
     $lang['not_specified'] = "غير محدد";
+    $lang['search_patient'] = "ابحث عن مريض بالاسم...";
 
     // Admin vs Pharmacist
     $lang['admin'] = "مدير";
@@ -148,6 +150,8 @@ if ($current_lang == 'ar') {
     $lang['join_date'] = "Join Date";
     $lang['active'] = "Active";
     $lang['pending'] = "Pending";
+    $lang['search_pharmacy'] = "Search pharmacy by name...";
+
 
     // Patients Table
     $lang['patient_name'] = "Patient";
@@ -155,6 +159,7 @@ if ($current_lang == 'ar') {
     $lang['age'] = "Age";
     $lang['years'] = "years";
     $lang['not_specified'] = "Not specified";
+    $lang['search_patient'] = "Search patient by name...";
 
 
     // Admin vs Pharmacist

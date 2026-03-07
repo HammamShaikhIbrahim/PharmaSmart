@@ -63,9 +63,9 @@ include('../includes/sidebar.php');
         <!-- فورم البحث (بيرسل الكلمة في الرابط GET) -->
         <form method="GET" class="w-full md:w-96">
             <div class="relative">
-                <input type="text" name="search" placeholder="ابحث عن مريض..." value="<?php echo htmlspecialchars($search); ?>"
+                <input type="text" name="search" placeholder="<?php echo $lang['search_patient']; ?>" value="<?php echo htmlspecialchars($search); ?>"
                     class="w-full p-3 rounded-2xl border dark:bg-slate-800 dark:border-slate-700 dark:text-white shadow-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                <i data-lucide="search" class="absolute left-3 top-3.5 text-gray-400"></i>
+                <i data-lucide="search" class="top-3.5 text-gray-400 <?php echo ($dir == 'rtl') ? 'absolute left-3' : 'absolute right-3'; ?>"></i>
             </div>
         </form>
     </div>
