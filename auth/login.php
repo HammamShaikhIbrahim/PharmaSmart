@@ -9,9 +9,9 @@ if (isset($_POST['login'])) {
     $email = mysqli_real_escape_string($conn, $_POST['email']);
     $password = $_POST['password'];
 
-    $query = "SELECT u.UserID, u.RoleID, u.Password, p.IsApproved 
-              FROM User u 
-              LEFT JOIN Pharmacist p ON u.UserID = p.PharmacistID 
+    $query = "SELECT u.UserID, u.RoleID, u.Password, p.IsApproved
+              FROM User u
+              LEFT JOIN Pharmacist p ON u.UserID = p.PharmacistID
               WHERE u.Email = '$email'";
 
     $result = mysqli_query($conn, $query);
@@ -59,7 +59,6 @@ if (isset($_POST['login'])) {
     </script>
 
     <script>
-        // سكربت التفضيل الافتراضي (النهاري)
         if (localStorage.getItem('color-theme') === 'dark') {
             document.documentElement.classList.add('dark');
         } else {
@@ -69,92 +68,127 @@ if (isset($_POST['login'])) {
     </script>
 
     <style>
-        body,
-        html {
+        body, html {
             height: 100%;
             margin: 0;
             overflow: hidden;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
-        body {
-            transition: background-color 0.3s ease, color 0.3s ease;
+        
+        /* تأثيرات الإضاءة والظلال المعقدة للأشكال 3D */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+        }
+        .dark .glass-panel {
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
         }
     </style>
 </head>
 
-<body class="bg-gray-50 dark:bg-slate-950 flex items-center justify-center relative">
-
-    <!-- مؤثرات الخلفية -->
-    <div class="absolute top-[-20%] rtl:right-[-10%] ltr:left-[-10%] w-96 h-96 bg-blue-400/20 dark:bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
-    <div class="absolute bottom-[-20%] rtl:left-[-10%] ltr:right-[-10%] w-96 h-96 bg-emerald-400/20 dark:bg-emerald-600/10 rounded-full blur-3xl pointer-events-none"></div>
+<!-- الخلفية الأساسية متدرجة وحيوية لتناسب الوضعين -->
+<body class="bg-gradient-to-br from-teal-50 to-emerald-200 dark:from-slate-900 dark:to-teal-950 flex items-center justify-center relative transition-colors duration-500">
 
     <!-- ==========================================
-         أزرار التحكم العائمة (ثابتة في الزاوية وتدعم الاتجاهين)
-         rtl:right-6 -> في العربي ستكون على اليمين
-         ltr:right-6 -> في الإنجليزي ستكون على اليمين أيضاً (كما طلبت أن تكون يمين ثابتة)
-         ========================================== -->
-    <div class="absolute top-6 right-6 flex items-center gap-3 z-50">
+         الأشكال الطبية ثلاثية الأبعاد (3D Medical Shapes)
+    ========================================== -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        
+        <!-- 1. كبسولة دواء 3D (أعلى اليسار) -->
+        <div class="absolute top-10 left-20 w-32 h-64 rounded-full transform rotate-[35deg]
+                    bg-gradient-to-b from-emerald-300 to-teal-500 dark:from-emerald-600 dark:to-teal-800
+                    shadow-[inset_15px_15px_30px_rgba(255,255,255,0.7),inset_-10px_-10px_30px_rgba(0,0,0,0.2),10px_20px_40px_rgba(20,184,166,0.3)]">
+        </div>
 
-        <!-- زر الوضع الليلي (نفس سلوك التوب بار بالضبط) -->
-        <button id="theme-toggle" type="button" class="bg-white dark:bg-slate-800 p-2.5 rounded-xl shadow-md border border-gray-100 dark:border-slate-700 hover:scale-105 transition-transform flex items-center justify-center">
-            <i id="theme-toggle-light-icon" data-lucide="sun" class="hidden w-5 h-5 text-yellow-500"></i>
-            <i id="theme-toggle-dark-icon" data-lucide="moon" class="hidden w-5 h-5 text-slate-400"></i>
+        <!-- 2. حبة دواء دائرية (Tablet) بمنتصف اليمين -->
+        <div class="absolute top-1/4 right-20 w-48 h-48 rounded-full transform -rotate-[15deg]
+                    bg-gradient-to-tr from-green-200 to-emerald-400 dark:from-green-700 dark:to-emerald-600
+                    shadow-[inset_-10px_-10px_30px_rgba(0,0,0,0.15),inset_15px_15px_30px_rgba(255,255,255,0.8),0_20px_40px_rgba(16,185,129,0.2)]">
+            <!-- خط المنتصف للحبة -->
+            <div class="absolute top-1/2 left-4 right-4 h-1 bg-white/40 dark:bg-black/10 rounded-full transform -translate-y-1/2 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)]"></div>
+        </div>
+
+        <!-- 3. الصليب الطبي 3D (أسفل اليسار) -->
+        <div class="absolute bottom-20 left-1/4 w-32 h-32 transform rotate-[15deg] opacity-80">
+            <!-- الجزء العمودي -->
+            <div class="absolute inset-x-10 inset-y-0 rounded-2xl bg-gradient-to-br from-teal-300 to-cyan-500 dark:from-teal-600 dark:to-cyan-800 shadow-[inset_5px_5px_15px_rgba(255,255,255,0.6),inset_-5px_-5px_15px_rgba(0,0,0,0.2)]"></div>
+            <!-- الجزء الأفقي -->
+            <div class="absolute inset-y-10 inset-x-0 rounded-2xl bg-gradient-to-br from-teal-300 to-cyan-500 dark:from-teal-600 dark:to-cyan-800 shadow-[inset_5px_5px_15px_rgba(255,255,255,0.6),inset_-5px_-5px_15px_rgba(0,0,0,0.2)]"></div>
+        </div>
+
+        <!-- 4. كبسولة صغيرة مموهة (عائمة في الخلفية لعمق الصورة) -->
+        <div class="absolute bottom-1/3 right-1/3 w-20 h-40 rounded-full transform -rotate-[40deg] blur-md
+                    bg-gradient-to-r from-emerald-400 to-green-300 dark:from-emerald-700 dark:to-green-800
+                    shadow-[inset_5px_5px_15px_rgba(255,255,255,0.5)]">
+        </div>
+
+    </div>
+
+    <!-- ==========================================
+         أزرار التحكم العائمة (زجاجية أيضاً)
+    ========================================== -->
+    <div class="absolute top-6 right-6 flex items-center gap-3 z-50">
+        <button id="theme-toggle" type="button" class="glass-panel p-3 rounded-2xl hover:scale-105 transition-transform flex items-center justify-center text-gray-700 dark:text-white">
+            <i id="theme-toggle-light-icon" data-lucide="sun" class="hidden w-5 h-5 text-amber-400"></i>
+            <i id="theme-toggle-dark-icon" data-lucide="moon" class="hidden w-5 h-5 text-blue-200"></i>
         </button>
 
-        <!-- زر اللغة -->
         <a href="?lang=<?php echo $lang['switch_lang_code']; ?>"
-            class="bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 font-bold px-4 py-2.5 rounded-xl shadow-md border border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 transition flex items-center gap-2 text-sm">
+           class="glass-panel text-gray-800 dark:text-white font-bold px-5 py-3 rounded-2xl hover:bg-white/30 dark:hover:bg-slate-800/50 transition flex items-center gap-2 text-sm">
             <i data-lucide="globe" class="w-4 h-4"></i>
             <?php echo $lang['switch_lang_text']; ?>
-
         </a>
     </div>
 
     <!-- ==========================================
-         صندوق تسجيل الدخول
-         ========================================== -->
-    <div class="bg-white dark:bg-slate-900 p-10 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-slate-800 w-full max-w-md z-10 transition-colors duration-300">
+         صندوق تسجيل الدخول (Glass Card)
+    ========================================== -->
+    <div class="glass-panel p-10 md:p-12 rounded-[2.5rem] w-full max-w-md z-10 transition-all duration-300 mx-4">
 
         <div class="text-center mb-10">
-            <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-50 dark:bg-blue-900/30 rounded-2xl mb-4 text-blue-600 dark:text-blue-400">
-                <i data-lucide="shield-check" class="w-8 h-8"></i>
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-white/30 dark:bg-slate-800/50 backdrop-blur-md rounded-3xl mb-5 text-emerald-600 dark:text-emerald-400 shadow-inner border border-white/40 dark:border-white/10">
+                <i data-lucide="shield-plus" class="w-10 h-10"></i>
             </div>
-            <h2 class="text-3xl font-black text-gray-800 dark:text-white tracking-tight mb-2">PharmaSmart</h2>
-            <p class="text-sm font-medium text-gray-500 dark:text-gray-400"><?php echo $lang['login_subtitle']; ?></p>
+            <h2 class="text-4xl font-black text-gray-900 dark:text-white tracking-tight mb-2">PharmaSmart</h2>
+            <p class="text-sm font-bold text-gray-600 dark:text-gray-300 opacity-80"><?php echo $lang['login_subtitle']; ?></p>
         </div>
 
-        <form method="POST" class="space-y-5 text-<?php echo ($dir == 'rtl') ? 'right' : 'left'; ?>">
+        <form method="POST" class="space-y-6 text-<?php echo ($dir == 'rtl') ? 'right' : 'left'; ?>">
 
             <div>
-                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2"><?php echo $lang['email']; ?></label>
+                <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-2 ml-1"><?php echo $lang['email']; ?></label>
                 <div class="relative">
                     <input type="email" name="email" required placeholder="name@pharmacy.com" dir="ltr"
-                        class="w-full rtl:pl-4 rtl:pr-12 ltr:pr-4 ltr:pl-12 py-3.5 bg-gray-50 dark:bg-slate-800 border border-transparent focus:bg-white dark:focus:bg-slate-900 focus:border-blue-500 rounded-2xl text-sm text-gray-800 dark:text-white placeholder-gray-400 outline-none transition-all">
-                    <i data-lucide="mail" class="absolute rtl:right-4 ltr:left-4 top-3.5 text-gray-400 w-5 h-5 pointer-events-none"></i>
+                        class="w-full rtl:pl-4 rtl:pr-14 ltr:pr-4 ltr:pl-14 py-4 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm border border-white/50 dark:border-slate-700 focus:bg-white dark:focus:bg-slate-800 focus:border-emerald-500 rounded-2xl text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 outline-none transition-all shadow-inner">
+                    <i data-lucide="mail" class="absolute rtl:right-5 ltr:left-5 top-4 text-emerald-600 dark:text-emerald-400 w-5 h-5 pointer-events-none"></i>
                 </div>
             </div>
 
             <div>
-                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2"><?php echo $lang['password']; ?></label>
+                <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-2 ml-1"><?php echo $lang['password']; ?></label>
                 <div class="relative">
                     <input type="password" name="password" required placeholder="••••••••" dir="ltr"
-                        class="w-full rtl:pl-4 rtl:pr-12 ltr:pr-4 ltr:pl-12 py-3.5 bg-gray-50 dark:bg-slate-800 border border-transparent focus:bg-white dark:focus:bg-slate-900 focus:border-blue-500 rounded-2xl text-sm text-gray-800 dark:text-white placeholder-gray-400 outline-none transition-all">
-                    <i data-lucide="lock" class="absolute rtl:right-4 ltr:left-4 top-3.5 text-gray-400 w-5 h-5 pointer-events-none"></i>
+                        class="w-full rtl:pl-4 rtl:pr-14 ltr:pr-4 ltr:pl-14 py-4 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm border border-white/50 dark:border-slate-700 focus:bg-white dark:focus:bg-slate-800 focus:border-emerald-500 rounded-2xl text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 outline-none transition-all shadow-inner">
+                    <i data-lucide="lock" class="absolute rtl:right-5 ltr:left-5 top-4 text-emerald-600 dark:text-emerald-400 w-5 h-5 pointer-events-none"></i>
                 </div>
             </div>
 
-            <button type="submit" name="login" class="w-full bg-blue-600 text-white py-4 rounded-2xl hover:bg-blue-700 transition-all font-bold text-base mt-6 shadow-lg shadow-blue-600/20 active:scale-[0.98] flex justify-center items-center gap-2">
+            <button type="submit" name="login" class="w-full bg-emerald-600 text-white py-4 rounded-2xl hover:bg-emerald-700 transition-all font-bold text-lg mt-8 shadow-[0_10px_20px_rgba(16,185,129,0.3)] active:scale-[0.98] flex justify-center items-center gap-2 border border-emerald-500/50">
                 <?php echo $lang['btn_login']; ?>
                 <i data-lucide="<?php echo ($dir == 'rtl') ? 'arrow-left' : 'arrow-right'; ?>" class="w-5 h-5"></i>
             </button>
 
         </form>
 
-        <div class="mt-8 text-center pt-6 border-t border-gray-100 dark:border-slate-800">
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">
+        <div class="mt-8 text-center pt-6 border-t border-white/30 dark:border-slate-700/50">
+            <p class="text-sm font-bold text-gray-700 dark:text-gray-300">
                 <?php echo $lang['new_account']; ?>
-                <a href="register.php" class="text-blue-600 dark:text-blue-400 font-bold hover:underline mx-1"><?php echo $lang['register_link']; ?></a>
+                <a href="register.php" class="text-emerald-700 dark:text-emerald-400 font-black hover:underline mx-1"><?php echo $lang['register_link']; ?></a>
             </p>
         </div>
     </div>
@@ -168,50 +202,47 @@ if (isset($_POST['login'])) {
                     title: '<?php echo $lang['err_title']; ?>',
                     text: '<?php echo $error; ?>',
                     confirmButtonText: '<?php echo $lang['ok_btn']; ?>',
-                    confirmButtonColor: '#ef4444',
+                    confirmButtonColor: '#10b981', // لون الزر تماشياً مع الثيم
                     allowOutsideClick: false,
-                    background: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff',
-                    color: document.documentElement.classList.contains('dark') ? '#f8fafc' : '#1f2937'
+                    background: document.documentElement.classList.contains('dark') ? '#1e293b' : 'rgba(255,255,255,0.9)',
+                    backdrop: 'rgba(0,0,0,0.4)',
+                    color: document.documentElement.classList.contains('dark') ? '#f8fafc' : '#1f2937',
+                    customClass: {
+                        popup: 'backdrop-blur-xl border border-white/20'
+                    }
                 });
             });
         </script>
     <?php endif; ?>
 
-    <!-- ==========================================
-         سكربت الوضع الليلي (مطابق تماماً للتوب بار)
-         ========================================== -->
     <script>
         lucide.createIcons();
 
         var themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
         var themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
 
-        // تحديد أي أيقونة ستظهر عند التحميل
         if (localStorage.getItem('color-theme') === 'light' || (!('color-theme' in localStorage))) {
-            themeToggleDarkIcon.classList.remove('hidden'); // نعرض القمر في الوضع النهاري
+            themeToggleDarkIcon.classList.remove('hidden'); 
         } else {
-            themeToggleLightIcon.classList.remove('hidden'); // نعرض الشمس في الوضع الليلي
+            themeToggleLightIcon.classList.remove('hidden'); 
         }
 
-        // دالة تحديث أيقونات الوضع الليلي/النهاري
         function updateThemeIcons() {
             var isDark = document.documentElement.classList.contains('dark');
             var sunIcon = document.getElementById('theme-toggle-light-icon');
             var moonIcon = document.getElementById('theme-toggle-dark-icon');
 
             if (isDark) {
-                sunIcon.classList.remove('hidden'); // إظهار الشمس في الوضع الليلي
+                sunIcon.classList.remove('hidden'); 
                 moonIcon.classList.add('hidden');
             } else {
                 sunIcon.classList.add('hidden');
-                moonIcon.classList.remove('hidden'); // إظهار القمر في الوضع النهاري
+                moonIcon.classList.remove('hidden'); 
             }
         }
 
-        // تشغيل عند التحميل
         updateThemeIcons();
 
-        // التبديل عند الضغط
         var themeToggleBtn = document.getElementById('theme-toggle');
         themeToggleBtn.addEventListener('click', function() {
             document.documentElement.classList.toggle('dark');
@@ -223,10 +254,9 @@ if (isset($_POST['login'])) {
                 localStorage.setItem('color-theme', 'light');
                 document.cookie = "theme=light; path=/";
             }
-            updateThemeIcons(); // تحديث الأيقونات فوراً بعد التغيير
+            updateThemeIcons(); 
         });
     </script>
 
 </body>
-
 </html>
