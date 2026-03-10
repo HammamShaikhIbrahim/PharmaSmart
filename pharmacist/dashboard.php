@@ -72,27 +72,24 @@ include('../includes/sidebar.php');
     <?php include('../includes/topbar.php'); ?>
 
     <!-- ==========================================
-         رأس الصفحة (نقلنا التاريخ هنا ليكون بادج أنيق)
+         رأس الصفحة
     =========================================== -->
     <div class="mb-8 flex justify-between items-center">
-
         <div class="flex items-center gap-4">
-            <div class="p-2.5 ">
+            <div class="p-2.5">
                 <i data-lucide="layout-dashboard" class="text-[#0A7A48] dark:text-[#4ADE80] w-7 h-7"></i>
             </div>
             <h1 class="text-3xl font-black text-gray-800 dark:text-white"><?php echo $lang['dashboard']; ?></h1>
         </div>
 
-        <!-- 🚀 بادج التاريخ (باللون الملاحظ لثيم الصيدلية) -->
-        <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 px-5 py-3 rounded-2xl shadow-sm flex items-center gap-3 transition-colors ">
+        <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 px-5 py-3 rounded-2xl shadow-sm flex items-center gap-3 transition-colors">
             <i data-lucide="calendar-days" class="text-[#0A7A48] dark:text-[#4ADE80] w-5 h-5"></i>
             <span class="text-sm font-bold text-gray-700 dark:text-gray-300 tracking-wide" dir="ltr"><?php echo date('d M, Y'); ?></span>
         </div>
-
     </div>
 
     <!-- ==========================================
-         1. شريط الإحصائيات (كروت موزعة بشكل 2 فقط)
+         1. شريط الإحصائيات 
     =========================================== -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
 
@@ -108,12 +105,11 @@ include('../includes/sidebar.php');
                 </div>
             </div>
         </div>
-        <!-- 🚀 كرت الطلبات قيد الانتظار (مضغوط وقابل للفتح كقائمة منسدلة) -->
+
+        <!-- كرت الطلبات قيد الانتظار -->
         <div class="relative">
-            <!-- الزر الذي يفتح القائمة -->
             <button onclick="togglePendingOrders()" class="w-full bg-white dark:bg-slate-800 rounded-3xl p-6 border border-gray-200 dark:border-slate-700 shadow-sm flex items-center justify-between transition-all hover:shadow-md hover:border-amber-500 focus:outline-none text-right group">
                 <div class="flex items-center gap-4">
-                    <!-- 💡 تغيير اللون إلى Amber ليتطابق مع صفحة الطلبات -->
                     <div class="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-2xl border border-transparent dark:border-amber-500/30 shrink-0 transition-colors group-hover:bg-amber-100 dark:group-hover:bg-amber-900/40">
                         <i data-lucide="clock" class="w-8 h-8 text-amber-500"></i>
                     </div>
@@ -124,7 +120,6 @@ include('../includes/sidebar.php');
                 </div>
                 <div class="flex items-center gap-4">
                     <?php if ($pendingOrders > 0): ?>
-                        <!-- 💡 توحيد اللون الكهرماني (Amber) للطلبات المعلقة -->
                         <span class="bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400 border border-amber-200 dark:border-amber-800 px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-sm">
                             <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
                             جديد: <?php echo $pendingOrders; ?>
@@ -140,7 +135,6 @@ include('../includes/sidebar.php');
             <div id="pendingOrdersList" class="absolute top-[calc(100%+0.5rem)] w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-3xl shadow-xl z-20 overflow-hidden origin-top scale-y-0 opacity-0 transition-all duration-300 pointer-events-none">
                 <div class="p-4 bg-amber-50/50 dark:bg-amber-900/10 border-b border-gray-100 dark:border-slate-700 flex justify-between items-center">
                     <span class="text-sm font-black text-amber-600 dark:text-amber-400">تحتاج موافقتك!</span>
-                    <!-- 💡 توجيه الصيدلاني لصفحة الطلبات مفلترة على "قيد الانتظار" مباشرة -->
                     <a href="orders.php?status=Pending" class="text-xs font-bold text-gray-500 hover:text-amber-600 dark:hover:text-amber-400 transition-colors">عرض الكل</a>
                 </div>
                 <div class="max-h-[300px] overflow-y-auto custom-scrollbar p-3 space-y-2">
@@ -175,7 +169,7 @@ include('../includes/sidebar.php');
     </div>
 
     <!-- ==========================================
-         2. شاشة العمليات: جدول أحدث الطلبات
+         2. شاشة العمليات: جدول أحدث الطلبات (تم إصلاح المحاذاة هنا)
     =========================================== -->
     <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden flex flex-col mb-8">
         <div class="p-6 border-b border-gray-100 dark:border-slate-700 flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/50">
@@ -193,18 +187,19 @@ include('../includes/sidebar.php');
             <table class="w-full text-sm">
                 <thead class="bg-transparent border-b border-gray-100 dark:border-slate-700/50">
                     <tr class="text-gray-500 dark:text-gray-400 <?php echo ($dir == 'rtl') ? 'text-right' : 'text-left'; ?>">
-                        <th class="p-5 font-bold">الطلب / الوقت</th>
-                        <th class="p-5 font-bold">المريض / الاتصال</th>
-                        <th class="p-5 font-bold">مكان التوصيل</th>
-                        <th class="p-5 font-bold text-center">الأصناف</th>
-                        <th class="p-5 font-bold">الإجمالي / الدفع</th>
-                        <th class="p-5 font-bold text-center">الحالة</th>
+                        <!-- إضافة whitespace-nowrap لمنع تكسر العناوين -->
+                        <th class="p-5 font-bold whitespace-nowrap">الطلب / الوقت</th>
+                        <th class="p-5 font-bold whitespace-nowrap">المريض / الاتصال</th>
+                        <!-- إعطاء عمود العنوان عرض أدنى لضمان عدم انضغاطه -->
+                        <th class="p-5 font-bold min-w-[200px]">مكان التوصيل</th>
+                        <th class="p-5 font-bold text-center whitespace-nowrap">الأصناف</th>
+                        <th class="p-5 font-bold whitespace-nowrap">الإجمالي / الدفع</th>
+                        <th class="p-5 font-bold text-center whitespace-nowrap">الحالة</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50 dark:divide-slate-700/50 <?php echo ($dir == 'rtl') ? 'text-right' : 'text-left'; ?>">
                     <?php if (mysqli_num_rows($recentOrdersResult) > 0): ?>
                         <?php while ($order = mysqli_fetch_assoc($recentOrdersResult)):
-                            // 💡 مطابقة تامة لـ UI/UX الخاص بصفحة orders.php
                             $statusColor = 'bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-gray-300';
                             $statusIcon = 'circle';
 
@@ -226,28 +221,36 @@ include('../includes/sidebar.php');
                             }
                         ?>
                             <tr class="hover:bg-[#F2FBF5] dark:hover:bg-[#044E29]/20 transition-colors duration-200 group">
-                                <td class="p-5">
+                                <td class="p-5 whitespace-nowrap">
                                     <div class="font-black text-gray-800 dark:text-white mb-1" dir="ltr">#ORD-<?php echo $order['OrderID']; ?></div>
-                                    <div class="text-xs text-gray-500 font-bold flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i> <?php echo date('h:i A', strtotime($order['OrderDate'])); ?></div>
+                                    <div class="text-xs text-gray-500 font-bold flex items-center gap-1"><i data-lucide="clock" class="w-3.5 h-3.5"></i> <?php echo date('h:i A', strtotime($order['OrderDate'])); ?></div>
                                 </td>
-                                <td class="p-5">
+                                <td class="p-5 whitespace-nowrap">
                                     <div class="font-bold text-gray-800 dark:text-white mb-1"><?php echo htmlspecialchars($order['Fname'] . ' ' . $order['Lname']); ?></div>
-                                    <div class="text-xs text-gray-500 font-bold flex items-center gap-1" dir="ltr"><i data-lucide="phone" class="w-3 h-3"></i> <?php echo htmlspecialchars($order['Phone'] ?? 'لا يوجد رقم'); ?></div>
-                                </td>
-                                <td class="p-5">
-                                    <div class="flex items-start gap-2 text-gray-600 dark:text-gray-300">
-                                        <div class="p-1.5 bg-gray-100 dark:bg-slate-700 rounded text-gray-400 mt-0.5 shrink-0"><i data-lucide="map-pin" class="w-3.5 h-3.5"></i></div>
-                                        <span class="max-w-[200px] leading-relaxed font-medium"><?php echo htmlspecialchars($order['DeliveryAddress'] ?? 'الاستلام من الصيدلية'); ?></span>
+                                    <!-- 💡 تم إصلاح محاذاة رقم الهاتف بإزالة dir=ltr من الحاوية ووضعها على الرقم فقط -->
+                                    <div class="text-xs text-gray-500 font-bold flex items-center gap-1.5">
+                                        <i data-lucide="phone" class="w-3.5 h-3.5"></i> 
+                                        <span dir="ltr"><?php echo htmlspecialchars($order['Phone'] ?? 'لا يوجد رقم'); ?></span>
                                     </div>
                                 </td>
-                                <td class="p-5 text-center"><span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 font-black text-xs"><?php echo $order['ItemsCount']; ?></span></td>
                                 <td class="p-5">
+                                    <!-- 💡 تم استخدام items-center وتوسيع الفجوة قليلاً لترتيب العنوان مع الأيقونة -->
+                                    <div class="flex items-center gap-2.5 text-gray-600 dark:text-gray-300">
+                                        <div class="p-1.5 bg-gray-100 dark:bg-slate-700 rounded-lg text-gray-400 shrink-0">
+                                            <i data-lucide="map-pin" class="w-4 h-4"></i>
+                                        </div>
+                                        <span class="leading-relaxed font-medium line-clamp-2"><?php echo htmlspecialchars($order['DeliveryAddress'] ?? 'الاستلام من الصيدلية'); ?></span>
+                                    </div>
+                                </td>
+                                <td class="p-5 text-center">
+                                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 font-black text-xs"><?php echo $order['ItemsCount']; ?></span>
+                                </td>
+                                <td class="p-5 whitespace-nowrap">
                                     <div class="font-black text-[#0A7A48] dark:text-[#4ADE80] text-base mb-1" dir="ltr"><?php echo number_format($order['TotalAmount'], 2); ?> ₪</div>
                                     <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider"><?php echo $order['PaymentMethod'] == 'COD' ? 'الدفع عند الاستلام' : 'بطاقة ائتمان'; ?></div>
                                 </td>
-                                <td class="p-5 text-center">
-                                    <!-- 💡 تمت إضافة كلاس border هنا لكي تتفاعل حدود البادج مع الألوان التي برمجناها -->
-                                    <span class="border <?php echo $statusColor; ?> px-3 py-2 rounded-xl text-xs font-bold inline-flex items-center justify-center gap-1.5 shadow-sm min-w-[100px]">
+                                <td class="p-5 text-center whitespace-nowrap">
+                                    <span class="border <?php echo $statusColor; ?> px-3 py-2 rounded-xl text-xs font-bold inline-flex items-center justify-center gap-1.5 shadow-sm min-w-[110px]">
                                         <i data-lucide="<?php echo $statusIcon; ?>" class="w-3.5 h-3.5 <?php echo ($order['Status'] == 'Accepted') ? 'animate-spin' : ''; ?>"></i>
                                         <?php echo $order['Status']; ?>
                                     </span>
@@ -339,29 +342,22 @@ include('../includes/sidebar.php');
     document.addEventListener("DOMContentLoaded", function() {
         lucide.createIcons();
     });
-    document.addEventListener("DOMContentLoaded", function() {
-        lucide.createIcons();
-    });
 
-    // 💡 دالة لفتح/إغلاق كرت الطلبات المعلقة
     function togglePendingOrders() {
         const list = document.getElementById('pendingOrdersList');
         const chevron = document.getElementById('pendingChevron');
 
         if (list.classList.contains('scale-y-0')) {
-            // فتح
             list.classList.remove('scale-y-0', 'opacity-0', 'pointer-events-none');
             list.classList.add('scale-y-100', 'opacity-100');
             chevron.style.transform = 'rotate(180deg)';
         } else {
-            // إغلاق
             list.classList.remove('scale-y-100', 'opacity-100');
             list.classList.add('scale-y-0', 'opacity-0', 'pointer-events-none');
             chevron.style.transform = 'rotate(0deg)';
         }
     }
 
-    // 💡 إغلاق القائمة تلقائياً عند الضغط في أي مكان فارغ بالشاشة
     document.addEventListener('click', function(event) {
         const list = document.getElementById('pendingOrdersList');
         if (!list) return;
