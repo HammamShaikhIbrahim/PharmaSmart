@@ -8,20 +8,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PharmaSmart</title>
 
+    <script src="https://kit.fontawesome.com/804071b851.js" crossorigin="anonymous"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <!-- ========================================== -->
     <!-- 💡 استيراد خطوط احترافية من Google Fonts   -->
-    <!-- Tajawal: مخصص للغة العربية (أنيق ومقروء) -->
-    <!-- Inter: مخصص للغة الإنجليزية (حديث وممتاز للداشبورد) -->
-    <!-- استوردنا الأوزان: 400(عادي), 500(متوسط), 700(عريض), 800(عريض جداً) -->
     <!-- ========================================== -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
-    
+
     <script>
         tailwind.config = {
             darkMode: 'class', // الاعتماد على class="dark" في <html>
@@ -42,7 +40,7 @@
                 extend: {
                     fontFamily: {
                         // هنا نخبر تيلويند أن الخط الأساسي (sans) هو Cairo
-                        sans: ['Cairo', 'sans-serif'], 
+                        sans: ['Cairo', 'sans-serif'],
                     }
                 }
             }
@@ -50,8 +48,6 @@
     </script>
 
     <style>
-
-
         /* إخفاء سكرول الشاشة الرئيسي، السكرول سيكون داخل الـ main فقط */
         body,
         html {

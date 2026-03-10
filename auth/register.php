@@ -3,10 +3,11 @@
 // 1. استدعاء ملف الاتصال بقاعدة البيانات
 // ==========================================
 include('../config/database.php');
+require_once('../includes/lang.php');
 session_start();
 
-$message = ""; 
-$error = "";  
+$message = "";
+$error = "";
 
 // ==========================================
 // 2. معالجة طلب التسجيل 
@@ -16,7 +17,7 @@ if (isset($_POST['register'])) {
     $lname = mysqli_real_escape_string($conn, $_POST['lname']);
     $email = mysqli_real_escape_string($conn, $_POST['email']);
     $password = $_POST['password'];
-    $phone = mysqli_real_escape_string($conn, $_POST['phone']); 
+    $phone = mysqli_real_escape_string($conn, $_POST['phone']);
 
     $pName = mysqli_real_escape_string($conn, $_POST['pName']);
     $license = mysqli_real_escape_string($conn, $_POST['license']);
@@ -26,67 +27,70 @@ if (isset($_POST['register'])) {
     $lat = (float)$_POST['lat'];
     $lng = (float)$_POST['lng'];
 
-    $logo = "default.png"; 
+    $logo = "default.png";
     if (!empty($_FILES['logo']['name'])) {
-        $logo = time() . "_" . $_FILES['logo']['name']; 
+        $logo = time() . "_" . $_FILES['logo']['name'];
         move_uploaded_file($_FILES['logo']['tmp_name'], "../uploads/" . $logo);
     }
 
     $checkEmail = mysqli_query($conn, "SELECT UserID FROM User WHERE Email = '$email'");
-    
+
     if (mysqli_num_rows($checkEmail) > 0) {
-        $error = "عذراً، هذا البريد الإلكتروني مسجل مسبقاً!";
+        $error = $lang['email_exists_error'];
     } elseif (empty($lat) || empty($lng)) {
-        $error = "يرجى تحديد موقع الصيدلية بدقة على الخريطة.";
+        $error = $lang['location_error'];
     } else {
         $sqlUser = "INSERT INTO User (Fname, Lname, Email, Password, Phone, RoleID)
                     VALUES ('$fname', '$lname', '$email', '$password', '$phone', 2)";
-        
+
         if (mysqli_query($conn, $sqlUser)) {
             $userId = mysqli_insert_id($conn);
-            
+
             $sqlPhar = "INSERT INTO Pharmacist (PharmacistID, PharmacyName, LicenseNumber, Location, Latitude, Longitude, WorkingHours, Logo, IsApproved)
                         VALUES ($userId, '$pName', '$license', '$location', $lat, $lng, '$workingHours', '$logo', 0)";
-            
+
             if (mysqli_query($conn, $sqlPhar)) {
-                $message = "تم إرسال طلب انضمامك بنجاح! يرجى انتظار تفعيل حسابك من الإدارة.";
+                $message = $lang['registration_success'];
             } else {
-                $error = "حدث خطأ أثناء حفظ بيانات الصيدلية: " . mysqli_error($conn);
+                $error = $lang['registration_error'] . " " . mysqli_error($conn);
             }
         } else {
-            $error = "حدث خطأ أثناء إنشاء حساب المستخدم: " . mysqli_error($conn);
+            $error = $lang['user_creation_error'] . " " . mysqli_error($conn);
         }
     }
 }
 ?>
 
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" class="<?php echo (isset($_COOKIE['theme']) && $_COOKIE['theme'] == 'dark') ? 'dark' : ''; ?>">
+<html lang="<?php echo $current_lang; ?>" dir="<?php echo $dir; ?>" class="<?php echo (isset($_COOKIE['theme']) && $_COOKIE['theme'] == 'dark') ? 'dark' : ''; ?>">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تسجيل صيدلية جديدة - PharmaSmart</title>
-    
+    <title><?php echo $lang['register_title']; ?></title>>
+    <script src="https://kit.fontawesome.com/804071b851.js" crossorigin="anonymous"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-       
-        tailwind.config = { darkMode: 'class' }
+        tailwind.config = {
+            darkMode: 'class'
+        }
     </script>
 
     <style>
-        body, html {
+        body,
+        html {
             min-height: 100%;
             margin: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow-x: hidden; 
+            overflow-x: hidden;
         }
-        
+
         .glass-panel {
             background: rgba(255, 255, 255, 0.4);
             backdrop-filter: blur(30px);
@@ -94,6 +98,7 @@ if (isset($_POST['register'])) {
             border: 1px solid rgba(255, 255, 255, 0.6);
             box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.4);
         }
+
         .dark .glass-panel {
             background: rgba(15, 23, 42, 0.5);
             border: 1px solid rgba(255, 255, 255, 0.15);
@@ -107,17 +112,20 @@ if (isset($_POST['register'])) {
             color: #1f2937;
             transition: all 0.3s ease;
         }
+
         .glass-input:focus {
             background: rgba(255, 255, 255, 0.95);
             border-color: #10b981;
             outline: none;
             box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
         }
+
         .dark .glass-input {
             background: rgba(30, 41, 59, 0.6);
             border-color: rgba(255, 255, 255, 0.15);
             color: #f8fafc;
         }
+
         .dark .glass-input:focus {
             background: rgba(30, 41, 59, 0.95);
             border-color: #10b981;
@@ -131,7 +139,7 @@ if (isset($_POST['register'])) {
          الأشكال موزعة على كامل مساحة الشاشة (Fixed Background)
     ========================================== -->
     <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        
+
         <!-- 1. الصليب الطبي (أعلى اليسار) -->
         <div class="absolute top-16 left-12 w-32 h-32 transform rotate-12 opacity-90">
             <div class="absolute inset-x-8 inset-y-0 rounded-xl bg-gradient-to-br from-green-300 to-teal-400 dark:from-green-600 dark:to-teal-700 shadow-[inset_3px_3px_10px_rgba(255,255,255,0.7),inset_-3px_-3px_10px_rgba(0,0,0,0.2)]"></div>
@@ -176,50 +184,65 @@ if (isset($_POST['register'])) {
         <!-- توهج ضوئي خلفي في المنتصف لربط الألوان -->
         <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[100vw] h-[100vh] bg-emerald-400/10 dark:bg-teal-900/30 rounded-full blur-[150px] z-[-1]"></div>
     </div>
+    <!-- ==========================================
+         أزرار التحكم العائمة (مع تأثيرات Hover لطيفة)
+    ========================================== -->
+    <div class="absolute top-6 right-6 flex items-center gap-3 z-50">
 
+        <!-- زر الوضع الليلي/النهاري -->
+        <button id="theme-toggle" type="button" class="glass-panel p-3 rounded-2xl text-gray-700 dark:text-white transition-all duration-300 hover:bg-white/40 dark:hover:bg-slate-800/70 hover:shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:-translate-y-1 focus:outline-none flex items-center justify-center group">
+            <i id="theme-toggle-light-icon" data-lucide="sun" class="hidden w-5 h-5 text-amber-400 transition-transform duration-500 group-hover:rotate-90"></i>
+            <i id="theme-toggle-dark-icon" data-lucide="moon" class="hidden w-5 h-5 text-amber-400 transition-transform duration-500 group-hover:-rotate-12"></i>
+        </button>
+
+        <!-- زر تغيير اللغة -->
+        <a href="?lang=<?php echo $lang['switch_lang_code']; ?>"
+            class="glass-panel text-gray-800 dark:text-white font-bold px-5 py-3 rounded-2xl transition-all duration-300 hover:bg-white/40 dark:hover:bg-slate-800/70 hover:shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:-translate-y-1 flex items-center gap-2 text-sm group">
+            <i data-lucide="globe" class="w-4 h-4 text-emerald-600 dark:text-emerald-400 transition-transform duration-500 group-hover:rotate-180"></i>
+            <span class="group-hover:text-emerald-700 dark:group-hover:text-emerald-300 transition-colors"><?php echo $lang['switch_lang_text']; ?></span>
+        </a>
+
+    </div>
     <!-- ==========================================
          نموذج التسجيل الزجاجي (يصعد فوق الأشكال أثناء السكرول)
     ========================================== -->
     <div class="relative z-10 flex items-center justify-center w-full px-4">
-        
+
         <div class="glass-panel p-8 md:p-12 rounded-[2.5rem] w-full max-w-4xl transition-all duration-300 my-auto">
-            
+
             <div class="text-center mb-10">
-                <div class="inline-flex items-center justify-center w-16 h-16 bg-white/40 dark:bg-slate-800/60 backdrop-blur-md rounded-2xl mb-4 text-emerald-600 dark:text-emerald-400 shadow-inner border border-white/50 dark:border-white/10">
-                    <i data-lucide="store" class="w-8 h-8"></i>
-                </div>
-                <h2 class="text-3xl md:text-4xl font-black text-gray-900 dark:text-white tracking-tight mb-2">انضمام لشبكة PharmaSmart</h2>
-                <p class="text-sm font-bold text-gray-700 dark:text-gray-300 opacity-90">قم بملء بياناتك بدقة ليتم مراجعتها من قبل الإدارة</p>
+                <h2 class="text-3xl md:text-4xl font-black text-gray-900 dark:text-white tracking-tight mb-2"><?php echo $lang['register_title']; ?></h2>
+                <p class="text-sm font-bold text-gray-700 dark:text-gray-300 opacity-90"><?php echo $lang['register_subtitle']; ?></p>
             </div>
 
             <form method="POST" enctype="multipart/form-data" class="space-y-8">
-                
+
                 <!-- القسم الأول: البيانات الشخصية -->
                 <div class="bg-white/30 dark:bg-slate-800/40 p-6 md:p-8 rounded-3xl border border-white/50 dark:border-slate-700/50 shadow-sm">
                     <h3 class="text-lg font-black text-gray-900 dark:text-white mb-5 flex items-center gap-2">
-                        <i data-lucide="user" class="text-emerald-600 dark:text-emerald-400"></i> البيانات الشخصية
+                        <i class="fa-solid fa-user-doctor text-emerald-600 dark:text-emerald-400"></i><?php echo $lang['personal_info']; ?>
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
                         <div>
-                            <label class="block text-xs font-bold text-gray-800 dark:text-gray-200 mb-1.5 ml-1">الاسم الأول</label>
-                            <input type="text" name="fname" required class="glass-input w-full p-3.5 rounded-xl">
+                            <!-- استخدم rtl:ml-1 ltr:mr-1 بدلاً من ml-1 -->
+                            <label class="block text-xs font-bold text-gray-800 dark:text-gray-200 mb-1.5 rtl:ml-1 ltr:mr-1"><?php echo $lang['first_name']; ?></label> <input type="text" name="fname" required class="glass-input w-full p-3.5 rounded-xl">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-gray-800 dark:text-gray-200 mb-1.5 ml-1">اسم العائلة</label>
+                            <label class="block text-xs font-bold text-gray-800 dark:text-gray-200 mb-1.5 rtl:ml-1 ltr:mr-1"><?php echo $lang['last_name']; ?></label>
                             <input type="text" name="lname" required class="glass-input w-full p-3.5 rounded-xl">
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                         <div class="md:col-span-1">
-                            <label class="block text-xs font-bold text-gray-800 dark:text-gray-200 mb-1.5 ml-1">رقم الهاتف</label>
+                            <label class="block text-xs font-bold text-gray-800 dark:text-gray-200 mb-1.5 rtl:ml-1 ltr:mr-1"><?php echo $lang['phone']; ?></label>
                             <input type="text" name="phone" required class="glass-input w-full p-3.5 rounded-xl text-left" dir="ltr" placeholder="05XXXXXXXX">
                         </div>
                         <div class="md:col-span-1">
-                            <label class="block text-xs font-bold text-gray-800 dark:text-gray-200 mb-1.5 ml-1">البريد الإلكتروني</label>
-                            <input type="email" name="email" required class="glass-input w-full p-3.5 rounded-xl text-left" dir="ltr" placeholder="name@domain.com">
+                            <label class="block text-xs font-bold text-gray-800 dark:text-gray-200 mb-1.5 rtl:ml-1 ltr:mr-1"><?php echo $lang['email']; ?></label>
+                            <input type="email" name="email" required class="glass-input w-full p-3.5 rounded-xl text-left" dir="ltr" placeholder="name@pharma.com">
                         </div>
                         <div class="md:col-span-1">
-                            <label class="block text-xs font-bold text-gray-800 dark:text-gray-200 mb-1.5 ml-1">كلمة المرور</label>
+                            <label class="block text-xs font-bold text-gray-800 dark:text-gray-200 mb-1.5 rtl:ml-1 ltr:mr-1"><?php echo $lang['password']; ?></label>
                             <input type="password" name="password" required class="glass-input w-full p-3.5 rounded-xl text-left" dir="ltr" placeholder="••••••••">
                         </div>
                     </div>
@@ -228,55 +251,44 @@ if (isset($_POST['register'])) {
                 <!-- القسم الثاني: بيانات الصيدلية -->
                 <div class="bg-white/30 dark:bg-slate-800/40 p-6 md:p-8 rounded-3xl border border-white/50 dark:border-slate-700/50 shadow-sm">
                     <h3 class="text-lg font-black text-gray-900 dark:text-white mb-5 flex items-center gap-2">
-                        <i data-lucide="building" class="text-emerald-600 dark:text-emerald-400"></i> بيانات الصيدلية
+                        <i class="fa-solid fa-staff-snake text-emerald-600 dark:text-emerald-400"></i> <?php echo $lang['pharmacy_info']; ?>
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
                         <div>
-                            <label class="block text-xs font-bold text-gray-800 dark:text-gray-200 mb-1.5 ml-1">اسم الصيدلية الرسمي</label>
+                            <label class="block text-xs font-bold text-gray-800 dark:text-gray-200 mb-1.5 rtl:ml-1 ltr:mr-1"><?php echo $lang['pharmacy_name']; ?></label>
                             <input type="text" name="pName" required class="glass-input w-full p-3.5 rounded-xl">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-gray-800 dark:text-gray-200 mb-1.5 ml-1">رقم الترخيص من وزارة الصحة</label>
+                            <label class="block text-xs font-bold text-gray-800 dark:text-gray-200 mb-1.5 rtl:ml-1 ltr:mr-1"><?php echo $lang['license_num']; ?></label>
                             <input type="text" name="license" required class="glass-input w-full p-3.5 rounded-xl text-left" dir="ltr">
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
                         <div>
-                            <label class="block text-xs font-bold text-gray-800 dark:text-gray-200 mb-1.5 ml-1">العنوان الوصفي (المدينة - الشارع)</label>
-                            <input type="text" name="location" required class="glass-input w-full p-3.5 rounded-xl placeholder-gray-500" placeholder="مثال: رام الله - شارع الإرسال">
+                            <label class="block text-xs font-bold text-gray-800 dark:text-gray-200 mb-1.5 rtl:ml-1 ltr:mr-1"><?php echo $lang['address']; ?></label>
+                            <input type="text" name="location" required class="glass-input w-full p-3.5 rounded-xl placeholder-gray-500">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-gray-800 dark:text-gray-200 mb-1.5 ml-1">ساعات الدوام</label>
-                            <input type="text" name="workingHours" required class="glass-input w-full p-3.5 rounded-xl placeholder-gray-500" placeholder="مثال: 8 صباحاً - 10 مساءً">
+                            <label class="block text-xs font-bold text-gray-800 dark:text-gray-200 mb-1.5 rtl:ml-1 ltr:mr-1"><?php echo $lang['working_hours']; ?></label>
+                            <input type="text" name="workingHours" required class="glass-input w-full p-3.5 rounded-xl placeholder-gray-500">
                         </div>
                     </div>
-                  
-<div>
-<label class="block text-xs font-bold text-gray-300 mb-2 ml-1">
-شعار الصيدلية 
-</label>
 
-<label class="flex items-center justify-between w-full p-3 rounded-xl 
-bg-white/5 border border-white/10 backdrop-blur-md 
- 
-transition cursor-pointer">
-
-<span class="text-gray-400 text-sm">
-اختر شعار الصيدلية
-</span>
-
-<span class="px-3 py-1.5 text-xs font-semibold rounded-lg 
-bg-emerald-500/20 text-emerald-400 border border-emerald-400/30
-transition duration-300
-hover:bg-emerald-500/30
-hover:shadow-[0_0_10px_rgba(16,185,129,0.9)]">
-Upload
-</span>
-
-<input type="file" name="logo" accept="image/*" class="hidden">
-
-</label>
-</div>
+                    <!-- حقل رفع الشعار -->
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-gray-800 dark:text-gray-200 mb-1.5 rtl:ml-1 ltr:mr-1">
+                            <?php echo $lang['pharmacy_logo']; ?>
+                        </label>
+                        <label class="flex items-center justify-between w-full p-3 rounded-xl bg-white/5 border border-white/20 dark:border-white/10 backdrop-blur-md transition cursor-pointer group hover:bg-white/10">
+                            <span id="logo-file-name" class="text-gray-600 dark:text-gray-400 text-sm truncate max-w-[70%]">
+                                <?php echo $lang['choose_logo']; ?>
+                            </span>
+                            <span class="px-4 py-1.5 text-xs font-bold rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-400/30 transition duration-300 group-hover:bg-emerald-500/30 group-hover:shadow-[0_0_10px_rgba(16,185,129,0.4)]">
+                                <?php echo $lang['upload']; ?> <i data-lucide="upload" class="inline w-3 h-3 rtl:mr-1 ltr:ml-1"></i>
+                            </span>
+                            <input type="file" name="logo" accept="image/*" class="hidden" onchange="updateLogoName(this)">
+                        </label>
+                    </div>
 
 
                 </div>
@@ -284,14 +296,14 @@ Upload
                 <!-- القسم الثالث: الخريطة -->
                 <div class="bg-emerald-500/20 dark:bg-teal-900/30 p-6 md:p-8 rounded-3xl border border-emerald-500/30 dark:border-teal-500/30 shadow-sm">
                     <h3 class="text-lg font-black text-emerald-900 dark:text-emerald-400 mb-2 flex items-center gap-2">
-                        <i data-lucide="map-pin" class="text-emerald-700 dark:text-emerald-400"></i> الموقع الجغرافي (GPS)
+                        <i data-lucide="map-pin" class="text-emerald-700 dark:text-emerald-400"></i> <?php echo $lang['location_picker']; ?>
                     </h3>
-                    <p class="text-xs text-emerald-800 dark:text-emerald-500/90 font-bold mb-5">يرجى الضغط على الخريطة لتحديد موقع الصيدلية بدقة، سيساعد هذا المرضى في العثور عليك عبر التطبيق.</p>
-                    
+                    <p class="text-xs text-emerald-800 dark:text-emerald-500/90 font-bold mb-5"><?php echo $lang['location_description']; ?></p>
+
                     <div class="relative w-full h-[300px] rounded-2xl overflow-hidden border-2 border-white/60 dark:border-slate-700/60 shadow-inner z-0">
                         <div id="pickerMap" class="absolute inset-0"></div>
                     </div>
-                    
+
                     <div class="relative w-full h-0 overflow-hidden">
                         <input type="text" name="lat" id="latInput" required style="opacity: 0; position: absolute;">
                         <input type="text" name="lng" id="lngInput" required style="opacity: 0; position: absolute;">
@@ -300,12 +312,12 @@ Upload
 
                 <!-- زر الإرسال -->
                 <button type="submit" name="register" class="w-full bg-emerald-600 text-white py-4 rounded-2xl hover:bg-emerald-700 transition-all font-black text-lg mt-8 shadow-[0_10px_20px_rgba(16,185,129,0.3)] active:scale-[0.98] border border-emerald-500/50">
-                    إرسال طلب الانضمام
+                    <?php echo $lang['register_button']; ?>
                 </button>
             </form>
 
             <div class="mt-8 text-center text-sm text-gray-800 dark:text-gray-300 font-bold border-t border-white/40 dark:border-slate-700/50 pt-6">
-                لديك حساب بالفعل؟ <a href="login.php" class="text-emerald-700 dark:text-emerald-400 hover:underline mx-1 font-black">العودة لتسجيل الدخول</a>
+                <?php echo $lang['already_have_account']; ?> <a href="login.php" class="text-emerald-700 dark:text-emerald-400 hover:underline mx-1 font-black"><?php echo $lang['login_link']; ?></a>
             </div>
         </div>
     </div>
@@ -313,14 +325,80 @@ Upload
     <!-- السكربتات -->
     <script>
         lucide.createIcons();
+        // ==========================================
+        // 💡 منطق الوضع الليلي (مطابق لصفحة اللوجن)
+        // ==========================================
+        var themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+        var themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
 
+        if (localStorage.getItem('color-theme') === 'light' || (!('color-theme' in localStorage))) {
+            themeToggleDarkIcon.classList.remove('hidden');
+        } else {
+            themeToggleLightIcon.classList.remove('hidden');
+        }
+
+        function updateThemeIcons() {
+            var isDark = document.documentElement.classList.contains('dark');
+            var sunIcon = document.getElementById('theme-toggle-light-icon');
+            var moonIcon = document.getElementById('theme-toggle-dark-icon');
+
+            if (isDark) {
+                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden');
+            } else {
+                sunIcon.classList.add('hidden');
+                moonIcon.classList.remove('hidden');
+            }
+        }
+
+        updateThemeIcons();
+
+        var themeToggleBtn = document.getElementById('theme-toggle');
+        themeToggleBtn.addEventListener('click', function() {
+            document.documentElement.classList.toggle('dark');
+
+            if (document.documentElement.classList.contains('dark')) {
+                localStorage.setItem('color-theme', 'dark');
+                document.cookie = "theme=dark; path=/";
+            } else {
+                localStorage.setItem('color-theme', 'light');
+                document.cookie = "theme=light; path=/";
+            }
+            updateThemeIcons();
+
+            // تحديث خريطة Leaflet لتناسب الثيم الجديد إذا أمكن (اختياري)
+            if (typeof map !== 'undefined') {
+                var newTileUrl = document.documentElement.classList.contains('dark') ?
+                    'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' :
+                    'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+                L.tileLayer(newTileUrl, {
+                    maxZoom: 19
+                }).addTo(map);
+            }
+        });
         var map = L.map('pickerMap').setView([31.90, 35.20], 8);
-        
-        var tileUrl = document.documentElement.classList.contains('dark') 
-            ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' 
-            : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
 
-        L.tileLayer(tileUrl, { maxZoom: 19 }).addTo(map);
+        var tileUrl = document.documentElement.classList.contains('dark') ?
+            'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' :
+            'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+
+        L.tileLayer(tileUrl, {
+            maxZoom: 19
+        }).addTo(map);
+
+        // ==========================================
+        // 💡 تصميم دبوس خريطة طبي احترافي (Custom SVG Marker)
+        // ==========================================
+        var customIcon = L.divIcon({
+            className: 'custom-leaflet-marker',
+            html: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.3));">
+                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" fill="#fff"></path>
+                     <path d="M12 7v6"></path>
+                     <path d="M9 10h6"></path>
+                   </svg>`,
+            iconSize: [40, 40],
+            iconAnchor: [20, 40], // نقطة الارتكاز أسفل منتصف الأيقونة
+        });
 
         var marker;
 
@@ -329,47 +407,75 @@ Upload
             var lng = e.latlng.lng;
 
             if (marker) {
+                // إذا كان موجوداً، انقله للمكان الجديد بـ Animation ناعم
                 marker.setLatLng(e.latlng);
             } else {
-                marker = L.circleMarker(e.latlng, {
-                    radius: 8,
-                    fillColor: "#10b981",
-                    color: "#ffffff",
-                    weight: 2,
-                    opacity: 1,
-                    fillOpacity: 1
+                // إنشاء الدبوس لأول مرة باستخدام الأيقونة المخصصة
+                marker = L.marker(e.latlng, {
+                    icon: customIcon,
+                    bounceOnAdd: true
                 }).addTo(map);
             }
 
+            // تخزين الإحداثيات في الحقول المخفية
             document.getElementById('latInput').value = lat;
             document.getElementById('lngInput').value = lng;
         });
 
-        <?php if($message): ?>
+        function updateLogoName(input) {
+            const displayElement = document.getElementById('logo-file-name');
+            if (input.files && input.files.length > 0) {
+                displayElement.innerText = input.files[0].name;
+                displayElement.classList.remove('text-gray-600', 'dark:text-gray-400');
+                displayElement.classList.add('text-emerald-600', 'font-bold');
+            } else {
+                displayElement.innerText = "<?php echo $lang['choose_logo']; ?>";
+            }
+        }
+        <?php if ($message): ?>
             Swal.fire({
                 icon: 'success',
-                title: 'اكتمل الطلب!',
+                title: '<?php echo $lang['success']; ?>',
                 text: '<?php echo $message; ?>',
                 confirmButtonColor: '#10b981',
                 background: document.documentElement.classList.contains('dark') ? '#1e293b' : 'rgba(255,255,255,0.9)',
                 backdrop: 'rgba(0,0,0,0.4)',
                 color: document.documentElement.classList.contains('dark') ? '#f8fafc' : '#1f2937',
-                customClass: { popup: 'backdrop-blur-xl border border-white/20' }
-            }).then(() => { window.location.href = 'login.php'; });
+                customClass: {
+                    popup: 'backdrop-blur-xl border border-white/20'
+                }
+            }).then(() => {
+                window.location.href = 'login.php';
+            });
         <?php endif; ?>
 
-        <?php if($error): ?>
+        <?php if ($error): ?>
             Swal.fire({
                 icon: 'error',
-                title: 'خطأ',
+                title: '<?php echo $lang['error']; ?>',
                 text: '<?php echo $error; ?>',
                 confirmButtonColor: '#10b981',
                 background: document.documentElement.classList.contains('dark') ? '#1e293b' : 'rgba(255,255,255,0.9)',
                 backdrop: 'rgba(0,0,0,0.4)',
                 color: document.documentElement.classList.contains('dark') ? '#f8fafc' : '#1f2937',
-                customClass: { popup: 'backdrop-blur-xl border border-white/20' }
+                customClass: {
+                    popup: 'backdrop-blur-xl border border-white/20'
+                }
             });
+            // إعدادات تيلويند لإجبار النظام على استخدام خط Cairo في كل اللغات
+            tailwind.config = {
+                darkMode: 'class',
+                theme: {
+                    extend: {
+                        fontFamily: {
+                            // هنا نخبر تيلويند أن الخط الأساسي (sans) هو Cairo
+                            sans: ['Cairo', 'sans-serif'],
+                        }
+                    }
+                }
+            }
         <?php endif; ?>
     </script>
 </body>
+
 </html>

@@ -48,8 +48,46 @@ $result = mysqli_query($conn, $query);
 // استدعاء ملفات التصميم
 include('../includes/header.php');
 include('../includes/sidebar.php');
-?>
 
+?>
+<style>
+    /* ستايل سلة المهملات المتحركة */
+    .bin-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background-color: transparent;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        padding: 0;
+    }
+
+    .bin-button:hover {
+        background-color: rgba(225, 29, 72, 0.1);
+    }
+
+    .dark .bin-button:hover {
+        background-color: rgba(225, 29, 72, 0.3);
+    }
+
+    .bin-bottom {
+        transform-origin: bottom center;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .bin-top {
+        transform-origin: bottom right;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .bin-button:hover .bin-top {
+        transform: rotate(20deg) translateY(-2px);
+    }
+</style>
 <!-- ==========================================
      تصميم الصفحة (الـ HTML و Tailwind)
 =========================================== -->
@@ -122,10 +160,17 @@ include('../includes/sidebar.php');
                             <td class="p-6 text-sm text-gray-500 dark:text-gray-400 text-center">
                                 <span dir="ltr"><?php echo date('Y-m-d', strtotime($row['CreatedAt'])); ?></span>
                             </td>
-                            <td class="p-6 text-center">
+                            <td class="p-6 text-sm text-gray-600 dark:text-gray-300 text-center flex items-center justify-center gap-2">
                                 <!-- 💡 زر الحذف بلون أحمر مع هوفر -->
-                                <button onclick="confirmDelete(<?php echo $row['UserID']; ?>)" class="text-rose-500 bg-rose-50 dark:bg-rose-900/30 hover:bg-rose-100 dark:hover:bg-rose-800/50 transition p-2.5 rounded-xl" title="Delete">
-                                    <i data-lucide="trash" class="w-5 h-5"></i>
+                                <!-- 🚀 زر الحذف: سلة مهملات متحركة Uiverse مطابقة للكود الأول -->
+                                <button onclick="confirmDelete(<?php echo $row['UserID']; ?>)" class="bin-button text-rose-500" title="Delete">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                                        <path d="M3 6h18" class="bin-top"></path>
+                                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" class="bin-top"></path>
+                                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" class="bin-bottom"></path>
+                                        <path d="M10 11v6" class="bin-bottom"></path>
+                                        <path d="M14 11v6" class="bin-bottom"></path>
+                                    </svg>
                                 </button>
                             </td>
                         </tr>
@@ -170,5 +215,7 @@ include('../includes/sidebar.php');
 
     lucide.createIcons(); // تفعيل أيقونات Lucide
 </script>
+
+
 
 <?php include('../includes/footer.php'); ?>

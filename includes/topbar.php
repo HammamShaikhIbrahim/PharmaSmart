@@ -104,43 +104,32 @@ if ($role_id == 2) {
 
     <!-- 2. الجهة اليسرى: أدوات التحكم (اللغة والوضع الليلي) -->
 
-    <div class="flex items-center gap-5">
+    <div class="flex items-center gap-4">
 
+        <!-- زر الوضع الليلي/النهاري -->
+        <button id="theme-toggle" type="button"
+            class="glass-panel p-3 rounded-2xl text-gray-700 dark:text-white transition-all duration-300 hover:bg-white/40 dark:hover:bg-slate-800/70 focus:outline-none flex items-center justify-center group 
+        hover:shadow-[0_0_15px_<?php echo ($role_id == 1) ? 'rgba(4,138,193,0.4)' : 'rgba(16,185,129,0.4)'; ?>] hover:-translate-y-1">
 
-
-        <!-- زر الوضع الليلي -->
-
-        <!-- 💡 ألوان ديناميكية حسب الدور -->
-
-        <button id="theme-toggle" type="button" class="bg-white dark:bg-slate-800 p-2.5 rounded-xl shadow-md border border-gray-100 dark:border-slate-700 hover:scale-105 transition-transform flex items-center justify-center <?php echo ($role_id == 1) ? 'hover:border-[#048AC1] dark:hover:border-[#048AC1]' : 'hover:border-[#0A7A48] dark:hover:border-[#0A7A48]'; ?>">
-
-            <i id="theme-toggle-light-icon" data-lucide="sun" class="hidden w-5 h-5 text-yellow-500"></i>
-
-            <i id="theme-toggle-dark-icon" data-lucide="moon" class="hidden w-5 h-5 text-slate-400"></i>
-
+            <i id="theme-toggle-light-icon" data-lucide="sun" class="hidden w-5 h-5 text-amber-400 transition-transform duration-500 group-hover:rotate-90"></i>
+            <i id="theme-toggle-dark-icon" data-lucide="moon" class="hidden w-5 h-5 text-amber-400 transition-transform duration-500 group-hover:-rotate-12"></i>
         </button>
 
+        <!-- خط فاصل أنيق -->
 
+        <div class="w-px h-6 bg-gray-200 dark:bg-slate-700"></div>
 
-        <div class="w-px h-6 bg-gray-200 dark:bg-slate-700"></div> <!-- خط فاصل أنيق -->
-
-
-
-        <!-- زر اللغة -->
-
-        <!-- 💡 ألوان ديناميكية حسب الدور -->
-
+        <!-- زر تغيير اللغة -->
         <a href="?lang=<?php echo $lang['switch_lang_code']; ?>"
+            class="glass-panel font-bold px-5 py-3 rounded-2xl transition-all duration-300 hover:bg-white/40 dark:hover:bg-slate-800/70 flex items-center gap-2 text-sm group 
+        hover:-translate-y-1 
+        text-gray-800 dark:text-white
+        hover:shadow-[0_0_15px_<?php echo ($role_id == 1) ? 'rgba(4,138,193,0.4)' : 'rgba(16,185,129,0.4)'; ?>]
+        hover:text-<?php echo ($role_id == 1) ? '[#048AC1]' : 'emerald-700'; ?> dark:hover:text-<?php echo ($role_id == 1) ? '[#048AC1]' : 'emerald-300'; ?>">
 
-            class="bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 font-bold px-4 py-2.5 rounded-xl shadow-md border border-gray-100 dark:border-slate-700 hover:scale-105 transition-transform flex items-center gap-2 text-sm <?php echo ($role_id == 1) ? 'hover:text-[#048AC1] hover:border-[#048AC1] dark:hover:text-[#048AC1] dark:hover:border-[#048AC1]' : 'hover:text-[#0A7A48] hover:border-[#0A7A48] dark:hover:text-[#0A7A48] dark:hover:border-[#0A7A48]'; ?>">
-
-            <i data-lucide="globe" class="w-4 h-4"></i>
-
-            <?php echo $lang['switch_lang_text']; ?>
-
+            <i data-lucide="globe" class="w-4 h-4 <?php echo ($role_id == 1) ? 'text-[#048AC1]' : 'text-emerald-600 dark:text-emerald-400'; ?> transition-transform duration-500 group-hover:rotate-180"></i>
+            <span class="transition-colors"><?php echo $lang['switch_lang_text']; ?></span>
         </a>
-
-
 
     </div>
 

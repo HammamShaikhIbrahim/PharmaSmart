@@ -18,6 +18,37 @@ if ($current_lang == 'ar') {
     $lang['new_account'] = "صيدلية جديدة؟";
     $lang['register_link'] = "قدم طلب انضمام";
 
+    //register page
+    $lang['email_exists_error'] = "عذراً، هذا البريد الإلكتروني مسجل مسبقاً!";
+    $lang['location_error'] = "يرجى تحديد موقع الصيدلية بدقة على الخريطة.";
+    $lang['registration_success'] = "تم إرسال طلب انضمامك بنجاح! يرجى انتظار تفعيل حسابك من الإدارة.";
+    $lang['registration_error'] = "حدث خطأ أثناء التسجيل. الرجاء المحاولة مرة أخرى.";
+    $lang['user_creation_error'] = "حدث خطأ أثناء إنشاء حساب المستخدم. الرجاء المحاولة مرة أخرى.";
+    $lang['register_title'] = "تسجيل صيدلية جديدة - PharmaSmart";
+    $lang['register_title_short'] = "تسجيل صيدلية جديدة";
+    $lang['register_subtitle'] = "قم بملء بياناتك بدقة ليتم مراجعتها من قبل الإدارة";
+    $lang['personal_info'] = "البيانات الشخصية";
+    $lang['first_name'] = "الاسم الأول";
+    $lang['last_name'] = "اسم العائلة";
+    $lang['phone'] = "رقم الهاتف";
+    $lang['email'] = "البريد الإلكتروني";
+    $lang['password'] = "كلمة المرور";
+    $lang['pharmacy_info'] = "بيانات الصيدلية";
+    $lang['pharmacy_name'] = "اسم الصيدلية الرسمي";
+    $lang['license_num'] = "رقم الترخيص من وزارة الصحة";
+    $lang['address'] = "العنوان الوصفي (المدينة - الشارع)";
+    $lang['working_hours'] = "ساعات الدوام";
+    $lang['pharmacy_logo'] = "شعار الصيدلية (اختياري)";
+    $lang['choose_logo'] = "اختر شعار الصيدلية";
+    $lang['upload'] = "رفع";
+    $lang['location_picker'] = "تحديد الموقع الجغرافي";
+    $lang['location_description'] = "يرجى الضغط على الخريطة لتحديد موقع الصيدلية بدقة، سيساعد هذا المرضى في العثور عليك عبر التطبيق.";
+    $lang['register_button'] = "إرسال طلب الانضمام";
+    $lang['already_have_account'] = "لديك حساب بالفعل؟";
+    $lang['login_link'] = "العودة لتسجيل الدخول";
+    $lang['success'] = "اكتمل الطلب!";
+    $lang['error'] = "خطأ";
+
     // أخطاء تسجيل الدخول (عربي)
     $lang['err_patient'] = "عذراً، نظام الويب مخصص للصيادلة والإدارة فقط. يرجى استخدام تطبيق الموبايل.";
     $lang['err_pending'] = "حسابك معلق حالياً، يرجى انتظار موافقة الإدارة.";
@@ -190,6 +221,37 @@ if ($current_lang == 'ar') {
     $lang['btn_login'] = "Login";
     $lang['new_account'] = "New Pharmacy?";
     $lang['register_link'] = "Submit Join Request";
+
+//register page
+    $lang['email_exists_error'] = "Sorry, this email is already registered!";
+    $lang['location_error'] = "Please select the pharmacy location accurately on the map.";
+    $lang['registration_success'] = "Your join request has been submitted successfully! Please wait for admin approval.";
+    $lang['registration_error'] = "An error occurred during registration. Please try again.";
+    $lang['user_creation_error'] = "An error occurred while creating the user account. Please try again.";
+    $lang['register_title'] = "New Pharmacy Registration - PharmaSmart";
+    $lang['register_title_short'] = "New Pharmacy Registration";
+    $lang['register_subtitle'] = "Please fill in your details accurately for review by the administration.";
+    $lang['personal_info'] = "Personal Information";
+    $lang['first_name'] = "First Name";
+    $lang['last_name'] = "Last Name";
+    $lang['phone'] = "Phone Number";
+    $lang['email'] = "Email Address";
+    $lang['password'] = "Password";
+    $lang['pharmacy_info'] = "Pharmacy Information";
+    $lang['pharmacy_name'] = "Official Pharmacy Name";
+    $lang['license_num'] = "License Number from Ministry of Health";
+    $lang['address'] = "Address (City - Street)";
+    $lang['working_hours'] = "Working Hours";
+    $lang['pharmacy_logo'] = "Pharmacy Logo (Optional)";
+    $lang['choose_logo'] = "Choose Pharmacy Logo";
+    $lang['upload'] = "Upload";
+    $lang['location_picker'] = "Select Geographic Location";
+    $lang['location_description'] = "Please click on the map to select the pharmacy location accurately, this will help patients find you through the app.";
+    $lang['register_button'] = "Submit Join Request";
+    $lang['already_have_account'] = "Already have an account?";
+    $lang['login_link'] = "Return to Login";
+    $lang['success'] = "Request completed!";
+    $lang['error'] = "Error";
 
     // أخطاء تسجيل الدخول (إنجليزي)
     $lang['err_patient'] = "Sorry, Web system is for Pharmacists & Admin only. Please use the mobile app.";

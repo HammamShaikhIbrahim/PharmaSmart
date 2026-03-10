@@ -48,9 +48,12 @@ if (isset($_POST['login'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PharmaSmart - <?php echo $lang['login_title']; ?></title>
 
+    <script src="https://kit.fontawesome.com/804071b851.js" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
 
     <script>
         tailwind.config = {
@@ -68,13 +71,14 @@ if (isset($_POST['login'])) {
     </script>
 
     <style>
-        body, html {
+        body,
+        html {
             height: 100%;
             margin: 0;
             overflow: hidden;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
+
         /* تأثيرات الإضاءة والظلال المعقدة للأشكال 3D */
         .glass-panel {
             background: rgba(255, 255, 255, 0.15);
@@ -83,6 +87,7 @@ if (isset($_POST['login'])) {
             border: 1px solid rgba(255, 255, 255, 0.4);
             box-shadow: 0 30px 60px rgba(0, 0, 0, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
         }
+
         .dark .glass-panel {
             background: rgba(15, 23, 42, 0.4);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -92,13 +97,14 @@ if (isset($_POST['login'])) {
 </head>
 
 <!-- الخلفية الأساسية متدرجة وحيوية لتناسب الوضعين -->
+
 <body class="bg-gradient-to-br from-teal-50 to-emerald-200 dark:from-slate-900 dark:to-teal-950 flex items-center justify-center relative transition-colors duration-500">
 
     <!-- ==========================================
          الأشكال الطبية ثلاثية الأبعاد (3D Medical Shapes)
     ========================================== -->
     <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        
+
         <!-- 1. كبسولة دواء 3D (أعلى اليسار) -->
         <div class="absolute top-10 left-20 w-32 h-64 rounded-full transform rotate-[35deg]
                     bg-gradient-to-b from-emerald-300 to-teal-500 dark:from-emerald-600 dark:to-teal-800
@@ -130,19 +136,23 @@ if (isset($_POST['login'])) {
     </div>
 
     <!-- ==========================================
-         أزرار التحكم العائمة (زجاجية أيضاً)
+         أزرار التحكم العائمة (مع تأثيرات Hover لطيفة)
     ========================================== -->
     <div class="absolute top-6 right-6 flex items-center gap-3 z-50">
-        <button id="theme-toggle" type="button" class="glass-panel p-3 rounded-2xl hover:scale-105 transition-transform flex items-center justify-center text-gray-700 dark:text-white">
-            <i id="theme-toggle-light-icon" data-lucide="sun" class="hidden w-5 h-5 text-amber-400"></i>
-            <i id="theme-toggle-dark-icon" data-lucide="moon" class="hidden w-5 h-5 text-blue-200"></i>
+
+        <!-- زر الوضع الليلي/النهاري -->
+        <button id="theme-toggle" type="button" class="glass-panel p-3 rounded-2xl text-gray-700 dark:text-white transition-all duration-300 hover:bg-white/40 dark:hover:bg-slate-800/70 hover:shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:-translate-y-1 focus:outline-none flex items-center justify-center group">
+            <i id="theme-toggle-light-icon" data-lucide="sun" class="hidden w-5 h-5 text-amber-400 transition-transform duration-500 group-hover:rotate-90"></i>
+            <i id="theme-toggle-dark-icon" data-lucide="moon" class="hidden w-5 h-5 text-amber-400 transition-transform duration-500 group-hover:-rotate-12"></i>
         </button>
 
+        <!-- زر تغيير اللغة -->
         <a href="?lang=<?php echo $lang['switch_lang_code']; ?>"
-           class="glass-panel text-gray-800 dark:text-white font-bold px-5 py-3 rounded-2xl hover:bg-white/30 dark:hover:bg-slate-800/50 transition flex items-center gap-2 text-sm">
-            <i data-lucide="globe" class="w-4 h-4"></i>
-            <?php echo $lang['switch_lang_text']; ?>
+            class="glass-panel text-gray-800 dark:text-white font-bold px-5 py-3 rounded-2xl transition-all duration-300 hover:bg-white/40 dark:hover:bg-slate-800/70 hover:shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:-translate-y-1 flex items-center gap-2 text-sm group">
+            <i data-lucide="globe" class="w-4 h-4 text-emerald-600 dark:text-emerald-400 transition-transform duration-500 group-hover:rotate-180"></i>
+            <span class="group-hover:text-emerald-700 dark:group-hover:text-emerald-300 transition-colors"><?php echo $lang['switch_lang_text']; ?></span>
         </a>
+
     </div>
 
     <!-- ==========================================
@@ -163,7 +173,7 @@ if (isset($_POST['login'])) {
             <div>
                 <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-2 ml-1"><?php echo $lang['email']; ?></label>
                 <div class="relative">
-                    <input type="email" name="email" required placeholder="name@pharmacy.com" dir="ltr"
+                    <input type="email" name="email" required placeholder="Email" dir="ltr"
                         class="w-full rtl:pl-4 rtl:pr-14 ltr:pr-4 ltr:pl-14 py-4 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm border border-white/50 dark:border-slate-700 focus:bg-white dark:focus:bg-slate-800 focus:border-emerald-500 rounded-2xl text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 outline-none transition-all shadow-inner">
                     <i data-lucide="mail" class="absolute rtl:right-5 ltr:left-5 top-4 text-emerald-600 dark:text-emerald-400 w-5 h-5 pointer-events-none"></i>
                 </div>
@@ -222,9 +232,9 @@ if (isset($_POST['login'])) {
         var themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
 
         if (localStorage.getItem('color-theme') === 'light' || (!('color-theme' in localStorage))) {
-            themeToggleDarkIcon.classList.remove('hidden'); 
+            themeToggleDarkIcon.classList.remove('hidden');
         } else {
-            themeToggleLightIcon.classList.remove('hidden'); 
+            themeToggleLightIcon.classList.remove('hidden');
         }
 
         function updateThemeIcons() {
@@ -233,11 +243,11 @@ if (isset($_POST['login'])) {
             var moonIcon = document.getElementById('theme-toggle-dark-icon');
 
             if (isDark) {
-                sunIcon.classList.remove('hidden'); 
+                sunIcon.classList.remove('hidden');
                 moonIcon.classList.add('hidden');
             } else {
                 sunIcon.classList.add('hidden');
-                moonIcon.classList.remove('hidden'); 
+                moonIcon.classList.remove('hidden');
             }
         }
 
@@ -254,9 +264,22 @@ if (isset($_POST['login'])) {
                 localStorage.setItem('color-theme', 'light');
                 document.cookie = "theme=light; path=/";
             }
-            updateThemeIcons(); 
+            updateThemeIcons();
         });
+        // إعدادات تيلويند لإجبار النظام على استخدام خط Cairo في كل اللغات
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        // هنا نخبر تيلويند أن الخط الأساسي (sans) هو Cairo
+                        sans: ['Cairo', 'sans-serif'],
+                    }
+                }
+            }
+        }
     </script>
 
 </body>
+
 </html>
