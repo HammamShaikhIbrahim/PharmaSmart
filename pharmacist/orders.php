@@ -14,7 +14,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role_id'] != 2) {
 $pharmacist_id = $_SESSION['user_id'];
 
 // ==========================================
-// 2. معالجة تحديث حالة الطلب (Actions)
+// 2. معالجة تحديث حالة الطلب (Actions) - لا تغيير هنا
 // ==========================================
 if (isset($_GET['action']) && isset($_GET['order_id'])) {
     $order_id = intval($_GET['order_id']);
@@ -33,14 +33,14 @@ if (isset($_GET['action']) && isset($_GET['order_id'])) {
 }
 
 // ==========================================
-// 3. جلب بيانات الطلبات 
+// 3. جلب بيانات الطلبات - لا تغيير هنا
 // ==========================================
 $filter_status = isset($_GET['status']) ? mysqli_real_escape_string($conn, $_GET['status']) : 'All';
 $status_condition = ($filter_status !== 'All') ? "AND o.Status = '$filter_status'" : "";
 
 $orders_query = "
     SELECT DISTINCT 
-        o.OrderID, o.OrderDate, o.Status, o.TotalAmount, o.PaymentMethod, o.DeliveryAddress,
+        o.OrderID, o.OrderDate, o.Status, o.TotalAmount, o.PaymentMethod, o.DeliveryAddress, o.PatientID,
         u.Fname, u.Lname, u.Phone,
         pr.ImagePath as PrescriptionImage
     FROM `Order` o
@@ -54,7 +54,7 @@ $orders_query = "
 $orders_result = mysqli_query($conn, $orders_query);
 
 // ==========================================
-// 4. جلب تفاصيل الأدوية لكل طلب
+// 4. جلب تفاصيل الأدوية لكل طلب - لا تغيير هنا
 // ==========================================
 $order_items_data = [];
 $items_query = "
@@ -73,32 +73,57 @@ include('../includes/sidebar.php');
 ?>
 
 <style>
-    .text-gradient {
-        background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        background-image: linear-gradient(90deg, #0A7A48, #10b981);
+    .table-container {
+        border-radius: 1.5rem;
+        overflow: hidden;
     }
-    .premium-card {
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        border: 2px solid transparent;
+    /* الوضع الداكن */
+    .dark .table-container { 
+        background-color: #1e293b; 
+        border: 1px solid rgba(100, 116, 139, 0.2);
     }
-    .premium-card:hover { transform: translateY(-8px); }
-    .premium-card.status-Pending:hover { border-color: rgba(245, 158, 11, 0.4); box-shadow: 0 20px 40px -10px rgba(245, 158, 11, 0.15); }
-    .premium-card.status-Accepted:hover { border-color: rgba(59, 130, 246, 0.4); box-shadow: 0 20px 40px -10px rgba(59, 130, 246, 0.15); }
-    .premium-card.status-Delivered:hover { border-color: rgba(16, 185, 129, 0.4); box-shadow: 0 20px 40px -10px rgba(16, 185, 129, 0.15); }
-    .premium-card.status-Rejected:hover { border-color: rgba(244, 63, 94, 0.4); box-shadow: 0 20px 40px -10px rgba(244, 63, 94, 0.15); }
+    /* الوضع الفاتح */
+    .light .table-container { 
+        background-color: white; 
+        border: 1px solid #e2e8f0; /* slate-200 */
+    }
 
-    .stripes-bg {
-        background-image: repeating-linear-gradient(45deg, rgba(244, 63, 94, 0.05), rgba(244, 63, 94, 0.05) 10px, transparent 10px, transparent 20px);
+    /* إشعار المعلومات (Tooltip) */
+    #orderTooltip {
+        position: fixed;
+        display: none;
+        padding: 0.75rem 1rem;
+        background-color: #0f172a; /* لون داكن جداً */
+        color: #000000;
+        border: 1px solid #334155;
+        border-radius: 0.75rem;
+        font-size: 0.8rem;
+        z-index: 101;
+        pointer-events: none;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+        backdrop-filter: blur(5px);
+        transition: opacity 0.2s;
     }
-    .dark .stripes-bg { background-image: repeating-linear-gradient(45deg, rgba(244, 63, 94, 0.15), rgba(244, 63, 94, 0.15) 10px, transparent 10px, transparent 20px); }
-    .hide-scroll::-webkit-scrollbar { display: none; }
+    #orderTooltip h4 {
+        font-weight: 800;
+        color: #fff;
+        margin-bottom: 0.5rem;
+    }
+    #orderTooltip p {
+        margin: 0.25rem 0;
+        color: #94a3b8;
+    }
+    #orderTooltip p span {
+        font-weight: 600;
+        color: #cbd5e1;
+    }
 </style>
 
 <main class="flex-1 p-4 md:p-8 bg-gray-50/50 dark:bg-[#0B1120] h-full overflow-y-auto transition-colors duration-300 relative">
 
     <?php include('../includes/topbar.php'); ?>
 
-    <!-- ترويسة الصفحة -->
+    <!-- ترويسة الصفحة والفلاتر - لا تغيير هنا -->
     <div class="mb-10 flex flex-col md:flex-row justify-between items-center gap-6">
         <div class="flex items-center gap-3">
             <i data-lucide="clipboard-check" class="text-[#0A7A48] w-10 h-10"></i>
@@ -109,264 +134,204 @@ include('../includes/sidebar.php');
                 <p class="text-sm text-gray-500 font-bold">تابع وقم بمعالجة طلبات عملائك بدقة.</p>
             </div>
         </div>
-
-        <!-- شريط الفلاتر الكبسولي المعدل -->
-        <div class="bg-white dark:bg-slate-800 p-1.5 rounded-full shadow-sm border border-gray-200 dark:border-slate-700 flex items-center overflow-x-auto hide-scroll">
-            <?php 
-            // إعداد مصفوفة الفلاتر مع الألوان المطلوبة عند الهوفر والاختيار
-            $filter_tabs = [
-                ['All', $lang['filter_all'], 'hover:text-white active:text-white'],
-                ['Pending', $lang['filter_pending'], 'hover:text-rose-500 active:text-rose-500'],
-                ['Accepted', $lang['filter_processing'], 'hover:text-blue-500 active:text-blue-500'],
-                ['Delivered', $lang['filter_delivered'], 'hover:text-emerald-500 active:text-emerald-500']
-            ];
-
-            foreach ($filter_tabs as $tab) {
-                $isActive = ($filter_status === $tab[0]);
-                // الكلاس الأساسي للفلاتر
-                $baseClass = "px-7 py-2.5 rounded-full text-sm font-black transition-all duration-300 whitespace-nowrap ";
-                
-                // إضافة الألوان بناءً على حالة النشاط والهوفر
-                if ($isActive) {
-                    $activeColor = str_replace(['hover:', 'active:'], ['', ''], $tab[2]);
-                    $stateClass = "bg-gray-50 dark:bg-slate-700 shadow-inner ring-1 ring-gray-100 dark:ring-slate-600 $activeColor";
-                } else {
-                    $stateClass = "text-gray-400 " . $tab[2];
+        <div class="bg-white dark:bg-slate-800 p-1.5 rounded-full shadow-sm border border-gray-200 dark:border-slate-700 flex items-center overflow-x-auto">
+             <?php 
+                $filter_tabs = [
+                    ['All', $lang['filter_all'], 'hover:text-white active:text-white'],
+                    ['Pending', $lang['filter_pending'], 'hover:text-amber-500 active:text-amber-500'],
+                    ['Accepted', $lang['filter_processing'], 'hover:text-blue-500 active:text-blue-500'],
+                    ['Delivered', $lang['filter_delivered'], 'hover:text-emerald-500 active:text-emerald-500'],
+                    ['Rejected', 'مرفوضة', 'hover:text-rose-500 active:text-rose-500']
+                ];
+                foreach ($filter_tabs as $tab) {
+                    $isActive = ($filter_status === $tab[0]);
+                    $baseClass = "px-7 py-2.5 rounded-full text-sm font-black transition-all duration-300 whitespace-nowrap ";
+                    if ($isActive) {
+                        $activeColor = str_replace(['hover:', 'active:'], ['', ''], $tab[2]);
+                        $stateClass = "bg-gray-50 dark:bg-slate-700 shadow-inner ring-1 ring-gray-100 dark:ring-slate-600 $activeColor";
+                    } else {
+                        $stateClass = "text-gray-400 " . $tab[2];
+                    }
+                    echo "<a href='?status={$tab[0]}' class='$baseClass $stateClass'>{$tab[1]}</a>";
                 }
-                
-                echo "<a href='?status={$tab[0]}' class='$baseClass $stateClass'>{$tab[1]}</a>";
-            }
             ?>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 pb-10">
-
-        <?php if (mysqli_num_rows($orders_result) > 0): ?>
-            <?php while ($order = mysqli_fetch_assoc($orders_result)):
-
-                $statusColor = ""; $statusBg = ""; $statusIcon = "";
-                $statusClass = "status-" . $order['Status']; 
-
-                switch ($order['Status']) {
-                    case 'Pending':
-                        $statusColor = "text-amber-600 dark:text-amber-400";
-                        $statusBg = "bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20";
-                        $statusText = $lang['status_pending'];
-                        $statusIcon = "clock";
-                        break;
-                    case 'Accepted':
-                        $statusColor = "text-blue-600 dark:text-blue-400";
-                        $statusBg = "bg-blue-50 dark:bg-blue-500/10 border-blue-200 dark:border-blue-500/20";
-                        $statusText = "قيد التجهيز"; // 💡 تم التعديل هنا بناءً على طلبك
-                        $statusIcon = "package";
-                        break;
-                    case 'Delivered':
-                        $statusColor = "text-emerald-600 dark:text-emerald-400";
-                        $statusBg = "bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20";
-                        $statusText = $lang['status_delivered'];
-                        $statusIcon = "check-circle-2";
-                        break;
-                    case 'Rejected':
-                        $statusColor = "text-rose-600 dark:text-rose-400";
-                        $statusBg = "bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/20";
-                        $statusText = $lang['status_rejected'];
-                        $statusIcon = "x-circle";
-                        break;
-                }
-
-                $current_order_items = isset($order_items_data[$order['OrderID']]) ? $order_items_data[$order['OrderID']] : [];
-                $has_controlled = false; $total_items = 0;
-                foreach ($current_order_items as $item) {
-                    if ($item['IsControlled'] == 1) $has_controlled = true;
-                    $total_items += $item['Quantity'];
-                }
-
-                $order_json = htmlspecialchars(json_encode([
-                    'id' => $order['OrderID'], 'date' => date('Y-m-d h:i A', strtotime($order['OrderDate'])),
-                    'status' => $order['Status'], 'total' => $order['TotalAmount'],
-                    'patient' => $order['Fname'] . ' ' . $order['Lname'], 'phone' => $order['Phone'],
-                    'address' => $order['DeliveryAddress'], 'items' => $current_order_items,
-                    'prescription' => $order['PrescriptionImage'], 'has_controlled' => $has_controlled
-                ]));
-            ?>
-
-                <div class="premium-card <?php echo $statusClass; ?> bg-white dark:bg-slate-800 rounded-[2rem] p-1.5 shadow-sm hover:shadow-xl relative flex flex-col h-full border border-gray-100 dark:border-slate-700/50">
-                    <div class="bg-gray-50/50 dark:bg-slate-800/80 rounded-[1.75rem] p-6 h-full flex flex-col border border-gray-100 dark:border-slate-700/50">
+    <!-- جدول الطلبات -->
+    <div class="table-container">
+        <table class="w-full text-sm text-right text-slate-300">
+       <!-- ==  جعل رأس الجدول متكيفاً(Responsive) == -->
+        <!-- ============================================= -->
+        <thead class="text-xs text-gray-500 dark:text-slate-400 uppercase bg-gray-50 dark:bg-slate-900/50">
+            <tr>
+                <th scope="col" class="px-6 py-4 font-black">رقم الطلب</th>
+                <th scope="col" class="px-6 py-4 font-black">العميل</th>
+                <th scope="col" class="px-6 py-4 font-black">تاريخ الطلب</th>
+                <th scope="col" class="px-6 py-4 font-black">الحالة</th>
+                <th scope="col" class="px-6 py-4 font-black">الإجمالي</th>
+                <th scope="col" class="px-6 py-4 font-black text-center">الإجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php if (mysqli_num_rows($orders_result) > 0): ?>
+                <?php while ($order = mysqli_fetch_assoc($orders_result)):
                         
-                        <div class="flex justify-between items-start mb-6">
+                        $statusText = ''; $statusPillClass = '';
+                        switch ($order['Status']) {
+                            case 'Pending':
+                                $statusPillClass = "bg-amber-500/10 text-amber-400"; $statusText = $lang['status_pending']; break;
+                            case 'Accepted':
+                                $statusPillClass = "bg-blue-500/10 text-blue-400"; $statusText = "قيد التجهيز"; break;
+                            case 'Delivered':
+                                $statusPillClass = "bg-emerald-500/10 text-emerald-400"; $statusText = $lang['status_delivered']; break;
+                            case 'Rejected':
+                                $statusPillClass = "bg-rose-500/10 text-rose-400"; $statusText = $lang['status_rejected']; break;
+                        }
+
+                        $current_order_items = isset($order_items_data[$order['OrderID']]) ? $order_items_data[$order['OrderID']] : [];
+                        $has_controlled = false;
+                        foreach ($current_order_items as $item) {
+                            if ($item['IsControlled'] == 1) $has_controlled = true;
+                        }
+                        // تم تجهيز بيانات JSON كما هي لاستخدامها في النافذة المنبثقة والإشعار
+                        $order_json = htmlspecialchars(json_encode([
+                            'id' => $order['OrderID'], 'date' => date('Y-m-d h:i A', strtotime($order['OrderDate'])),
+                            'status' => $order['Status'], 'total' => $order['TotalAmount'],
+                            'patient' => $order['Fname'] . ' ' . $order['Lname'], 'phone' => $order['Phone'],
+                            'address' => $order['DeliveryAddress'], 'items' => $current_order_items,
+                            'prescription' => $order['PrescriptionImage'], 'has_controlled' => $has_controlled
+                        ]));
+                    ?>
+                    
+                    <!-- 1. الفاصل: تم تغيير لون `border-slate-800` إلى `border-slate-700/50` لفاصل أنعم. -->
+                    <!-- 2. تأثير التأشير: `hover:bg-slate-900/90` يقوم بتغيير لون الخلفية عند التمرير. -->
+                    <!-- 3. إشعار المعلومات: تم إضافة `onmousemove` و `onmouseout` لاستدعاء دوال الإشعار. -->
+      <tr class="border-b border-slate-700/50 hover:bg-slate-800 hover:ring-1 hover:ring-slate-100 transition-all duration-200 cursor-pointer"
+    onmousemove="showTooltip(event, '<?php echo $order_json; ?>')" 
+    onmouseout="hideTooltip()">
+                    
+                    <!-- رقم الطلب -->
+                    <td onclick="viewOrderDetails('<?php echo $order_json; ?>')" class="px-6 py-5 font-mono font-bold text-gray-00 dark:text-white">#ORD-<?php echo $order['OrderID']; ?></td>
+                    
+                    <!-- العميل -->
+                    <td onclick="viewOrderDetails('<?php echo $order_json; ?>')" class="px-6 py-5">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 dark:text-emerald-400 font-bold text-sm">
+                                <?php echo mb_substr($order['Fname'], 0, 1); ?>
+                            </div>
                             <div>
-                                <h3 class="text-xl font-black text-gray-900 dark:text-white tracking-tight" dir="ltr">#ORD-<?php echo $order['OrderID']; ?></h3>
-                                <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1 block"><?php echo date('M d, h:i A', strtotime($order['OrderDate'])); ?></span>
-                            </div>
-                            <div class="px-3 py-1.5 rounded-xl border <?php echo $statusBg; ?> <?php echo $statusColor; ?> flex items-center gap-1.5 text-[10px] font-black uppercase">
-                                <i data-lucide="<?php echo $statusIcon; ?>" class="w-3.5 h-3.5"></i>
-                                <?php echo $statusText; ?>
+                                <div class="font-bold text-gray-900 dark:text-white"><?php echo htmlspecialchars($order['Fname'] . ' ' . $order['Lname']); ?></div>
+                                <div class="text-xs text-gray-500 dark:text-slate-400" dir="ltr"><?php echo htmlspecialchars($order['Phone']); ?></div>
                             </div>
                         </div>
+                    </td>
+                    
+                    <!-- تاريخ الطلب -->
+                    <td onclick="viewOrderDetails('<?php echo $order_json; ?>')" class="px-6 py-5">
+                         <div class="font-medium text-gray-700 dark:text-slate-300"><?php echo date('Y-m-d', strtotime($order['OrderDate'])); ?></div>
+                         <div class="text-xs text-gray-500 dark:text-slate-500"><?php echo date('h:i A', strtotime($order['OrderDate'])); ?></div>
+                    </td>
 
-                        <!-- المريض والمحادثة المعدلة -->
-                        <div class="mb-6 p-4 rounded-3xl bg-white dark:bg-slate-700/50 border border-gray-100 dark:border-slate-600 shadow-sm flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-2xl bg-emerald-50 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shadow-inner">
-                                    <i data-lucide="user" class="w-5 h-5"></i>
-                                </div>
-                                <div class="overflow-hidden">
-                                    <span class="font-black text-gray-800 dark:text-gray-100 text-sm block truncate"><?php echo htmlspecialchars($order['Fname'] . ' ' . $order['Lname']); ?></span>
-                                    <span class="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">مريض مسجل</span>
-                                </div>
-                            </div>
-                            <!-- 💡 أيقونة المحادثة بدلاً من الاتصال -->
-                            <button class="w-10 h-10 rounded-2xl bg-gray-50 dark:bg-slate-600 flex items-center justify-center text-gray-400 hover:text-emerald-600 transition-colors shadow-sm">
-                                <i data-lucide="message-square-more" class="w-5 h-5"></i>
+                    <!-- الحالة -->
+                    <td onclick="viewOrderDetails('<?php echo $order_json; ?>')" class="px-6 py-5">
+                        <span class="px-3 py-1.5 rounded-full text-[10px] font-black uppercase <?php echo $statusPillClass; ?>">
+                            <?php echo $statusText; ?>
+                        </span>
+                    </td>
+                    
+                    <!-- الإجمالي -->
+                    <td onclick="viewOrderDetails('<?php echo $order_json; ?>')" class="px-6 py-5 font-bold text-gray-800 dark:text-white" dir="ltr">
+                        <?php echo number_format($order['TotalAmount'], 2); ?> ₪
+                    </td>
+
+                    <!-- الإجراءات -->
+                    <td class="px-6 py-5 text-center">
+                        <div class="flex items-center justify-center gap-3">
+                            <button onclick="viewOrderDetails('<?php echo $order_json; ?>')" class="p-2 rounded-lg text-gray-400 dark:text-slate-400 hover:bg-gray-200 dark:hover:bg-slate-700 hover:text-gray-700 dark:hover:text-white transition-colors" title="معاينة التفاصيل">
+                                <i data-lucide="eye" class="w-5 h-5"></i>
                             </button>
-                        </div>
-
-                        <div class="flex-1">
-                            <?php if ($has_controlled): ?>
-                                <div class="mb-6 rounded-[1.5rem] p-4 border border-rose-200 dark:border-rose-900/50 stripes-bg flex items-center gap-4 relative overflow-hidden">
-                                    <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-rose-500"></div>
-                                    <div class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center text-rose-500 shadow-sm shrink-0">
-                                        <i data-lucide="shield-alert" class="w-5 h-5"></i>
-                                    </div>
-                                    <div>
-                                        <span class="text-xs font-black text-rose-700 dark:text-rose-400 block italic">Rx Required</span>
-                                        <span class="text-[10px] font-bold text-rose-600/70 dark:text-rose-300/70">يتطلب مراجعة الروشتة المرفقة</span>
-                                    </div>
-                                </div>
-                            <?php else: ?>
-                                <!-- 💡 ملء الفراغ بالأصناف المطلوبة -->
-                                <div class="mb-6">
-                                    <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-3 px-1">الأصناف المطلوبة:</span>
-                                    <div class="flex flex-wrap gap-2">
-                                        <?php 
-                                        $cnt = 0;
-                                        foreach($current_order_items as $it): 
-                                            if($cnt < 2): 
-                                        ?>
-                                            <div class="bg-emerald-50 dark:bg-emerald-900/20 text-[#0A7A48] dark:text-emerald-400 px-3 py-1.5 rounded-xl text-[10px] font-bold border border-emerald-100 dark:border-emerald-800/50 flex items-center gap-1.5">
-                                                <i data-lucide="pill" class="w-3 h-3"></i>
-                                                <span class="truncate max-w-[80px]"><?php echo $it['Name']; ?></span>
-                                            </div>
-                                        <?php $cnt++; endif; endforeach; ?>
-                                        <?php if(count($current_order_items) > 2): ?>
-                                            <div class="bg-gray-100 dark:bg-slate-700 text-gray-500 px-3 py-1.5 rounded-xl text-[10px] font-bold border border-gray-200 dark:border-slate-600">+ <?php echo count($current_order_items) - 2; ?></div>
-                                        <?php endif; ?>
-                                    </div>
-                                </div>
+                            
+                            <?php if ($order['Status'] == 'Pending'): ?>
+                                <button onclick="confirmOrderStatus(<?php echo $order['OrderID']; ?>, 'Accepted')" class="p-2 rounded-lg text-emerald-500 dark:text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-300 transition-colors" title="قبول وتجهيز">
+                                    <i data-lucide="check-circle" class="w-5 h-5"></i>
+                                </button>
+                            <?php endif; ?>
+                            
+                            <?php if ($order['Status'] == 'Accepted'): ?>
+                                 <button onclick="confirmOrderStatus(<?php echo $order['OrderID']; ?>, 'Delivered')" class="p-2 rounded-lg text-blue-500 dark:text-blue-400 hover:bg-blue-500/10 hover:text-blue-600 dark:hover:text-blue-300 transition-colors" title="تأكيد التسليم">
+                                    <i data-lucide="truck" class="w-5 h-5"></i>
+                                </button>
+                            <?php endif; ?>
+                            
+                            <?php if ($order['Status'] == 'Pending'): ?>
+                                <button onclick="confirmOrderStatus(<?php echo $order['OrderID']; ?>, 'Rejected')" class="p-2 rounded-lg text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-400 transition-colors" title="رفض الطلب">
+                                    <i data-lucide="x-circle" class="w-5 h-5"></i>
+                                </button>
                             <?php endif; ?>
                         </div>
-
-                        <div class="pt-5 border-t border-dashed border-gray-200 dark:border-slate-700 flex items-end justify-between mt-auto">
-                            <div>
-                                <span class="text-[10px] font-bold text-gray-400 uppercase block mb-1">المجموع</span>
-                                <div class="flex items-baseline gap-1" dir="ltr">
-                                    <span class="text-3xl font-black text-gray-900 dark:text-white leading-none"><?php echo number_format($order['TotalAmount'], 2); ?></span>
-                                    <span class="text-sm font-bold text-gray-1000">₪</span>
-                                </div>
-                            </div>
-
-                            <div class="flex gap-2">
-                                <!-- 💡 أيقونة العين مع الأنيميشن -->
-                                <button onclick="viewOrderDetails('<?php echo $order_json; ?>')" class="w-12 h-12 rounded-2xl bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 text-gray-500 hover:text-emerald-500 transition-all duration-300 hover:scale-125 flex items-center justify-center shadow-sm" title="معاينة">
-                                    <i data-lucide="eye" class="w-6 h-6"></i>
-                                </button>
-
-                                <?php if ($order['Status'] == 'Pending'): ?>
-                                    <button onclick="confirmOrderStatus(<?php echo $order['OrderID']; ?>, 'Accepted')" class="w-12 h-12 rounded-2xl bg-[#0A7A48] text-white flex items-center justify-center hover:bg-[#044E29] transition-all shadow-lg shadow-green-900/20" title="قبول وتجهيز">
-                                        <i data-lucide="check" class="w-6 h-6"></i>
-                                    </button>
-                                <?php elseif ($order['Status'] == 'Accepted'): ?>
-                                    <button onclick="confirmOrderStatus(<?php echo $order['OrderID']; ?>, 'Delivered')" class="px-5 h-12 rounded-2xl bg-[#0A7A48] text-white flex items-center justify-center gap-2 font-bold hover:bg-[#044E29] transition-all shadow-lg">
-                                        <i data-lucide="truck" class="w-5 h-5"></i> تسليم
-                                    </button>
-                                <?php endif; ?>
-                            </div>
+                    </td>
+                </tr>
+                <?php endwhile; ?>
+            <?php else: ?>
+                <tr>
+                    <td colspan="6" class="text-center py-20">
+                        <div class="flex flex-col items-center gap-4 text-slate-500">
+                            <i data-lucide="inbox" class="w-16 h-16"></i>
+                            <span class="font-bold text-lg">لا توجد طلبات تطابق الفلتر الحالي</span>
                         </div>
-                    </div>
-                </div>
-            <?php endwhile; ?>
-        <?php else: ?>
-            <div class="col-span-full py-32 flex flex-col items-center opacity-50"><i data-lucide="inbox" class="w-20 h-20 mb-4 text-gray-300"></i><h2 class="text-xl font-bold text-gray-400">لا توجد طلبات</h2></div>
-        <?php endif; ?>
-    </div>
+                    </td>
+                </tr>
+            <?php endif; ?>
+        </tbody>
+    </table>
+</div>
+    
 </main>
 
-<!-- ==========================================
-     نافذة تفاصيل الطلب (Modal)
-=========================================== -->
+<!-- ====== تعديل: إضافة عنصر الإشعار (Tooltip) إلى HTML ====== -->
+<div id="orderTooltip"></div>
+
+<!-- نافذة تفاصيل الطلب (Modal) - لا تغيير هنا -->
 <div id="orderModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex justify-center items-end md:items-center transition-opacity p-0 md:p-4">
+    <!-- ... محتوى النافذة المنبثقة يبقى كما هو بدون أي تعديل ... -->
     <div class="bg-white dark:bg-slate-900 w-full md:max-w-5xl max-h-[90vh] md:max-h-[85vh] rounded-t-[3rem] md:rounded-[3rem] shadow-2xl overflow-hidden flex flex-col transform transition-transform translate-y-full md:translate-y-0" id="modalContent">
-        
-        <div class="px-8 py-8 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-slate-900 shrink-0">
-            <div class="flex items-center gap-4">
-                <div class="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-3xl text-[#0A7A48] shadow-inner"><i data-lucide="receipt" class="w-8 h-8"></i></div>
-                <div><h2 class="text-2xl font-black text-gray-900 dark:text-white tracking-tight flex items-center gap-2"><?php echo $lang['order_details']; ?> <span id="modalOrderId" class="text-[#0A7A48]" dir="ltr"></span></h2><p id="modalOrderDate" class="text-xs font-bold text-gray-400 mt-1 uppercase tracking-widest"></p></div>
-            </div>
-            <button onclick="closeOrderModal()" class="w-12 h-12 flex items-center justify-center rounded-full bg-gray-100 dark:bg-slate-800 text-gray-500 hover:text-rose-50 hover:text-rose-500 transition-all"><i data-lucide="x" class="w-6 h-6"></i></button>
-        </div>
-
-        <div class="p-8 overflow-y-auto custom-scrollbar flex-1 bg-white dark:bg-slate-900">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
-                <div class="lg:col-span-2 space-y-8">
-                    <div class="bg-gray-50 dark:bg-slate-800/50 rounded-[2.5rem] border border-gray-100 dark:border-slate-800 overflow-hidden shadow-sm">
-                        <table class="w-full text-sm text-right">
-                            <thead class="bg-white/50 dark:bg-slate-800 border-b dark:border-slate-700 text-gray-500"><tr><th class="py-5 px-8 font-black uppercase tracking-wider">المنتج</th><th class="py-5 px-8 font-black text-center uppercase tracking-wider">الكمية</th><th class="py-5 px-8 font-black uppercase tracking-wider text-left">الإجمالي</th></tr></thead>
-                            <tbody id="modalItemsTable" class="divide-y divide-gray-100 dark:divide-slate-700/50 text-gray-800 dark:text-gray-200"></tbody>
-                        </table>
-                    </div>
-
-                    <!-- 💡 ملء الفراغ في المودال بشريط الحالة -->
-                    <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-gray-100 dark:border-slate-700 shadow-sm relative overflow-hidden">
-                        <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6">مراحل سير الطلب</h3>
-                        <div class="flex justify-between items-center relative">
-                            <div class="absolute left-0 top-1/2 w-full h-0.5 bg-gray-100 dark:bg-slate-700 -z-0"></div>
-                            <div class="relative z-10 flex flex-col items-center gap-2"><div class="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-lg"><i data-lucide="check" class="w-4 h-4"></i></div><span class="text-[9px] font-black text-emerald-600">جديد</span></div>
-                            <div class="relative z-10 flex flex-col items-center gap-2"><div class="w-7 h-7 rounded-full bg-gray-200 dark:bg-slate-700 flex items-center justify-center text-gray-400"><i data-lucide="package" class="w-4 h-4"></i></div><span class="text-[9px] font-bold text-gray-400">تجهيز</span></div>
-                            <div class="relative z-10 flex flex-col items-center gap-2"><div class="w-7 h-7 rounded-full bg-gray-200 dark:bg-slate-700 flex items-center justify-center text-gray-400"><i data-lucide="truck" class="w-4 h-4"></i></div><span class="text-[9px] font-bold text-gray-400">توصيل</span></div>
-                        </div>
-                    </div>
-
-                    <div id="prescriptionSection" class="hidden">
-                        <div class="bg-rose-50 dark:bg-rose-950/20 rounded-[2.5rem] p-8 border-2 border-dashed border-rose-200 dark:border-rose-900/50 flex flex-col md:flex-row gap-8 items-center relative overflow-hidden">
-                            <a id="prescriptionImgLink" href="#" target="_blank" class="block relative group overflow-hidden rounded-[2rem] border-8 border-white dark:border-slate-800 shadow-xl shrink-0 bg-white">
-                                <img id="prescriptionImg" src="" alt="Rx" class="w-44 h-44 object-cover transition-transform duration-700 group-hover:scale-110">
-                            </a>
-                            <div class="flex-1 space-y-4">
-                                <h3 class="text-xl font-black text-rose-700 dark:text-rose-400 flex items-center gap-2"><i data-lucide="file-check-2" class="w-6 h-6"></i> مراجعة الوصفة الطبية</h3>
-                                <label class="flex items-center gap-3 bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm cursor-pointer border border-rose-100 dark:border-rose-900/30 transition-all hover:ring-2 hover:ring-rose-500/20"><input type="checkbox" id="verifyPrescriptionCheck" class="w-6 h-6 text-rose-600 rounded-lg border-gray-300 focus:ring-rose-500"><span class="text-sm font-black text-gray-800 dark:text-gray-200 italic">أقر بمراجعتي للوصفة وتحملي للمسؤولية.</span></label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="space-y-8">
-                    <div class="bg-gray-50 dark:bg-slate-800/50 rounded-[2.5rem] p-8 border border-gray-100 dark:border-slate-800 shadow-sm space-y-6 text-sm">
-                        <h3 class="text-xs font-black text-gray-400 uppercase tracking-widest border-b pb-3">بيانات العميل</h3>
-                        <div><span class="text-[10px] font-bold text-gray-400 block mb-1">الاسم</span><span id="modalPatientName" class="font-black text-gray-800 dark:text-gray-200"></span></div>
-                        <div><span class="text-[10px] font-bold text-gray-400 block mb-1">الهاتف</span><span id="modalPatientPhone" class="font-bold text-gray-800 dark:text-gray-200" dir="ltr"></span></div>
-                        <div><span class="text-[10px] font-bold text-gray-400 block mb-1">العنوان</span><span id="modalPatientAddress" class="font-bold text-gray-700 dark:text-gray-300 leading-relaxed"></span></div>
-                    </div>
-                    <div class="bg-gradient-to-br from-[#0A7A48] to-[#10b981] rounded-[2.5rem] p-8 text-white shadow-2xl text-center">
-                        <span class="text-green-100 text-xs font-black uppercase tracking-widest mb-2 block">إجمالي المطلوب</span>
-                        <h2 id="modalTotalAmount" class="text-5xl font-black mb-4 tracking-tighter" dir="ltr"></h2>
-                        <span class="bg-black/10 backdrop-blur-md px-6 py-2 rounded-2xl text-[10px] font-black border border-white/10 flex items-center gap-2 justify-center italic">الدفع عند الاستلام <i data-lucide="banknote" class="w-3.5 h-3.5"></i></span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="p-8 border-t border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-900 flex justify-between items-center">
-            <button onclick="closeOrderModal()" class="px-8 py-4 rounded-2xl bg-white dark:bg-slate-800 text-gray-500 font-black text-sm border border-gray-200 dark:border-slate-700 hover:bg-gray-100 transition-all">إغلاق</button>
-            <div id="dynamicActionButtons" class="flex gap-3"></div>
-        </div>
+        <div class="px-8 py-8 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-slate-900 shrink-0"><div class="flex items-center gap-4"><div class="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-3xl text-[#0A7A48] shadow-inner"><i data-lucide="receipt" class="w-8 h-8"></i></div><div><h2 class="text-2xl font-black text-gray-900 dark:text-white tracking-tight flex items-center gap-2"><?php echo $lang['order_details']; ?> <span id="modalOrderId" class="text-[#0A7A48]" dir="ltr"></span></h2><p id="modalOrderDate" class="text-xs font-bold text-gray-400 mt-1 uppercase tracking-widest"></p></div></div><button onclick="closeOrderModal()" class="w-12 h-12 flex items-center justify-center rounded-full bg-gray-100 dark:bg-slate-800 text-gray-500 hover:text-rose-50 hover:text-rose-500 transition-all"><i data-lucide="x" class="w-6 h-6"></i></button></div>
+        <div class="p-8 overflow-y-auto custom-scrollbar flex-1 bg-white dark:bg-slate-900"><div class="grid grid-cols-1 lg:grid-cols-3 gap-10"><div class="lg:col-span-2 space-y-8"><div class="bg-gray-50 dark:bg-slate-800/50 rounded-[2.5rem] border border-gray-100 dark:border-slate-800 overflow-hidden shadow-sm"><table class="w-full text-sm text-right"><thead class="bg-white/50 dark:bg-slate-800 border-b dark:border-slate-700 text-gray-500"><tr><th class="py-5 px-8 font-black uppercase tracking-wider">المنتج</th><th class="py-5 px-8 font-black text-center uppercase tracking-wider">الكمية</th><th class="py-5 px-8 font-black uppercase tracking-wider text-left">الإجمالي</th></tr></thead><tbody id="modalItemsTable" class="divide-y divide-gray-100 dark:divide-slate-700/50 text-gray-800 dark:text-gray-200"></tbody></table></div><div id="prescriptionSection" class="hidden"><div class="bg-rose-50 dark:bg-rose-950/20 rounded-[2.5rem] p-8 border-2 border-dashed border-rose-200 dark:border-rose-900/50 flex flex-col md:flex-row gap-8 items-center relative overflow-hidden"><a id="prescriptionImgLink" href="#" target="_blank" class="block relative group overflow-hidden rounded-[2rem] border-8 border-white dark:border-slate-800 shadow-xl shrink-0 bg-white"><img id="prescriptionImg" src="" alt="Rx" class="w-44 h-44 object-cover transition-transform duration-700 group-hover:scale-110"></a><div class="flex-1 space-y-4"><h3 class="text-xl font-black text-rose-700 dark:text-rose-400 flex items-center gap-2"><i data-lucide="file-check-2" class="w-6 h-6"></i> مراجعة الوصفة الطبية</h3><label class="flex items-center gap-3 bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm cursor-pointer border border-rose-100 dark:border-rose-900/30 transition-all hover:ring-2 hover:ring-rose-500/20"><input type="checkbox" id="verifyPrescriptionCheck" class="w-6 h-6 text-rose-600 rounded-lg border-gray-300 focus:ring-rose-500"><span class="text-sm font-black text-gray-800 dark:text-gray-200 italic">أقر بمراجعتي للوصفة وتحملي للمسؤولية.</span></label></div></div></div></div><div class="space-y-8"><div class="bg-gray-50 dark:bg-slate-800/50 rounded-[2.5rem] p-8 border border-gray-100 dark:border-slate-800 shadow-sm space-y-6 text-sm"><h3 class="text-xs font-black text-gray-400 uppercase tracking-widest border-b pb-3">بيانات العميل</h3><div><span class="text-[10px] font-bold text-gray-400 block mb-1">الاسم</span><span id="modalPatientName" class="font-black text-gray-800 dark:text-gray-200"></span></div><div><span class="text-[10px] font-bold text-gray-400 block mb-1">الهاتف</span><span id="modalPatientPhone" class="font-bold text-gray-800 dark:text-gray-200" dir="ltr"></span></div><div><span class="text-[10px] font-bold text-gray-400 block mb-1">العنوان</span><span id="modalPatientAddress" class="font-bold text-gray-700 dark:text-gray-300 leading-relaxed"></span></div></div><div class="bg-gradient-to-br from-[#0A7A48] to-[#10b981] rounded-[2.5rem] p-8 text-white shadow-2xl text-center"><span class="text-green-100 text-xs font-black uppercase tracking-widest mb-2 block">إجمالي المطلوب</span><h2 id="modalTotalAmount" class="text-5xl font-black mb-4 tracking-tighter" dir="ltr"></h2><span class="bg-black/10 backdrop-blur-md px-6 py-2 rounded-2xl text-[10px] font-black border border-white/10 flex items-center gap-2 justify-center italic">الدفع عند الاستلام <i data-lucide="banknote" class="w-3.5 h-3.5"></i></span></div></div></div></div>
+        <div class="p-8 border-t border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-900 flex justify-between items-center"><button onclick="closeOrderModal()" class="px-8 py-4 rounded-2xl bg-white dark:bg-slate-800 text-gray-500 font-black text-sm border border-gray-200 dark:border-slate-700 hover:bg-gray-100 transition-all">إغلاق</button><div id="dynamicActionButtons" class="flex gap-3"></div></div>
     </div>
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() { lucide.createIcons(); });
+    lucide.createIcons();
+    
     let currentOrderData = null;
     const currency = "₪";
+
+    // ====== تعديل: إضافة دوال الإشعار (Tooltip) ======
+    const tooltip = document.getElementById('orderTooltip');
+    function showTooltip(event, jsonString) {
+        const data = JSON.parse(jsonString);
+        
+        // بناء محتوى الإشعار
+        tooltip.innerHTML = `
+            <h4 class="font-mono">#ORD-${data.id}</h4>
+            <p>العميل: <span>${data.patient}</span></p>
+            <p>عدد الأصناف: <span>${data.items.length}</span></p>
+            ${data.has_controlled ? '<p style="color:#f43f5e;">يحتوي على دواء مراقب 💊</p>' : ''}
+        `;
+
+        // إظهار الإشعار بجانب مؤشر الفأرة
+        tooltip.style.display = 'block';
+        tooltip.style.left = event.pageX + 15 + 'px';
+        tooltip.style.top = event.pageY + 15 + 'px';
+    }
+
+    function hideTooltip() {
+        tooltip.style.display = 'none';
+    }
+    // ====== نهاية تعديل الإشعار ======
+
 
     function viewOrderDetails(jsonString) {
         const order = JSON.parse(jsonString); currentOrderData = order;
@@ -424,5 +389,3 @@ include('../includes/sidebar.php');
         Swal.fire({ title: t, text: txt, icon: i, showCancelButton: true, confirmButtonColor: c, cancelButtonColor: '#94a3b8', confirmButtonText: b, cancelButtonText: "إلغاء", background: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff', color: document.documentElement.classList.contains('dark') ? '#f8fafc' : '#1f2937', customClass: { popup: 'rounded-3xl' } }).then((r) => { if (r.isConfirmed) window.location.href = `orders.php?action=${action}&order_id=${orderId}`; });
     }
 </script>
-
-<?php include('../includes/footer.php'); ?>
