@@ -211,6 +211,26 @@ if ($current_lang == 'ar') {
     $lang['close'] = "إغلاق";
     $lang['accept_prepare'] = "قبول وتجهيز";
     $lang['confirm_delivery'] = "تأكيد التسليم";
+
+    // كلمات صفحة الطلبات (Orders Page)
+    $lang['filter_processing'] = "جاري التجهيز";
+    $lang['filter_delivered'] = "تم التسليم";
+    $lang['filter_rejected'] = "ملغي";
+    $lang['details_btn'] = "التفاصيل";
+    $lang['accept_prepare'] = "قبول وتجهيز";
+    $lang['confirm_delivery'] = "تسليم للمندوب";
+    $lang['status_processing'] = "هل أنت متأكد من قبول الطلب وبدء تجهيزه؟";
+    $lang['status_rejected'] = "هل أنت متأكد من إلغاء هذا الطلب؟";
+    $lang['status_delivered'] = "هل تم تسليم الطلب للمندوب بنجاح؟";
+    $lang['rx_alert'] = "تنبيه وصفة طبية";
+    $lang['rx_verify_check'] = "لقد قمت بمراجعة الوصفة والتحقق من صحتها";
+    $lang['attached_rx'] = "وصفة طبية مرفقة";
+    $lang['customer_info'] = "بيانات العميل";
+    $lang['item_total'] = "الإجمالي";
+    $lang['qty'] = "الكمية";
+    $lang['close'] = "إغلاق";
+    $lang['total_required'] = "المطلوب دفعه";
+    $lang['no_orders_desc'] = "لا يوجد طلبات حالياً";
 } else {
 
     // Login Page
@@ -222,7 +242,7 @@ if ($current_lang == 'ar') {
     $lang['new_account'] = "New Pharmacy?";
     $lang['register_link'] = "Submit Join Request";
 
-//register page
+    //register page
     $lang['email_exists_error'] = "Sorry, this email is already registered!";
     $lang['location_error'] = "Please select the pharmacy location accurately on the map.";
     $lang['registration_success'] = "Your join request has been submitted successfully! Please wait for admin approval.";
@@ -419,4 +439,24 @@ if ($current_lang == 'ar') {
     $lang['close'] = "Close";
     $lang['accept_prepare'] = "Accept & Prepare";
     $lang['confirm_delivery'] = "Confirm Delivery";
+
+    // Orders Page Translations
+    $lang['filter_processing'] = "Processing";
+    $lang['filter_delivered'] = "Delivered";
+    $lang['filter_rejected'] = "Rejected";
+    $lang['details_btn'] = "Details";
+    $lang['accept_prepare'] = "Accept & Prepare";
+    $lang['confirm_delivery'] = "Confirm Delivery";
+    $lang['status_processing'] = "Are you sure you want to accept and prepare this order?";
+    $lang['status_rejected'] = "Are you sure you want to reject this order?";
+    $lang['status_delivered'] = "Has this order been delivered to the courier?";
+    $lang['rx_alert'] = "Prescription Alert";
+    $lang['rx_verify_check'] = "I have verified and validated this prescription";
+    $lang['attached_rx'] = "Attached Prescription";
+    $lang['customer_info'] = "Customer Info";
+    $lang['item_total'] = "Total";
+    $lang['qty'] = "Qty";
+    $lang['close'] = "Close";
+    $lang['total_required'] = "Total Required";
+    $lang['no_orders_desc'] = "No orders available right now";
 }

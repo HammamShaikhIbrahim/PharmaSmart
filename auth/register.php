@@ -1,17 +1,12 @@
 <?php
-// ==========================================
-// 1. استدعاء ملف الاتصال بقاعدة البيانات
-// ==========================================
 include('../config/database.php');
-require_once('../includes/lang.php');
 session_start();
+require_once('../includes/lang.php');
 
 $message = "";
 $error = "";
 
-// ==========================================
-// 2. معالجة طلب التسجيل 
-// ==========================================
+
 if (isset($_POST['register'])) {
     $fname = mysqli_real_escape_string($conn, $_POST['fname']);
     $lname = mysqli_real_escape_string($conn, $_POST['lname']);
@@ -136,56 +131,37 @@ if (isset($_POST['register'])) {
 <body class="bg-gradient-to-br from-teal-50 to-emerald-200 dark:from-slate-900 dark:to-teal-950 relative transition-colors duration-500 py-10 min-h-screen">
 
     <!-- ==========================================
-         الأشكال موزعة على كامل مساحة الشاشة (Fixed Background)
+            الأشكال الطبية ثلاثية الأبعاد
     ========================================== -->
     <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
 
-        <!-- 1. الصليب الطبي (أعلى اليسار) -->
-        <div class="absolute top-16 left-12 w-32 h-32 transform rotate-12 opacity-90">
-            <div class="absolute inset-x-8 inset-y-0 rounded-xl bg-gradient-to-br from-green-300 to-teal-400 dark:from-green-600 dark:to-teal-700 shadow-[inset_3px_3px_10px_rgba(255,255,255,0.7),inset_-3px_-3px_10px_rgba(0,0,0,0.2)]"></div>
-            <div class="absolute inset-y-8 inset-x-0 rounded-xl bg-gradient-to-br from-green-300 to-teal-400 dark:from-green-600 dark:to-teal-700 shadow-[inset_3px_3px_10px_rgba(255,255,255,0.7),inset_-3px_-3px_10px_rgba(0,0,0,0.2)]"></div>
+        <!-- شكل الكبسولة -->
+        <div class="absolute top-10 left-20 w-32 h-64 rounded-full transform rotate-[35deg]
+                    bg-gradient-to-b from-emerald-300 to-teal-500 dark:from-emerald-600 dark:to-teal-800
+                    shadow-[inset_15px_15px_30px_rgba(255,255,255,0.7),inset_-10px_-10px_30px_rgba(0,0,0,0.2),10px_20px_40px_rgba(20,184,166,0.3)]">
         </div>
 
-        <!-- 2. كرة زجاجية عملاقة (أعلى اليمين، تخرج من الشاشة) -->
-        <div class="absolute -top-20 -right-20 w-[400px] h-[400px] rounded-full 
-                    bg-gradient-to-tr from-emerald-300/80 to-teal-500/50 dark:from-emerald-600/60 dark:to-teal-800/50
-                    backdrop-blur-sm
-                    shadow-[inset_15px_15px_40px_rgba(255,255,255,0.7),inset_-10px_-10px_30px_rgba(0,0,0,0.2),0_20px_40px_rgba(20,184,166,0.3)]">
+        <!-- شكل القرص-->
+        <div class="absolute top-1/4 right-20 w-48 h-48 rounded-full transform -rotate-[15deg]
+                    bg-gradient-to-tr from-green-200 to-emerald-400 dark:from-green-700 dark:to-emerald-600
+                    shadow-[inset_-10px_-10px_30px_rgba(0,0,0,0.15),inset_15px_15px_30px_rgba(255,255,255,0.8),0_20px_40px_rgba(16,185,129,0.2)]">
+            <div class="absolute top-1/2 left-4 right-4 h-1 bg-white/40 dark:bg-black/10 rounded-full transform -translate-y-1/2 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)]"></div>
         </div>
 
-        <!-- 3. كبسولة دواء طويلة مائلة (منتصف اليسار) -->
-        <div class="absolute top-1/3 -left-10 w-40 h-96 rounded-[100px] transform rotate-[30deg]
-                    bg-gradient-to-b from-teal-200/90 to-emerald-500/60 dark:from-teal-700/70 dark:to-emerald-900/60
-                    backdrop-blur-md border border-white/40 dark:border-white/10
-                    shadow-[inset_10px_10px_25px_rgba(255,255,255,0.8),inset_-5px_-5px_20px_rgba(16,185,129,0.3),0_15px_30px_rgba(16,185,129,0.2)]">
+        <!-- شكل الزائد -->
+        <div class="absolute bottom-20 left-1/4 w-32 h-32 transform rotate-[15deg] opacity-80">
+            <div class="absolute inset-x-10 inset-y-0 rounded-2xl bg-gradient-to-br from-teal-300 to-cyan-500 dark:from-teal-600 dark:to-cyan-800 shadow-[inset_5px_5px_15px_rgba(255,255,255,0.6),inset_-5px_-5px_15px_rgba(0,0,0,0.2)]"></div>
+            <div class="absolute inset-y-10 inset-x-0 rounded-2xl bg-gradient-to-br from-teal-300 to-cyan-500 dark:from-teal-600 dark:to-cyan-800 shadow-[inset_5px_5px_15px_rgba(255,255,255,0.6),inset_-5px_-5px_15px_rgba(0,0,0,0.2)]"></div>
+        </div>
+        <!-- كبسولة صغيرة -->
+        <div class="absolute bottom-1/3 right-1/3 w-20 h-40 rounded-full transform -rotate-[40deg] blur-md
+                    bg-gradient-to-r from-emerald-400 to-green-300 dark:from-emerald-700 dark:to-green-800
+                    shadow-[inset_5px_5px_15px_rgba(255,255,255,0.5)]">
         </div>
 
-        <!-- 4. حلقة علمية (Torus) (منتصف اليمين) -->
-        <div class="absolute top-[40%] right-10 w-64 h-64 
-                    border-[50px] border-emerald-400/50 dark:border-emerald-700/50 
-                    rounded-full transform -rotate-[15deg] scale-y-75 backdrop-blur-sm
-                    shadow-[inset_10px_10px_20px_rgba(255,255,255,0.6),inset_-10px_-10px_20px_rgba(0,0,0,0.2),0_20px_40px_rgba(20,184,166,0.2)]">
-        </div>
-
-        <!-- 5. قطرة سيروم / دورق (أسفل اليسار) -->
-        <div class="absolute bottom-10 left-[15%] w-[250px] h-[300px] 
-                    bg-gradient-to-b from-teal-200/50 to-emerald-400/30 dark:from-teal-600/40 dark:to-emerald-900/30
-                    rounded-[50%_50%_50%_50%/60%_60%_40%_40%] transform -rotate-[10deg] backdrop-blur-xl border border-white/60 dark:border-white/10
-                    shadow-[inset_15px_15px_40px_rgba(255,255,255,0.8),inset_-10px_-10px_20px_rgba(16,185,129,0.3),0_20px_50px_rgba(20,184,166,0.2)]">
-        </div>
-
-        <!-- 6. أنبوب ملتوٍ (متعرج) (أسفل اليمين يخرج من الشاشة) -->
-        <div class="absolute -bottom-32 -right-10 w-[500px] h-[400px] 
-                    border-[80px] border-t-transparent border-l-transparent border-emerald-300/60 dark:border-emerald-600/40 
-                    rounded-[200px] transform rotate-[45deg] backdrop-blur-md
-                    shadow-[inset_20px_20px_40px_rgba(255,255,255,0.7),0_30px_60px_rgba(16,185,129,0.3)]">
-        </div>
-
-        <!-- توهج ضوئي خلفي في المنتصف لربط الألوان -->
-        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[100vw] h-[100vh] bg-emerald-400/10 dark:bg-teal-900/30 rounded-full blur-[150px] z-[-1]"></div>
     </div>
     <!-- ==========================================
-         أزرار التحكم العائمة (مع تأثيرات Hover لطيفة)
+            ازرار التحكم في الثيم واللغة
     ========================================== -->
     <div class="absolute top-6 right-6 flex items-center gap-3 z-50">
 
@@ -204,7 +180,7 @@ if (isset($_POST['register'])) {
 
     </div>
     <!-- ==========================================
-         نموذج التسجيل الزجاجي (يصعد فوق الأشكال أثناء السكرول)
+            صندوق التسجيل
     ========================================== -->
     <div class="relative z-10 flex items-center justify-center w-full px-4">
 

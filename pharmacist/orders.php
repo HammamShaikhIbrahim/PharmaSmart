@@ -14,7 +14,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role_id'] != 2) {
 $pharmacist_id = $_SESSION['user_id'];
 
 // ==========================================
-// 2. معالجة تحديث حالة الطلب (Actions) - لا تغيير هنا
+// 2. معالجة تحديث حالة الطلب (Actions)
 // ==========================================
 if (isset($_GET['action']) && isset($_GET['order_id'])) {
     $order_id = intval($_GET['order_id']);
@@ -27,13 +27,17 @@ if (isset($_GET['action']) && isset($_GET['order_id'])) {
         if ($action == 'Accepted') {
             mysqli_query($conn, "UPDATE Prescription SET IsVerified = 1 WHERE OrderID = $order_id");
         }
+        if (isset($_GET['ajax'])) {
+            echo json_encode(['success' => true]);
+            exit();
+        }
         header("Location: orders.php");
         exit();
     }
 }
 
 // ==========================================
-// 3. جلب بيانات الطلبات -    
+// 3. جلب بيانات الطلبات (تدعم AJAX للفلتر الزجاجي)
 // ==========================================
 $filter_status = isset($_GET['status']) ? mysqli_real_escape_string($conn, $_GET['status']) : 'All';
 $status_condition = ($filter_status !== 'All') ? "AND o.Status = '$filter_status'" : "";
@@ -54,7 +58,7 @@ $orders_query = "
 $orders_result = mysqli_query($conn, $orders_query);
 
 // ==========================================
-// 4. جلب تفاصيل الأدوية لكل طلب - لا تغيير هنا
+// 4. جلب تفاصيل الأدوية لكل طلب
 // ==========================================
 $order_items_data = [];
 $items_query = "
@@ -68,337 +72,701 @@ while ($item = mysqli_fetch_assoc($items_result)) {
     $order_items_data[$item['OrderID']][] = $item;
 }
 
+// ==========================================
+// 5. دالة مساعدة لترجمة وتلوين حالة الطلب
+// ==========================================
+function getStatusDisplay($status, $lang)
+{
+    switch ($status) {
+        case 'Pending':
+            return ['class' => 'bg-amber-500/10 text-amber-500',     'text' => $lang['filter_pending'], 'icon' => 'fa-solid fa-bell fa-shake'];
+        case 'Accepted':
+            return ['class' => 'bg-blue-500/10 text-blue-500',       'text' => $lang['filter_processing'], 'icon' => 'fa-solid fa-box-open'];
+        case 'Delivered':
+            return ['class' => 'bg-emerald-500/10 text-emerald-500', 'text' => $lang['filter_delivered'], 'icon' => 'fa-solid fa-check-double'];
+        case 'Rejected':
+            return ['class' => 'bg-rose-500/10 text-rose-500',       'text' => $lang['filter_rejected'], 'icon' => 'fa-solid fa-ban'];
+        default:
+            return ['class' => '', 'text' => $status, 'icon' => ''];
+    }
+}
+
+// ==========================================
+// 6. تجميع الطلبات حسب المريض
+// ==========================================
+$grouped_orders = [];
+if ($orders_result && mysqli_num_rows($orders_result) > 0) {
+    while ($order = mysqli_fetch_assoc($orders_result)) {
+        $patient_id = $order['PatientID'];
+        if (!isset($grouped_orders[$patient_id])) {
+            $grouped_orders[$patient_id] = [
+                'fname'   => $order['Fname'],
+                'lname'   => $order['Lname'],
+                'phone'   => $order['Phone'],
+                'orders'  => []
+            ];
+        }
+        $grouped_orders[$patient_id]['orders'][] = $order;
+    }
+}
+
+// ==========================================
+// 7. إنشاء HTML الجدول (يستخدم عند التحميل الأولي ومع AJAX)
+// ==========================================
+function renderTableRows($grouped_orders, $order_items_data, $lang)
+{
+    ob_start();
+    if (!empty($grouped_orders)) {
+        foreach ($grouped_orders as $patient_id => $patient_data):
+            $orders      = $patient_data['orders'];
+            $order_count = count($orders);
+            $has_multiple = $order_count > 1;
+
+            $first_order = $orders[0];
+            $statusDisplay   = getStatusDisplay($first_order['Status'], $lang);
+
+            $current_order_items = isset($order_items_data[$first_order['OrderID']]) ? $order_items_data[$first_order['OrderID']] : [];
+            $has_controlled = false;
+            foreach ($current_order_items as $ci) {
+                if ($ci['IsControlled'] == 1) $has_controlled = true;
+            }
+
+            $first_json = htmlspecialchars(json_encode([
+                'id' => $first_order['OrderID'],
+                'date' => date('Y-m-d h:i A', strtotime($first_order['OrderDate'])),
+                'status' => $first_order['Status'],
+                'total' => $first_order['TotalAmount'],
+                'patient' => $first_order['Fname'] . ' ' . $first_order['Lname'],
+                'phone' => $first_order['Phone'],
+                'address' => $first_order['DeliveryAddress'],
+                'items' => $current_order_items,
+                'prescription' => $first_order['PrescriptionImage'],
+                'has_controlled' => $has_controlled
+            ]));
+
+            $uid = 'patient_' . $patient_id;
+            // تجهيز نص البحث المخفي
+            $searchableText = strtolower("ord-{$first_order['OrderID']} {$patient_data['fname']} {$patient_data['lname']} {$patient_data['phone']}");
+?>
+
+            <tr class="main-order-row border-b border-slate-200 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all duration-200 <?php echo $has_multiple ? 'cursor-pointer group' : 'cursor-pointer'; ?>"
+                data-searchable="<?php echo $searchableText; ?>"
+                <?php if ($has_multiple): ?>onclick="togglePatientOrders('<?php echo $uid; ?>')" <?php else: ?>onclick="viewOrderDetails('<?php echo $first_json; ?>')" <?php endif; ?>>
+
+                <td class="px-6 py-5 font-mono font-bold text-gray-900 dark:text-white">
+                    <div class="flex items-center gap-2">
+                        <?php if ($has_multiple): ?>
+                            <div id="arrow_<?php echo $uid; ?>" class="w-6 h-6 flex items-center justify-center rounded-full bg-[#113f2b]/10 text-[#113f2b] dark:text-[#d2f34c] transition-transform duration-300">
+                                <i class="fa-solid fa-chevron-left text-[10px]"></i>
+                            </div>
+                        <?php endif; ?>
+                        <span>#ORD-<?php echo $first_order['OrderID']; ?></span>
+                        <?php if ($has_multiple): ?>
+                            <span class="text-[10px] font-black bg-[#113f2b] text-[#d2f34c] px-2 py-0.5 rounded-full shadow-sm">+<?php echo $order_count - 1; ?></span>
+                        <?php endif; ?>
+                    </div>
+                </td>
+
+                <td class="px-6 py-5">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center text-gray-500 font-bold text-sm">
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+                        <div>
+                            <div class="font-bold text-gray-900 dark:text-white"><?php echo htmlspecialchars($patient_data['fname'] . ' ' . $patient_data['lname']); ?></div>
+                            <div class="text-xs text-gray-500 dark:text-slate-400" dir="ltr"><?php echo htmlspecialchars($patient_data['phone']); ?></div>
+                        </div>
+                    </div>
+                </td>
+
+                <td class="px-6 py-5">
+                    <div class="font-medium text-gray-700 dark:text-slate-300"><?php echo date('Y-m-d', strtotime($first_order['OrderDate'])); ?></div>
+                    <div class="text-xs text-gray-500 dark:text-slate-500"><i class="fa-regular fa-clock"></i> <?php echo date('h:i A', strtotime($first_order['OrderDate'])); ?></div>
+                </td>
+
+                <td class="px-6 py-5">
+                    <span class="px-3 py-1.5 rounded-full text-xs font-bold border flex items-center gap-1.5 w-fit <?php echo $statusDisplay['class']; ?> border-current border-opacity-20">
+                        <i class="<?php echo $statusDisplay['icon']; ?>"></i> <?php echo $statusDisplay['text']; ?>
+                    </span>
+                </td>
+
+                <td class="px-6 py-5 font-black text-[#113f2b] dark:text-[#d2f34c]" dir="ltr">
+                    <?php echo number_format($first_order['TotalAmount'], 2); ?> <?php echo isset($lang['currency']) ? $lang['currency'] : '₪'; ?>
+                </td>
+
+                <td class="px-6 py-5 text-center">
+                    <div class="flex items-center justify-center gap-3" onclick="event.stopPropagation()">
+                        <button onclick="viewOrderDetails('<?php echo $first_json; ?>')" class="p-2 rounded-lg text-gray-400 hover:bg-gray-200 hover:text-gray-700 transition-colors" title="<?php echo $lang['details_btn']; ?>">
+                            <i class="fa-solid fa-eye text-lg"></i>
+                        </button>
+                        <?php if ($first_order['Status'] == 'Pending'): ?>
+                            <button onclick="confirmOrderStatus(<?php echo $first_order['OrderID']; ?>, 'Accepted')" class="p-2 rounded-lg text-[#113f2b] dark:text-[#d2f34c] hover:bg-[#113f2b]/10 transition-colors" title="<?php echo $lang['accept_prepare']; ?>">
+                                <i class="fa-solid fa-check-circle text-lg"></i>
+                            </button>
+                            <button onclick="confirmOrderStatus(<?php echo $first_order['OrderID']; ?>, 'Rejected')" class="p-2 rounded-lg text-rose-500 hover:bg-rose-500/10 transition-colors" title="<?php echo $lang['filter_rejected']; ?>">
+                                <i class="fa-solid fa-circle-xmark text-lg"></i>
+                            </button>
+                        <?php endif; ?>
+                        <?php if ($first_order['Status'] == 'Accepted'): ?>
+                            <button onclick="confirmOrderStatus(<?php echo $first_order['OrderID']; ?>, 'Delivered')" class="p-2 rounded-lg text-blue-500 hover:bg-blue-500/10 transition-colors" title="<?php echo $lang['confirm_delivery']; ?>">
+                                <i class="fa-solid fa-motorcycle text-lg"></i>
+                            </button>
+                        <?php endif; ?>
+                    </div>
+                </td>
+            </tr>
+
+            <?php if ($has_multiple):
+                foreach (array_slice($orders, 1) as $sub_order):
+                    $subStatusDisplay   = getStatusDisplay($sub_order['Status'], $lang);
+                    $sub_items = isset($order_items_data[$sub_order['OrderID']]) ? $order_items_data[$sub_order['OrderID']] : [];
+                    $sub_has_controlled = false;
+                    foreach ($sub_items as $si) {
+                        if ($si['IsControlled'] == 1) $sub_has_controlled = true;
+                    }
+
+                    $sub_json = htmlspecialchars(json_encode([
+                        'id' => $sub_order['OrderID'],
+                        'date' => date('Y-m-d h:i A', strtotime($sub_order['OrderDate'])),
+                        'status' => $sub_order['Status'],
+                        'total' => $sub_order['TotalAmount'],
+                        'patient' => $sub_order['Fname'] . ' ' . $sub_order['Lname'],
+                        'phone' => $sub_order['Phone'],
+                        'address' => $sub_order['DeliveryAddress'],
+                        'items' => $sub_items,
+                        'prescription' => $sub_order['PrescriptionImage'],
+                        'has_controlled' => $sub_has_controlled
+                    ]));
+
+                    $subSearchableText = strtolower("ord-{$sub_order['OrderID']} {$sub_order['Fname']} {$sub_order['Lname']}");
+            ?>
+                    <tr class="sub-order-row hidden border-b border-dashed border-slate-200 dark:border-slate-700/30 bg-slate-50/50 dark:bg-slate-800/20 transition-all duration-200 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/50"
+                        data-parent="<?php echo $uid; ?>"
+                        data-searchable="<?php echo $subSearchableText; ?>"
+                        onclick="viewOrderDetails('<?php echo $sub_json; ?>')">
+
+                        <td class="px-6 py-4 font-mono font-bold text-gray-500 dark:text-slate-400">
+                            <div class="flex items-center gap-2 ps-8">
+                                <div class="w-1 h-8 rounded-full bg-[#113f2b]/30"></div>
+                                <span class="text-sm">#ORD-<?php echo $sub_order['OrderID']; ?></span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="text-xs text-gray-400 dark:text-slate-500 italic ps-12"><?php echo htmlspecialchars($sub_order['Fname'] . ' ' . $sub_order['Lname']); ?></span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm font-medium text-gray-600 dark:text-slate-400"><?php echo date('Y-m-d', strtotime($sub_order['OrderDate'])); ?></div>
+                            <div class="text-xs text-gray-400 dark:text-slate-500"><?php echo date('h:i A', strtotime($sub_order['OrderDate'])); ?></div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 rounded text-[10px] font-bold border flex items-center gap-1 w-fit <?php echo $subStatusDisplay['class']; ?> border-current border-opacity-20">
+                                <i class="<?php echo $subStatusDisplay['icon']; ?>"></i> <?php echo $subStatusDisplay['text']; ?>
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 font-bold text-gray-600 dark:text-slate-400 text-sm" dir="ltr">
+                            <?php echo number_format($sub_order['TotalAmount'], 2); ?> <?php echo isset($lang['currency']) ? $lang['currency'] : '₪'; ?>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <div class="flex items-center justify-center gap-3" onclick="event.stopPropagation()">
+                                <button onclick="viewOrderDetails('<?php echo $sub_json; ?>')" class="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 transition-colors">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            <?php endif; ?>
+
+        <?php endforeach;
+    } else { ?>
+        <tr>
+            <td colspan="6" class="text-center py-20">
+                <div class="flex flex-col items-center gap-4 text-slate-500">
+                    <i class="fa-solid fa-box-open text-5xl text-gray-300"></i>
+                    <span class="font-bold text-lg"><?php echo isset($lang['no_orders_desc']) ? $lang['no_orders_desc'] : $lang['no_data']; ?></span>
+                </div>
+            </td>
+        </tr>
+<?php }
+    return ob_get_clean();
+}
+
+if (isset($_GET['ajax']) && $_GET['ajax'] == '1') {
+    echo renderTableRows($grouped_orders, $order_items_data, $lang);
+    exit();
+}
+
 include('../includes/header.php');
 include('../includes/sidebar.php');
 ?>
 
+<!-- استدعاء FontAwesome 6 -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 <style>
-
-
-
-/* ================================================== */
-/* == تعديل: إضافة تصميم أزرار الفلتر الزجاجية == */
-/* ================================================== */
-.glass-radio-group {
-  display: flex;
-  position: relative;
-  border-radius: 9999px; /* rounded-full */
-  backdrop-filter: blur(12px);
-  overflow: hidden;
-  width: fit-content;
-  padding: 0.375rem; /* p-1.5 */
-}
-
-/* الوضع الفاتح */
-.light .glass-radio-group {
-  background: rgba(255, 255, 255, 0.7); /* أبيض شفاف */
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1); /* shadow-md */
-}
-
-/* الوضع الداكن */
-.dark .glass-radio-group {
-  background: rgba(41, 56, 81, 0.5); /* أزرق داكن شفاف */
-  box-shadow: inset 0 2px 4px 0 rgba(255, 255, 255, 0.05);
-}
-
-/* هذا هو الرابط/الزر نفسه */
-.glass-radio-group a {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.875rem; /* text-sm */
-  padding: 0.625rem 1.75rem; /* px-7 py-2.5 */
-  cursor: pointer;
-  font-weight: 900; /* font-black */
-  position: relative;
-  z-index: 2;
-  transition: color 0.4s ease-in-out;
-  border-radius: 9999px;
-  white-space: nowrap;
-}
-
-.light .glass-radio-group a { color: #64748b; } /* slate-500 */
-.dark .glass-radio-group a { color: #94a3b8; } /* slate-400 */
-
-.light .glass-radio-group a.active-glider-item,
-.light .glass-radio-group a:hover { color: #0f172a; } /* slate-900 */
-
-.dark .glass-radio-group a.active-glider-item,
-.dark .glass-radio-group a:hover { color: #ffffff; }
-
-/* هذا هو الجزء المتحرك (الـ Glider) */
-.glass-glider {
-  position: absolute;
-  top: 0.375rem;
-  bottom: 0.375rem;
-  z-index: 1;
-  transition: transform 0.5s cubic-bezier(0.45, 0, 0.09, 1);
-  border-radius: 9999px;
-}
-
-.light .glass-glider {
-  background: white;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1); /* shadow */
-}
-
-.dark .glass-glider {
-  background-color: #334155; /* slate-700 */
-  box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-
-
-
-
-
-
-
-
-
-
-
-    .table-container {
-        border-radius: 1.5rem;
+    /* ================================================== */
+    /* == تصميم الفلتر Glass Radio Group (Uiverse) == */
+    /* ================================================== */
+    .glass-radio-group {
+        display: flex;
+        position: relative;
+        background: rgba(255, 255, 255, 0.6);
+        border-radius: 1rem;
+        backdrop-filter: blur(12px);
+        box-shadow: inset 1px 1px 4px rgba(255, 255, 255, 0.6), inset -1px -1px 6px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.08);
         overflow: hidden;
-    }
-    /* الوضع الداكن */
-    .dark .table-container { 
-        background-color: #1e293b; 
-        border: 1px solid rgba(100, 116, 139, 0.2);
-    }
-    /* الوضع الفاتح */
-    .light .table-container { 
-        background-color: white; 
-        border: 1px solid #e2e8f0; /* slate-200 */
+        width: fit-content;
     }
 
+    .dark .glass-radio-group {
+        background: rgba(0, 0, 0, 0.2);
+        box-shadow: inset 1px 1px 4px rgba(255, 255, 255, 0.1), inset -1px -1px 6px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
 
+    .glass-radio-group input {
+        display: none;
+    }
+
+    .glass-radio-group label {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 100px;
+        font-size: 13px;
+        padding: 0.75rem 1.4rem;
+        cursor: pointer;
+        font-weight: 800;
+        color: #64748b;
+        position: relative;
+        z-index: 2;
+        transition: color 0.3s ease-in-out;
+        gap: 8px;
+    }
+
+    .dark .glass-radio-group label {
+        color: #94a3b8;
+    }
+
+    .glass-radio-group label:hover {
+        color: #113f2b;
+    }
+
+    .dark .glass-radio-group label:hover {
+        color: #fff;
+    }
+
+    .glass-radio-group input:checked+label {
+        color: #fff !important;
+    }
+
+    .glass-glider {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: calc(100% / 5);
+        border-radius: 1rem;
+        z-index: 1;
+        transition: transform 0.5s cubic-bezier(0.37, 1.95, 0.66, 0.56), background 0.4s ease-in-out, box-shadow 0.4s ease-in-out;
+    }
+
+    /* الألوان حسب الحالة */
+    #rd-all:checked~.glass-glider {
+        background: linear-gradient(135deg, #113f2b, #1a5c40);
+        box-shadow: 0 0 18px rgba(17, 63, 43, 0.5);
+    }
+
+    #rd-pending:checked~.glass-glider {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        box-shadow: 0 0 18px rgba(245, 158, 11, 0.5);
+    }
+
+    #rd-accepted:checked~.glass-glider {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        box-shadow: 0 0 18px rgba(59, 130, 246, 0.5);
+    }
+
+    #rd-delivered:checked~.glass-glider {
+        background: linear-gradient(135deg, #10b981, #059669);
+        box-shadow: 0 0 18px rgba(16, 185, 129, 0.5);
+    }
+
+    #rd-rejected:checked~.glass-glider {
+        background: linear-gradient(135deg, #f43f5e, #e11d48);
+        box-shadow: 0 0 18px rgba(244, 63, 94, 0.5);
+    }
+
+    /* حركات السلايدر حسب اتجاه الصفحة */
+    html[dir="rtl"] #rd-all:checked~.glass-glider {
+        transform: translateX(0%);
+    }
+
+    html[dir="rtl"] #rd-pending:checked~.glass-glider {
+        transform: translateX(-100%);
+    }
+
+    html[dir="rtl"] #rd-accepted:checked~.glass-glider {
+        transform: translateX(-200%);
+    }
+
+    html[dir="rtl"] #rd-delivered:checked~.glass-glider {
+        transform: translateX(-300%);
+    }
+
+    html[dir="rtl"] #rd-rejected:checked~.glass-glider {
+        transform: translateX(-400%);
+    }
+
+    html[dir="ltr"] #rd-all:checked~.glass-glider {
+        transform: translateX(0%);
+    }
+
+    html[dir="ltr"] #rd-pending:checked~.glass-glider {
+        transform: translateX(100%);
+    }
+
+    html[dir="ltr"] #rd-accepted:checked~.glass-glider {
+        transform: translateX(200%);
+    }
+
+    html[dir="ltr"] #rd-delivered:checked~.glass-glider {
+        transform: translateX(300%);
+    }
+
+    html[dir="ltr"] #rd-rejected:checked~.glass-glider {
+        transform: translateX(400%);
+    }
+
+    /* أنيميشن الجداول */
+    #ordersTableBody {
+        transition: opacity 0.2s ease;
+    }
+
+    #ordersTableBody.loading {
+        opacity: 0.3;
+        pointer-events: none;
+    }
+
+    .sub-order-row {
+        transition: opacity 0.25s ease;
+    }
+
+    .sub-order-row.show {
+        display: table-row !important;
+    }
 </style>
 
-<main class="flex-1 p-4 md:p-8 bg-emerald-50 dark:bg-[#0B1120] h-full overflow-y-auto transition-colors duration-300 relative">
+<main class="flex-1 p-8 bg-green-50 dark:bg-green-950 h-full overflow-y-auto transition-colors duration-300 relative">
     <?php include('../includes/topbar.php'); ?>
 
-    <!-- ترويسة الصفحة والفلاتر - لا تغيير هنا -->
-    <div class="mb-10 flex flex-col md:flex-row justify-between items-center gap-6">
-        <div class="flex items-center gap-3">
-            <i data-lucide="clipboard-check" class="text-[#0A7A48] w-10 h-10"></i>
+    <!-- ترويسة الصفحة والفلتر الزجاجي والبحث -->
+    <div class="mb-10 flex flex-col xl:flex-row justify-between items-center gap-6">
+
+        <!-- العنوان -->
+        <div class="flex items-center gap-4 w-full xl:w-auto shrink-0">
+            <div class="bg-[#113f2b] p-3 rounded-2xl shadow-lg">
+                <i class="fa-solid fa-truck-fast text-[#d2f34c] text-2xl"></i>
+            </div>
             <div>
-                <h1 class="text-4xl font-black text-gray-900 dark:text-white tracking-tight mb-1">
-                    <span class="text-gradient"><?php echo $lang['manage_orders']; ?></span>
-                </h1>
-                <p class="text-sm text-gray-500 font-bold">تابع وقم بمعالجة طلبات عملائك بدقة.</p>
+                <h1 class="text-3xl font-black text-gray-900 dark:text-white"><?php echo isset($lang['orders']) ? $lang['orders'] : 'Orders'; ?></h1>
+                <p class="text-sm text-gray-500 font-bold mt-1"><?php echo isset($lang['manage_orders']) ? $lang['manage_orders'] : 'Manage your orders'; ?></p>
             </div>
         </div>
-       <!-- ============================================= -->
-<!-- == تعديل: تطبيق تصميم الفلاتر الزجاجية == -->
-<!-- ============================================= -->
-<div class="glass-radio-group">
-    <?php 
-        $filter_tabs = [
-            ['All', $lang['filter_all']],
-            ['Pending', $lang['filter_pending']],
-            ['Accepted', $lang['filter_processing']],
-            ['Delivered', $lang['filter_delivered']],
-            ['Rejected', 'مرفوضة']
-        ];
-        
-        $total_tabs = count($filter_tabs);
-        $activeIndex = 0; // القيمة الافتراضية للفلتر "الكل"
 
-        foreach ($filter_tabs as $index => $tab) {
-            // تحقق من هو الفلتر النشط حالياً
-            $isActive = ($filter_status === $tab[0]);
-            if ($isActive) {
-                $activeIndex = $index; // قم بتحديث مؤشر الفلتر النشط
-            }
-            // أضف كلاس "active-glider-item" للرابط النشط لتغيير لون النص
-            $active_class = $isActive ? ' active-glider-item' : '';
-            echo "<a href='?status={$tab[0]}' class='$active_class'>{$tab[1]}</a>";
-        }
-    ?>
-    <!-- هذا هو العنصر المتحرك الذي سيتحرك خلف الزر النشط -->
-    <!-- يتم حساب عرضه وموقعه ديناميكياً باستخدام PHP -->
-    <div class="glass-glider" style="
-        width: calc(100% / <?php echo $total_tabs; ?>); 
-        transform: translateX(<?php echo $activeIndex * 100; ?>%); "></div>
-</div>
+        <!-- أدوات التحكم: مربع البحث + الفلتر الزجاجي -->
+        <div class="flex flex-col md:flex-row items-center gap-4 w-full xl:w-auto">
+
+            <!-- مربع البحث الآني (Zero-Lag) -->
+            <div class="relative w-full md:w-64">
+                <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="<?php echo isset($lang['search_product']) ? $lang['search_product'] : 'Search...'; ?>"
+                    class="w-full py-2.5 px-4 <?php echo ($dir == 'rtl') ? 'pl-10' : 'pr-10'; ?> rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:border-[#113f2b] dark:text-white shadow-sm focus:ring-2 focus:ring-[#113f2b]/20">
+                <i class="fa-solid fa-magnifying-glass absolute <?php echo ($dir == 'rtl') ? 'left-3' : 'right-3'; ?> top-3 text-gray-400"></i>
+            </div>
+
+            <!-- الفلتر الزجاجي (Glass Filter) -->
+            <div class="w-full md:w-auto overflow-x-auto custom-scrollbar pb-2 md:pb-0">
+                <div class="glass-radio-group">
+                    <input type="radio" name="order_filter" id="rd-all" onclick="filterOrders('All')" <?php echo $filter_status == 'All' ? 'checked' : ''; ?> />
+                    <label for="rd-all"><i class="fa-solid fa-layer-group"></i> <?php echo isset($lang['filter_all']) ? $lang['filter_all'] : 'All'; ?></label>
+
+                    <input type="radio" name="order_filter" id="rd-pending" onclick="filterOrders('Pending')" <?php echo $filter_status == 'Pending' ? 'checked' : ''; ?> />
+                    <label for="rd-pending"><i class="fa-solid fa-bell"></i> <?php echo isset($lang['filter_pending']) ? $lang['filter_pending'] : 'Pending'; ?></label>
+
+                    <input type="radio" name="order_filter" id="rd-accepted" onclick="filterOrders('Accepted')" <?php echo $filter_status == 'Accepted' ? 'checked' : ''; ?> />
+                    <label for="rd-accepted"><i class="fa-solid fa-box-open"></i> <?php echo isset($lang['filter_processing']) ? $lang['filter_processing'] : 'Processing'; ?></label>
+
+                    <input type="radio" name="order_filter" id="rd-delivered" onclick="filterOrders('Delivered')" <?php echo $filter_status == 'Delivered' ? 'checked' : ''; ?> />
+                    <label for="rd-delivered"><i class="fa-solid fa-check-double"></i> <?php echo isset($lang['filter_delivered']) ? $lang['filter_delivered'] : 'Delivered'; ?></label>
+
+                    <input type="radio" name="order_filter" id="rd-rejected" onclick="filterOrders('Rejected')" <?php echo $filter_status == 'Rejected' ? 'checked' : ''; ?> />
+                    <label for="rd-rejected"><i class="fa-solid fa-ban"></i> <?php echo isset($lang['filter_rejected']) ? $lang['filter_rejected'] : 'Rejected'; ?></label>
+
+                    <div class="glass-glider"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- جدول الطلبات -->
-<div class="table-container bg-white dark:bg-[#1e293b]">        <table class="w-full text-sm text-right text-slate-300">
-       <!-- ==  جعل رأس الجدول متكيفاً(Responsive) == -->
-        <!-- ============================================= -->
-        <thead class="text-xs text-gray-500 dark:text-slate-400 uppercase bg-gray-50 dark:bg-slate-900/50">
-            <tr>
-                <th scope="col" class="px-6 py-4 font-black">رقم الطلب</th>
-                <th scope="col" class="px-6 py-4 font-black">المريض</th>
-                <th scope="col" class="px-6 py-4 font-black">تاريخ الطلب</th>
-                <th scope="col" class="px-6 py-4 font-black">الحالة</th>
-                <th scope="col" class="px-6 py-4 font-black">الإجمالي</th>
-                <th scope="col" class="px-6 py-4 font-black text-center">الإجراءات</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php if (mysqli_num_rows($orders_result) > 0): ?>
-                <?php while ($order = mysqli_fetch_assoc($orders_result)):
-                        
-                        $statusText = ''; $statusPillClass = '';
-                        switch ($order['Status']) {
-                            case 'Pending':
-                                $statusPillClass = "bg-amber-500/10 text-amber-400"; $statusText = $lang['status_pending']; break;
-                            case 'Accepted':
-                                $statusPillClass = "bg-blue-500/10 text-blue-400"; $statusText = "قيد التجهيز"; break;
-                            case 'Delivered':
-                                $statusPillClass = "bg-emerald-500/10 text-emerald-400"; $statusText = $lang['status_delivered']; break;
-                            case 'Rejected':
-                                $statusPillClass = "bg-rose-500/10 text-rose-400"; $statusText = $lang['status_rejected']; break;
-                        }
-
-                        $current_order_items = isset($order_items_data[$order['OrderID']]) ? $order_items_data[$order['OrderID']] : [];
-                        $has_controlled = false;
-                        foreach ($current_order_items as $item) {
-                            if ($item['IsControlled'] == 1) $has_controlled = true;
-                        }
-                        // تم تجهيز بيانات JSON كما هي لاستخدامها في النافذة المنبثقة والإشعار
-                        $order_json = htmlspecialchars(json_encode([
-                            'id' => $order['OrderID'], 'date' => date('Y-m-d h:i A', strtotime($order['OrderDate'])),
-                            'status' => $order['Status'], 'total' => $order['TotalAmount'],
-                            'patient' => $order['Fname'] . ' ' . $order['Lname'], 'phone' => $order['Phone'],
-                            'address' => $order['DeliveryAddress'], 'items' => $current_order_items,
-                            'prescription' => $order['PrescriptionImage'], 'has_controlled' => $has_controlled
-                        ]));
-                    ?>
-                    
-                    <!-- 1. الفاصل: تم تغيير لون `border-slate-800` إلى `border-slate-700/50` لفاصل أنعم. -->
-                    <!-- 2. تأثير التأشير: `hover:bg-slate-900/90` يقوم بتغيير لون الخلفية عند التمرير. -->
-                    <!-- 3. إشعار المعلومات: تم إضافة `onmousemove` و `onmouseout` لاستدعاء دوال الإشعار. -->
-      <tr class="border-b border-slate-700/50 hover:bg-slate-800 hover:ring-1 hover:ring-slate-100 transition-all duration-200 cursor-pointer"
-                    
-                    <!-- رقم الطلب -->
-                    <td onclick="viewOrderDetails('<?php echo $order_json; ?>')" class="px-6 py-5 font-mono font-bold text-gray-00 dark:text-white">#ORD-<?php echo $order['OrderID']; ?></td>
-                    
-                    <!-- العميل -->
-                    <td onclick="viewOrderDetails('<?php echo $order_json; ?>')" class="px-6 py-5">
-                        <div class="flex items-center gap-3">
-                            <div class="w-9 h-9 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 dark:text-emerald-400 font-bold text-sm">
-                                <?php echo mb_substr($order['Fname'], 0, 1); ?>
-                            </div>
-                            <div>
-                                <div class="font-bold text-gray-900 dark:text-white"><?php echo htmlspecialchars($order['Fname'] . ' ' . $order['Lname']); ?></div>
-                                <div class="text-xs text-gray-500 dark:text-slate-400" dir="ltr"><?php echo htmlspecialchars($order['Phone']); ?></div>
-                            </div>
-                        </div>
-                    </td>
-                    
-                    <!-- تاريخ الطلب -->
-                    <td onclick="viewOrderDetails('<?php echo $order_json; ?>')" class="px-6 py-5">
-                         <div class="font-medium text-gray-700 dark:text-slate-300"><?php echo date('Y-m-d', strtotime($order['OrderDate'])); ?></div>
-                         <div class="text-xs text-gray-500 dark:text-slate-500"><?php echo date('h:i A', strtotime($order['OrderDate'])); ?></div>
-                    </td>
-
-                    <!-- الحالة -->
-                    <td onclick="viewOrderDetails('<?php echo $order_json; ?>')" class="px-6 py-5">
-                        <span class="px-3 py-1.5 rounded-full text-[10px] font-black uppercase <?php echo $statusPillClass; ?>">
-                            <?php echo $statusText; ?>
-                        </span>
-                    </td>
-                    
-                    <!-- الإجمالي -->
-                    <td onclick="viewOrderDetails('<?php echo $order_json; ?>')" class="px-6 py-5 font-bold text-gray-800 dark:text-white" dir="ltr">
-                        <?php echo number_format($order['TotalAmount'], 2); ?> ₪
-                    </td>
-
-                    <!-- الإجراءات -->
-                    <td class="px-6 py-5 text-center">
-                        <div class="flex items-center justify-center gap-3">
-                            <button onclick="viewOrderDetails('<?php echo $order_json; ?>')" class="p-2 rounded-lg text-gray-400 dark:text-slate-400 hover:bg-gray-200 dark:hover:bg-slate-700 hover:text-gray-700 dark:hover:text-white transition-colors" title="معاينة التفاصيل">
-                                <i data-lucide="eye" class="w-5 h-5"></i>
-                            </button>
-                            
-                            <?php if ($order['Status'] == 'Pending'): ?>
-                                <button onclick="confirmOrderStatus(<?php echo $order['OrderID']; ?>, 'Accepted')" class="p-2 rounded-lg text-emerald-500 dark:text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-300 transition-colors" title="قبول وتجهيز">
-                                    <i data-lucide="check-circle" class="w-5 h-5"></i>
-                                </button>
-                            <?php endif; ?>
-                            
-                            <?php if ($order['Status'] == 'Accepted'): ?>
-                                 <button onclick="confirmOrderStatus(<?php echo $order['OrderID']; ?>, 'Delivered')" class="p-2 rounded-lg text-blue-500 dark:text-blue-400 hover:bg-blue-500/10 hover:text-blue-600 dark:hover:text-blue-300 transition-colors" title="تأكيد التسليم">
-                                    <i data-lucide="truck" class="w-5 h-5"></i>
-                                </button>
-                            <?php endif; ?>
-                            
-                            <?php if ($order['Status'] == 'Pending'): ?>
-                                <button onclick="confirmOrderStatus(<?php echo $order['OrderID']; ?>, 'Rejected')" class="p-2 rounded-lg text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-400 transition-colors" title="رفض الطلب">
-                                    <i data-lucide="x-circle" class="w-5 h-5"></i>
-                                </button>
-                            <?php endif; ?>
-                        </div>
-                    </td>
+    <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
+        <table class="w-full text-sm <?php echo ($dir == 'rtl') ? 'text-right' : 'text-left'; ?>">
+            <thead class="bg-gray-50/50 dark:bg-slate-900/50 border-b border-gray-200 dark:border-slate-700">
+                <tr class="text-gray-600 dark:text-gray-400">
+                    <th class="px-6 py-4 font-bold"><?php echo isset($lang['order_id']) ? $lang['order_id'] : 'Order ID'; ?></th>
+                    <th class="px-6 py-4 font-bold"><?php echo isset($lang['patient_name']) ? $lang['patient_name'] : 'Patient'; ?></th>
+                    <th class="px-6 py-4 font-bold"><?php echo isset($lang['time']) ? $lang['time'] : 'Time'; ?></th>
+                    <th class="px-6 py-4 font-bold"><?php echo isset($lang['status']) ? $lang['status'] : 'Status'; ?></th>
+                    <th class="px-6 py-4 font-bold"><?php echo isset($lang['amount']) ? $lang['amount'] : 'Amount'; ?></th>
+                    <th class="px-6 py-4 font-bold text-center"><?php echo isset($lang['actions']) ? $lang['actions'] : 'Actions'; ?></th>
                 </tr>
-                <?php endwhile; ?>
-            <?php else: ?>
-                <tr>
-                    <td colspan="6" class="text-center py-20">
-                        <div class="flex flex-col items-center gap-4 text-slate-500">
-                            <i data-lucide="inbox" class="w-16 h-16"></i>
-                            <span class="font-bold text-lg">لا توجد طلبات تطابق الفلتر الحالي</span>
-                        </div>
-                    </td>
-                </tr>
-            <?php endif; ?>
-        </tbody>
-    </table>
-</div>
-    
+            </thead>
+            <tbody id="ordersTableBody" class="divide-y divide-gray-50 dark:divide-slate-700/50">
+                <?php echo renderTableRows($grouped_orders, $order_items_data, $lang); ?>
+            </tbody>
+        </table>
+    </div>
 </main>
 
-<!-- ====== تعديل: إضافة عنصر الإشعار (Tooltip) إلى HTML ====== -->
-<div id="orderTooltip"></div>
+<!-- النافذة المنبثقة (Modal) للتفاصيل -->
+<div id="orderModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex justify-center items-center transition-opacity p-4">
+    <div class="bg-white dark:bg-slate-900 w-full md:max-w-4xl max-h-[90vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col transform transition-transform translate-y-full md:translate-y-0" id="modalContent">
 
-<!-- نافذة تفاصيل الطلب (Modal) - لا تغيير هنا -->
-<div id="orderModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex justify-center items-end md:items-center transition-opacity p-0 md:p-4">
-    <!-- ... محتوى النافذة المنبثقة يبقى كما هو بدون أي تعديل ... -->
-    <div class="bg-white dark:bg-slate-900 w-full md:max-w-5xl max-h-[90vh] md:max-h-[85vh] rounded-t-[3rem] md:rounded-[3rem] shadow-2xl overflow-hidden flex flex-col transform transition-transform translate-y-full md:translate-y-0" id="modalContent">
-        <div class="px-8 py-8 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-slate-900 shrink-0"><div class="flex items-center gap-4"><div class="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-3xl text-[#0A7A48] shadow-inner"><i data-lucide="receipt" class="w-8 h-8"></i></div><div><h2 class="text-2xl font-black text-gray-900 dark:text-white tracking-tight flex items-center gap-2"><?php echo $lang['order_details']; ?> <span id="modalOrderId" class="text-[#0A7A48]" dir="ltr"></span></h2><p id="modalOrderDate" class="text-xs font-bold text-gray-400 mt-1 uppercase tracking-widest"></p></div></div><button onclick="closeOrderModal()" class="w-12 h-12 flex items-center justify-center rounded-full bg-gray-100 dark:bg-slate-800 text-gray-500 hover:text-rose-50 hover:text-rose-500 transition-all"><i data-lucide="x" class="w-6 h-6"></i></button></div>
-        <div class="p-8 overflow-y-auto custom-scrollbar flex-1 bg-white dark:bg-slate-900"><div class="grid grid-cols-1 lg:grid-cols-3 gap-10"><div class="lg:col-span-2 space-y-8"><div class="bg-gray-50 dark:bg-slate-800/50 rounded-[2.5rem] border border-gray-100 dark:border-slate-800 overflow-hidden shadow-sm"><table class="w-full text-sm text-right"><thead class="bg-white/50 dark:bg-slate-800 border-b dark:border-slate-700 text-gray-500"><tr><th class="py-5 px-8 font-black uppercase tracking-wider">المنتج</th><th class="py-5 px-8 font-black text-center uppercase tracking-wider">الكمية</th><th class="py-5 px-8 font-black uppercase tracking-wider text-left">الإجمالي</th></tr></thead><tbody id="modalItemsTable" class="divide-y divide-gray-100 dark:divide-slate-700/50 text-gray-800 dark:text-gray-200"></tbody></table></div><div id="prescriptionSection" class="hidden"><div class="bg-rose-50 dark:bg-rose-950/20 rounded-[2.5rem] p-8 border-2 border-dashed border-rose-200 dark:border-rose-900/50 flex flex-col md:flex-row gap-8 items-center relative overflow-hidden"><a id="prescriptionImgLink" href="#" target="_blank" class="block relative group overflow-hidden rounded-[2rem] border-8 border-white dark:border-slate-800 shadow-xl shrink-0 bg-white"><img id="prescriptionImg" src="" alt="Rx" class="w-44 h-44 object-cover transition-transform duration-700 group-hover:scale-110"></a><div class="flex-1 space-y-4"><h3 class="text-xl font-black text-rose-700 dark:text-rose-400 flex items-center gap-2"><i data-lucide="file-check-2" class="w-6 h-6"></i> مراجعة الوصفة الطبية</h3><label class="flex items-center gap-3 bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm cursor-pointer border border-rose-100 dark:border-rose-900/30 transition-all hover:ring-2 hover:ring-rose-500/20"><input type="checkbox" id="verifyPrescriptionCheck" class="w-6 h-6 text-rose-600 rounded-lg border-gray-300 focus:ring-rose-500"><span class="text-sm font-black text-gray-800 dark:text-gray-200 italic">أقر بمراجعتي للوصفة وتحملي للمسؤولية.</span></label></div></div></div></div><div class="space-y-8"><div class="bg-gray-50 dark:bg-slate-800/50 rounded-[2.5rem] p-8 border border-gray-100 dark:border-slate-800 shadow-sm space-y-6 text-sm"><h3 class="text-xs font-black text-gray-400 uppercase tracking-widest border-b pb-3">بيانات العميل</h3><div><span class="text-[10px] font-bold text-gray-400 block mb-1">الاسم</span><span id="modalPatientName" class="font-black text-gray-800 dark:text-gray-200"></span></div><div><span class="text-[10px] font-bold text-gray-400 block mb-1">الهاتف</span><span id="modalPatientPhone" class="font-bold text-gray-800 dark:text-gray-200" dir="ltr"></span></div><div><span class="text-[10px] font-bold text-gray-400 block mb-1">العنوان</span><span id="modalPatientAddress" class="font-bold text-gray-700 dark:text-gray-300 leading-relaxed"></span></div></div><div class="bg-gradient-to-br from-[#0A7A48] to-[#10b981] rounded-[2.5rem] p-8 text-white shadow-2xl text-center"><span class="text-green-100 text-xs font-black uppercase tracking-widest mb-2 block">إجمالي المطلوب</span><h2 id="modalTotalAmount" class="text-5xl font-black mb-4 tracking-tighter" dir="ltr"></h2><span class="bg-black/10 backdrop-blur-md px-6 py-2 rounded-2xl text-[10px] font-black border border-white/10 flex items-center gap-2 justify-center italic">الدفع عند الاستلام <i data-lucide="banknote" class="w-3.5 h-3.5"></i></span></div></div></div></div>
-        <div class="p-8 border-t border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-900 flex justify-between items-center"><button onclick="closeOrderModal()" class="px-8 py-4 rounded-2xl bg-white dark:bg-slate-800 text-gray-500 font-black text-sm border border-gray-200 dark:border-slate-700 hover:bg-gray-100 transition-all">إغلاق</button><div id="dynamicActionButtons" class="flex gap-3"></div></div>
+        <!-- هيدر النافذة -->
+        <div class="px-8 py-6 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50 dark:bg-slate-800 shrink-0">
+            <div class="flex items-center gap-4">
+                <div class="p-3 bg-[#113f2b] rounded-2xl text-[#d2f34c] shadow-md">
+                    <i class="fa-solid fa-file-invoice-dollar text-2xl"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl font-black text-gray-900 dark:text-white flex items-center gap-2"><?php echo isset($lang['order_details']) ? $lang['order_details'] : 'Order Details'; ?> <span id="modalOrderId" class="text-[#113f2b] dark:text-[#d2f34c]" dir="ltr"></span></h2>
+                    <p id="modalOrderDate" class="text-xs font-bold text-gray-400 mt-1"></p>
+                </div>
+            </div>
+            <button onclick="closeOrderModal()" class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-200 dark:bg-slate-700 text-gray-500 hover:text-rose-500 hover:bg-rose-50 transition-all">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <!-- محتوى النافذة -->
+        <div class="p-8 overflow-y-auto custom-scrollbar flex-1">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+                <div class="lg:col-span-2 space-y-6">
+                    <h3 class="text-sm font-black text-gray-500 border-b border-gray-100 dark:border-slate-700 pb-2"><i class="fa-solid fa-pills"></i> <?php echo isset($lang['product']) ? $lang['product'] : 'Products'; ?></h3>
+                    <div class="bg-gray-50 dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 overflow-hidden shadow-sm">
+                        <table class="w-full text-sm <?php echo ($dir == 'rtl') ? 'text-right' : 'text-left'; ?>">
+                            <thead class="bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-700 text-gray-500">
+                                <tr>
+                                    <th class="py-3 px-4 font-bold"><?php echo isset($lang['product']) ? $lang['product'] : 'Product'; ?></th>
+                                    <th class="py-3 px-4 font-bold text-center"><?php echo isset($lang['qty']) ? $lang['qty'] : 'Qty'; ?></th>
+                                    <th class="py-3 px-4 font-bold <?php echo ($dir == 'rtl') ? 'text-left' : 'text-right'; ?>"><?php echo isset($lang['item_total']) ? $lang['item_total'] : 'Total'; ?></th>
+                                </tr>
+                            </thead>
+                            <tbody id="modalItemsTable" class="divide-y divide-gray-100 dark:divide-slate-700/50 text-gray-800 dark:text-gray-200"></tbody>
+                        </table>
+                    </div>
+
+                    <!-- الوصفة الطبية (إن وجدت) -->
+                    <div id="prescriptionSection" class="hidden">
+                        <div class="bg-rose-50 dark:bg-rose-900/20 rounded-2xl p-6 border border-rose-200 dark:border-rose-800 flex flex-col md:flex-row gap-6 items-center">
+                            <a id="prescriptionImgLink" href="#" target="_blank" class="block relative rounded-xl border-4 border-white shadow-md overflow-hidden shrink-0">
+                                <img id="prescriptionImg" src="" alt="Rx" class="w-32 h-32 object-cover">
+                                <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition">
+                                    <i class="fa-solid fa-magnifying-glass-plus text-white text-2xl"></i>
+                                </div>
+                            </a>
+                            <div class="flex-1 space-y-3">
+                                <h3 class="font-black text-rose-600 dark:text-rose-400 flex items-center gap-2"><i class="fa-solid fa-file-prescription"></i> <?php echo isset($lang['attached_rx']) ? $lang['attached_rx'] : 'Attached Prescription'; ?></h3>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" id="verifyPrescriptionCheck" class="w-5 h-5 text-rose-600 rounded">
+                                    <span class="text-sm font-bold text-gray-700 dark:text-gray-300"><?php echo isset($lang['rx_verify_check']) ? $lang['rx_verify_check'] : 'I verify this prescription'; ?></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- معلومات المريض -->
+                <div class="space-y-6">
+                    <div class="bg-gray-50 dark:bg-slate-800 rounded-2xl p-6 border border-gray-100 dark:border-slate-700 space-y-4 text-sm">
+                        <h3 class="text-sm font-black text-gray-500 border-b border-gray-200 dark:border-slate-600 pb-2"><i class="fa-solid fa-address-card"></i> <?php echo isset($lang['customer_info']) ? $lang['customer_info'] : 'Customer Info'; ?></h3>
+                        <div><span class="text-[10px] font-bold text-gray-400 block"><?php echo isset($lang['patient_name']) ? $lang['patient_name'] : 'Name'; ?></span><span id="modalPatientName" class="font-bold text-gray-800 dark:text-gray-200"></span></div>
+                        <div><span class="text-[10px] font-bold text-gray-400 block"><?php echo isset($lang['phone']) ? $lang['phone'] : 'Phone'; ?></span><span id="modalPatientPhone" class="font-bold text-gray-800 dark:text-gray-200" dir="ltr"></span></div>
+                        <div><span class="text-[10px] font-bold text-gray-400 block"><?php echo isset($lang['address']) ? $lang['address'] : 'Address'; ?></span><span id="modalPatientAddress" class="font-bold text-gray-700 dark:text-gray-300"></span></div>
+                    </div>
+
+                    <div class="bg-[#113f2b] rounded-2xl p-6 text-center shadow-lg relative overflow-hidden">
+                        <i class="fa-solid fa-sack-dollar absolute -right-4 -bottom-4 text-6xl text-white opacity-10"></i>
+                        <span class="text-[#d2f34c] text-xs font-bold block mb-1 relative z-10"><?php echo isset($lang['total_required']) ? $lang['total_required'] : 'Total to Pay'; ?></span>
+                        <h2 id="modalTotalAmount" class="text-4xl font-black text-white relative z-10" dir="ltr"></h2>
+                        <span class="bg-black/10 px-4 py-1 mt-2 inline-block rounded-xl text-[10px] font-bold text-white/80"><?php echo isset($lang['cod']) ? $lang['cod'] : 'COD'; ?></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6 border-t border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-800 flex justify-between items-center">
+            <button onclick="closeOrderModal()" class="px-6 py-2.5 rounded-xl bg-white dark:bg-slate-700 text-gray-600 dark:text-gray-300 font-bold border border-gray-200 dark:border-slate-600 hover:bg-gray-100"><?php echo isset($lang['close']) ? $lang['close'] : 'Close'; ?></button>
+            <div id="dynamicActionButtons" class="flex gap-2"></div>
+        </div>
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    lucide.createIcons();
-    
+    // ==========================================
+    // 💡 1. ترجمات JavaScript الأصلية
+    // ==========================================
+    const jsLang = {
+        acceptTitle: "<?php echo isset($lang['swal_title']) ? addslashes($lang['swal_title']) : 'Are you sure?'; ?>",
+        acceptText: "<?php echo isset($lang['status_processing']) ? addslashes($lang['status_processing']) : 'Start Processing?'; ?>",
+        acceptBtn: "<?php echo isset($lang['accept_prepare']) ? addslashes($lang['accept_prepare']) : 'Accept'; ?>",
+        rejectTitle: "<?php echo isset($lang['swal_title']) ? addslashes($lang['swal_title']) : 'Are you sure?'; ?>",
+        rejectText: "<?php echo isset($lang['status_rejected']) ? addslashes($lang['status_rejected']) : 'Cancel Order?'; ?>",
+        rejectBtn: "<?php echo isset($lang['filter_rejected']) ? addslashes($lang['filter_rejected']) : 'Reject'; ?>",
+        deliverTitle: "<?php echo isset($lang['swal_title']) ? addslashes($lang['swal_title']) : 'Are you sure?'; ?>",
+        deliverText: "<?php echo isset($lang['status_delivered']) ? addslashes($lang['status_delivered']) : 'Confirm Delivery?'; ?>",
+        deliverBtn: "<?php echo isset($lang['confirm_delivery']) ? addslashes($lang['confirm_delivery']) : 'Deliver'; ?>",
+        cancelBtn: "<?php echo isset($lang['swal_cancel']) ? addslashes($lang['swal_cancel']) : 'Cancel'; ?>",
+        rxWarningTitle: "<?php echo isset($lang['rx_alert']) ? addslashes($lang['rx_alert']) : 'Warning'; ?>",
+        rxWarningText: "<?php echo isset($lang['rx_verify_check']) ? addslashes($lang['rx_verify_check']) : 'Please verify prescription'; ?>",
+        rxWarningBtn: "<?php echo isset($lang['ok_btn']) ? addslashes($lang['ok_btn']) : 'OK'; ?>",
+        acceptPrepare: "<?php echo isset($lang['accept_prepare']) ? addslashes($lang['accept_prepare']) : 'Accept'; ?>",
+        confirmDelivery: "<?php echo isset($lang['confirm_delivery']) ? addslashes($lang['confirm_delivery']) : 'Deliver'; ?>",
+        rejectLabel: "<?php echo isset($lang['filter_rejected']) ? addslashes($lang['filter_rejected']) : 'Reject'; ?>"
+    };
+
+    // ==========================================
+    // 💡 2. دالة البحث الآني (Zero-Lag Search)
+    // ==========================================
+    function searchTable() {
+        const input = document.getElementById("searchInput").value.toLowerCase();
+        const rows = document.querySelectorAll("tr[data-searchable]");
+
+        rows.forEach(row => {
+            const searchableText = row.getAttribute("data-searchable");
+            if (searchableText.includes(input)) {
+                row.classList.remove("hidden");
+                if (row.classList.contains('sub-order-row') && openPatients.has(row.getAttribute('data-parent'))) {
+                    row.classList.add("show");
+                }
+            } else {
+                row.classList.add("hidden");
+                row.classList.remove("show");
+            }
+        });
+    }
+
+    // ==========================================
+    // 3. تجميع وعرض الطلبات (Group Toggling)
+    // ==========================================
+    const openPatients = new Set();
+
+    function togglePatientOrders(uid) {
+        const rows = document.querySelectorAll(`.sub-order-row[data-parent="${uid}"]`);
+        const arrow = document.getElementById('arrow_' + uid);
+        const isOpen = openPatients.has(uid);
+        const currentSearch = document.getElementById("searchInput").value.toLowerCase();
+
+        if (isOpen) {
+            rows.forEach(r => {
+                r.classList.remove('show');
+                r.classList.add('hidden');
+            });
+            if (arrow) arrow.style.transform = '';
+            openPatients.delete(uid);
+        } else {
+            rows.forEach(r => {
+                const text = r.getAttribute('data-searchable');
+                if (text.includes(currentSearch)) {
+                    r.classList.remove('hidden');
+                    r.classList.add('show');
+                }
+            });
+            if (arrow) arrow.style.transform = 'rotate(-90deg)';
+            openPatients.add(uid);
+        }
+    }
+
+    // ==========================================
+    // 4. فلتر الأزرار الزجاجية (AJAX)
+    // ==========================================
+    let currentFilter = '<?php echo $filter_status; ?>';
+
+    function filterOrders(status) {
+        if (status === currentFilter) return;
+        currentFilter = status;
+        history.pushState(null, '', '?status=' + status);
+
+        const tbody = document.getElementById('ordersTableBody');
+        tbody.classList.add('loading');
+        openPatients.clear();
+
+        fetch('orders.php?ajax=1&status=' + status)
+            .then(res => res.text())
+            .then(html => {
+                tbody.innerHTML = html;
+                tbody.classList.remove('loading');
+                searchTable();
+            });
+    }
+
+    // ==========================================
+    // 5. أزرار التحكم والنافذة المنبثقة
+    // ==========================================
     let currentOrderData = null;
-    const currency = "₪";
+    const currency = "<?php echo isset($lang['currency']) ? $lang['currency'] : '₪'; ?>";
 
-    // ====== تعديل: إضافة دوال الإشعار (Tooltip) ======
-    const tooltip = document.getElementById('orderTooltip');
-    function showTooltip(event, jsonString) {
-        const data = JSON.parse(jsonString);
-        
-        // بناء محتوى الإشعار
-        tooltip.innerHTML = `
-            <h4 class="font-mono">#ORD-${data.id}</h4>
-            <p>العميل: <span>${data.patient}</span></p>
-            <p>عدد الأصناف: <span>${data.items.length}</span></p>
-            ${data.has_controlled ? '<p style="color:#f43f5e;">يحتوي على دواء مراقب 💊</p>' : ''}
-        `;
+    function confirmOrderStatus(orderId, action) {
+        let t = '',
+            txt = '',
+            b = '',
+            c = '#113f2b',
+            i = 'question';
+        if (action === 'Accepted') {
+            t = jsLang.acceptTitle;
+            txt = jsLang.acceptText;
+            b = jsLang.acceptBtn;
+        } else if (action === 'Rejected') {
+            t = jsLang.rejectTitle;
+            txt = jsLang.rejectText;
+            b = jsLang.rejectBtn;
+            c = '#f43f5e';
+            i = 'warning';
+        } else if (action === 'Delivered') {
+            t = jsLang.deliverTitle;
+            txt = jsLang.deliverText;
+            b = jsLang.deliverBtn;
+        }
 
-        // إظهار الإشعار بجانب مؤشر الفأرة
-        tooltip.style.display = 'block';
-        tooltip.style.left = event.pageX + 15 + 'px';
-        tooltip.style.top = event.pageY + 15 + 'px';
+        Swal.fire({
+            title: t,
+            text: txt,
+            icon: i,
+            showCancelButton: true,
+            confirmButtonColor: c,
+            cancelButtonColor: '#94a3b8',
+            confirmButtonText: b,
+            cancelButtonText: jsLang.cancelBtn,
+            background: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff',
+            color: document.documentElement.classList.contains('dark') ? '#f8fafc' : '#1f2937'
+        }).then((r) => {
+            if (r.isConfirmed) {
+                fetch(`orders.php?ajax=1&action=${action}&order_id=${orderId}`)
+                    .then(() => {
+                        closeOrderModal();
+                        filterOrders(currentFilter);
+                        currentFilter = '';
+                        filterOrders(document.querySelector('input[name="order_filter"]:checked').value);
+                    });
+            }
+        });
     }
-
-    function hideTooltip() {
-        tooltip.style.display = 'none';
-    }
-    // ====== نهاية تعديل الإشعار ======
-
 
     function viewOrderDetails(jsonString) {
-        const order = JSON.parse(jsonString); currentOrderData = order;
+        const order = JSON.parse(jsonString);
+        currentOrderData = order;
+
         document.getElementById('modalOrderId').innerText = `#ORD-${order.id}`;
         document.getElementById('modalOrderDate').innerText = order.date;
         document.getElementById('modalPatientName').innerText = order.patient;
@@ -406,50 +774,70 @@ include('../includes/sidebar.php');
         document.getElementById('modalPatientAddress').innerText = order.address;
         document.getElementById('modalTotalAmount').innerText = parseFloat(order.total).toFixed(2) + ' ' + currency;
 
-        const tbody = document.getElementById('modalItemsTable'); tbody.innerHTML = '';
+        const tbody = document.getElementById('modalItemsTable');
+        tbody.innerHTML = '';
         order.items.forEach(item => {
-            const rx = item.IsControlled == 1 ? '<span class="mx-2 bg-rose-100 text-rose-700 text-[9px] px-2 py-0.5 rounded font-black">Rx</span>' : '';
-            tbody.innerHTML += `<tr class="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition"><td class="py-5 px-6 font-black text-gray-800 dark:text-gray-100">${item.Name}${rx}</td><td class="py-5 px-6 text-center font-bold text-gray-500"><span class="bg-white dark:bg-slate-800 px-3 py-1 rounded-lg">x${item.Quantity}</span></td><td class="py-5 px-6 font-black text-emerald-600 text-left" dir="ltr">${parseFloat(item.Quantity * item.SoldPrice).toFixed(2)} ${currency}</td></tr>`;
+            const rx = item.IsControlled == 1 ? '<span class="mx-2 bg-rose-100 text-rose-700 text-[10px] px-2 py-0.5 rounded font-bold">Rx</span>' : '';
+            tbody.innerHTML += `
+                <tr class="hover:bg-gray-50 dark:hover:bg-slate-800 transition border-b border-gray-50 dark:border-slate-700">
+                    <td class="py-3 px-4 font-bold text-gray-800 dark:text-gray-200">${item.Name}${rx}</td>
+                    <td class="py-3 px-4 text-center font-bold text-gray-500"><span class="bg-gray-100 dark:bg-slate-700 px-3 py-1 rounded">x${item.Quantity}</span></td>
+                    <td class="py-3 px-4 font-black text-[#113f2b] dark:text-[#d2f34c] <?php echo ($dir == 'rtl') ? 'text-left' : 'text-right'; ?>" dir="ltr">${parseFloat(item.Quantity * item.SoldPrice).toFixed(2)} ${currency}</td>
+                </tr>`;
         });
 
         const rxSec = document.getElementById('prescriptionSection');
         const vCh = document.getElementById('verifyPrescriptionCheck');
         if (order.has_controlled) {
-            rxSec.classList.remove('hidden'); vCh.checked = false;
-            document.getElementById('prescriptionImg').src = order.prescription ? `../uploads/${order.prescription}` : 'https://via.placeholder.com/200';
+            rxSec.classList.remove('hidden');
+            vCh.checked = false;
+            document.getElementById('prescriptionImg').src = order.prescription ? `../uploads/${order.prescription}` : 'https://placehold.co/400x400/ffe4e6/be123c?text=No+Rx';
             document.getElementById('prescriptionImgLink').href = order.prescription ? `../uploads/${order.prescription}` : '#';
-        } else { rxSec.classList.add('hidden'); vCh.checked = true; }
-
-        const btnContainer = document.getElementById('dynamicActionButtons'); btnContainer.innerHTML = '';
-        if (order.status === 'Pending') {
-            btnContainer.innerHTML = `<button onclick="confirmOrderStatus(${order.id}, 'Rejected')" class="px-8 py-4 rounded-2xl bg-rose-50 text-rose-600 font-black text-sm hover:bg-rose-100 transition-all">رفض</button><button onclick="attemptAcceptOrder()" class="bg-[#0A7A48] hover:bg-[#044E29] text-white px-10 py-4 rounded-2xl font-black text-sm shadow-xl shadow-green-900/30 flex items-center justify-center gap-2"><i data-lucide="check-circle-2" class="w-5 h-5"></i> قبول وتجهيز</button>`;
-        } else if (order.status === 'Accepted') {
-            btnContainer.innerHTML = `<button onclick="confirmOrderStatus(${order.id}, 'Delivered')" class="bg-[#0A7A48] hover:bg-[#044E29] text-white px-10 py-4 rounded-2xl font-black text-sm shadow-xl shadow-green-900/30 flex items-center justify-center gap-2"><i data-lucide="truck" class="w-5 h-5"></i> تأكيد التسليم</button>`;
+        } else {
+            rxSec.classList.add('hidden');
+            vCh.checked = true;
         }
-        lucide.createIcons();
-        const m = document.getElementById('orderModal'); const c = document.getElementById('modalContent');
-        m.classList.remove('hidden'); setTimeout(() => c.classList.remove('translate-y-full'), 10);
+
+        const btnContainer = document.getElementById('dynamicActionButtons');
+        btnContainer.innerHTML = '';
+        if (order.status === 'Pending') {
+            btnContainer.innerHTML = `
+                <button onclick="confirmOrderStatus(${order.id}, 'Rejected')" class="px-6 py-2.5 rounded-xl bg-rose-50 text-rose-600 font-bold hover:bg-rose-100 transition"><i class="fa-solid fa-ban"></i> ${jsLang.rejectLabel}</button>
+                <button onclick="attemptAcceptOrder()" class="bg-[#113f2b] hover:bg-[#0a271a] text-[#d2f34c] px-8 py-2.5 rounded-xl font-bold flex items-center gap-2 transition"><i class="fa-solid fa-check"></i> ${jsLang.acceptPrepare}</button>
+            `;
+        } else if (order.status === 'Accepted') {
+            btnContainer.innerHTML = `
+                <button onclick="confirmOrderStatus(${order.id}, 'Delivered')" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2.5 rounded-xl font-bold flex items-center gap-2 transition"><i class="fa-solid fa-motorcycle"></i> ${jsLang.confirmDelivery}</button>
+            `;
+        }
+
+        const m = document.getElementById('orderModal');
+        const c = document.getElementById('modalContent');
+        m.classList.remove('hidden');
+        setTimeout(() => c.classList.remove('translate-y-full'), 10);
     }
 
     function closeOrderModal() {
         const c = document.getElementById('modalContent');
-        c.classList.add('translate-y-full'); setTimeout(() => document.getElementById('orderModal').classList.add('hidden'), 300);
+        c.classList.add('translate-y-full');
+        setTimeout(() => document.getElementById('orderModal').classList.add('hidden'), 300);
     }
 
     function attemptAcceptOrder() {
         if (currentOrderData.has_controlled && !document.getElementById('verifyPrescriptionCheck').checked) {
-            Swal.fire({ icon: 'warning', title: "تنبيه أمني", text: "يرجى الإقرار بمراجعة الوصفة الطبية.", confirmButtonText: "حسناً", confirmButtonColor: '#f43f5e', background: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff', color: document.documentElement.classList.contains('dark') ? '#f8fafc' : '#1f2937', customClass: { popup: 'rounded-3xl' } });
+            Swal.fire({
+                icon: 'error',
+                title: jsLang.rxWarningTitle,
+                text: jsLang.rxWarningText,
+                confirmButtonText: jsLang.rxWarningBtn,
+                confirmButtonColor: '#f43f5e',
+                background: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff',
+                color: document.documentElement.classList.contains('dark') ? '#f8fafc' : '#1f2937'
+            });
             return;
         }
         confirmOrderStatus(currentOrderData.id, 'Accepted');
     }
-
-    function confirmOrderStatus(orderId, action) {
-        let t = '', txt = '', b = '', c = '#0A7A48', i = 'question';
-        if (action === 'Accepted') { t = "قبول الطلب؟"; txt = "سيتم إشعار المريض ببدء التجهيز."; b = "نعم، أقبل"; }
-        else if (action === 'Rejected') { t = "رفض الطلب؟"; txt = "هل تريد إلغاء الطلب نهائياً؟"; b = "نعم، ارفض"; c = '#f43f5e'; i = 'warning'; }
-        else if (action === 'Delivered') { t = "تأكيد التسليم؟"; txt = "هل تم تسليم الطلب واستلام ثمنه؟"; b = "نعم، تم"; }
-
-        Swal.fire({ title: t, text: txt, icon: i, showCancelButton: true, confirmButtonColor: c, cancelButtonColor: '#94a3b8', confirmButtonText: b, cancelButtonText: "إلغاء", background: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff', color: document.documentElement.classList.contains('dark') ? '#f8fafc' : '#1f2937', customClass: { popup: 'rounded-3xl' } }).then((r) => { if (r.isConfirmed) window.location.href = `orders.php?action=${action}&order_id=${orderId}`; });
-    }
 </script>
+
+<?php include('../includes/footer.php'); ?>

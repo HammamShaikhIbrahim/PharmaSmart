@@ -79,7 +79,7 @@ if (isset($_POST['login'])) {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        /* تأثيرات الإضاءة والظلال المعقدة للأشكال 3D */
+        /* تأثيرات الإضاءة والظلال تاعات الأشكال*/
         .glass-panel {
             background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(20px);
@@ -96,38 +96,32 @@ if (isset($_POST['login'])) {
     </style>
 </head>
 
-<!-- الخلفية الأساسية متدرجة وحيوية لتناسب الوضعين -->
-
 <body class="bg-gradient-to-br from-teal-50 to-emerald-200 dark:from-slate-900 dark:to-teal-950 flex items-center justify-center relative transition-colors duration-500">
 
     <!-- ==========================================
-         الأشكال الطبية ثلاثية الأبعاد (3D Medical Shapes)
+            الأشكال الطبية ثلاثية الأبعاد
     ========================================== -->
     <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
 
-        <!-- 1. كبسولة دواء 3D (أعلى اليسار) -->
+        <!-- شكل الكبسولة -->
         <div class="absolute top-10 left-20 w-32 h-64 rounded-full transform rotate-[35deg]
                     bg-gradient-to-b from-emerald-300 to-teal-500 dark:from-emerald-600 dark:to-teal-800
                     shadow-[inset_15px_15px_30px_rgba(255,255,255,0.7),inset_-10px_-10px_30px_rgba(0,0,0,0.2),10px_20px_40px_rgba(20,184,166,0.3)]">
         </div>
 
-        <!-- 2. حبة دواء دائرية (Tablet) بمنتصف اليمين -->
+        <!-- شكل القرص-->
         <div class="absolute top-1/4 right-20 w-48 h-48 rounded-full transform -rotate-[15deg]
                     bg-gradient-to-tr from-green-200 to-emerald-400 dark:from-green-700 dark:to-emerald-600
                     shadow-[inset_-10px_-10px_30px_rgba(0,0,0,0.15),inset_15px_15px_30px_rgba(255,255,255,0.8),0_20px_40px_rgba(16,185,129,0.2)]">
-            <!-- خط المنتصف للحبة -->
             <div class="absolute top-1/2 left-4 right-4 h-1 bg-white/40 dark:bg-black/10 rounded-full transform -translate-y-1/2 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)]"></div>
         </div>
 
-        <!-- 3. الصليب الطبي 3D (أسفل اليسار) -->
+        <!-- شكل الزائد -->
         <div class="absolute bottom-20 left-1/4 w-32 h-32 transform rotate-[15deg] opacity-80">
-            <!-- الجزء العمودي -->
             <div class="absolute inset-x-10 inset-y-0 rounded-2xl bg-gradient-to-br from-teal-300 to-cyan-500 dark:from-teal-600 dark:to-cyan-800 shadow-[inset_5px_5px_15px_rgba(255,255,255,0.6),inset_-5px_-5px_15px_rgba(0,0,0,0.2)]"></div>
-            <!-- الجزء الأفقي -->
             <div class="absolute inset-y-10 inset-x-0 rounded-2xl bg-gradient-to-br from-teal-300 to-cyan-500 dark:from-teal-600 dark:to-cyan-800 shadow-[inset_5px_5px_15px_rgba(255,255,255,0.6),inset_-5px_-5px_15px_rgba(0,0,0,0.2)]"></div>
         </div>
-
-        <!-- 4. كبسولة صغيرة مموهة (عائمة في الخلفية لعمق الصورة) -->
+        <!-- كبسولة صغيرة -->
         <div class="absolute bottom-1/3 right-1/3 w-20 h-40 rounded-full transform -rotate-[40deg] blur-md
                     bg-gradient-to-r from-emerald-400 to-green-300 dark:from-emerald-700 dark:to-green-800
                     shadow-[inset_5px_5px_15px_rgba(255,255,255,0.5)]">
@@ -136,7 +130,7 @@ if (isset($_POST['login'])) {
     </div>
 
     <!-- ==========================================
-         أزرار التحكم العائمة (مع تأثيرات Hover لطيفة)
+            ازرار التحكم في الثيم واللغة
     ========================================== -->
     <div class="absolute top-6 right-6 flex items-center gap-3 z-50">
 
@@ -156,7 +150,7 @@ if (isset($_POST['login'])) {
     </div>
 
     <!-- ==========================================
-         صندوق تسجيل الدخول (Glass Card)
+            صندوق تسجيل الدخول 
     ========================================== -->
     <div class="glass-panel p-10 md:p-12 rounded-[2.5rem] w-full max-w-md z-10 transition-all duration-300 mx-4">
 
@@ -212,7 +206,7 @@ if (isset($_POST['login'])) {
                     title: '<?php echo $lang['err_title']; ?>',
                     text: '<?php echo $error; ?>',
                     confirmButtonText: '<?php echo $lang['ok_btn']; ?>',
-                    confirmButtonColor: '#10b981', // لون الزر تماشياً مع الثيم
+                    confirmButtonColor: '#10b981',
                     allowOutsideClick: false,
                     background: document.documentElement.classList.contains('dark') ? '#1e293b' : 'rgba(255,255,255,0.9)',
                     backdrop: 'rgba(0,0,0,0.4)',
@@ -266,13 +260,11 @@ if (isset($_POST['login'])) {
             }
             updateThemeIcons();
         });
-        // إعدادات تيلويند لإجبار النظام على استخدام خط Cairo في كل اللغات
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: {
-                        // هنا نخبر تيلويند أن الخط الأساسي (sans) هو Cairo
                         sans: ['Cairo', 'sans-serif'],
                     }
                 }
