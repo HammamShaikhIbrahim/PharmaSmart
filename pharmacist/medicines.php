@@ -64,17 +64,35 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_stock'])) {
 }
 
 // ==========================================
-// 3. معالجة عملية الحذف (Delete Stock)
+// 3. معالجة عملية الحذف (Delete Stock) مع التحديث الذكي للطلبات
 // ==========================================
 if (isset($_GET['delete'])) {
     $del_id = intval($_GET['delete']);
+
+    // 🚀 الحل الجذري: البحث عن الطلبات التي تحتوي على هذا الدواء وخصم ثمنه من الإجمالي العام للطلب قبل الحذف
+    $find_orders_query = mysqli_query($conn, "SELECT OrderID, Quantity, SoldPrice FROM OrderItems WHERE StockID = $del_id");
+    if ($find_orders_query && mysqli_num_rows($find_orders_query) > 0) {
+        while ($order_item = mysqli_fetch_assoc($find_orders_query)) {
+            $o_id = $order_item['OrderID'];
+            $deduct_amount = $order_item['Quantity'] * $order_item['SoldPrice'];
+
+            // تحديث الإجمالي في جدول الطلبات (بشرط ألا يقل عن 0)
+            mysqli_query($conn, "UPDATE `Order` SET TotalAmount = GREATEST(TotalAmount - $deduct_amount, 0) WHERE OrderID = $o_id");
+        }
+    }
+
+    // حذف الدواء من تفاصيل الطلبات لتجنب الأخطاء
+    mysqli_query($conn, "DELETE FROM OrderItems WHERE StockID = $del_id");
+
+    // أخيرًا حذف الدواء من المخزون
     mysqli_query($conn, "DELETE FROM PharmacyStock WHERE StockID=$del_id AND PharmacistID=$pharmacist_id");
+
     header("Location: medicines.php");
     exit();
 }
 
 // ==========================================
-// 4. 🚀 معالجة طلب AJAX للبحث في الكتالوج الموحد
+// 4. معالجة طلب AJAX للبحث في الكتالوج الموحد
 // ==========================================
 if (isset($_GET['search_system_med'])) {
     $q = mysqli_real_escape_string($conn, $_GET['search_system_med']);
@@ -83,7 +101,6 @@ if (isset($_GET['search_system_med'])) {
     $cat_condition = ($cat_id > 0) ? "AND sm.CategoryID = $cat_id" : "";
     $q_condition = !empty($q) ? "AND (sm.Name LIKE '%$q%' OR sm.ScientificName LIKE '%$q%')" : "";
 
-    // جلب الأدوية متضمنة سعر التكلفة الثابت
     $sys_query = "
         SELECT sm.SystemMedID, sm.Name, sm.ScientificName, sm.Image, sm.IsControlled, sm.FixedCostPrice, c.$cat_col as CategoryName
         FROM SystemMedicine sm
@@ -92,7 +109,7 @@ if (isset($_GET['search_system_med'])) {
         $q_condition
         $cat_condition
         AND sm.SystemMedID NOT IN (SELECT SystemMedID FROM PharmacyStock WHERE PharmacistID = $pharmacist_id)
-        ORDER BY sm.SystemMedID DESC  /* 🚀 التعديل هنا: عرض أحدث الأدوية أولاً كنوع من الاقتراح */
+        ORDER BY sm.SystemMedID DESC
         LIMIT 20
     ";
 
@@ -154,7 +171,6 @@ if (isset($_GET['ajax_table'])) {
                 $imgSrc = 'https://ui-avatars.com/api/?name=' . urlencode($med['Name']) . '&background=e2e8f0&color=475569';
             }
 
-            // تضمين FixedCostPrice لتحديث الفورم عند التعديل
             $med_json = htmlspecialchars(json_encode([
                 'StockID' => $med['StockID'],
                 'SystemMedID' => $med['SystemMedID'],
@@ -370,6 +386,7 @@ include('../includes/sidebar.php');
 
             <button onclick="openModal()" class="w-full md:w-auto group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-2xl bg-[#0A7A48] px-6 py-3 font-bold text-white shadow-lg shadow-green-900/20 transition-all duration-300 hover:scale-[1.02] active:scale-95 border border-transparent hover:border-green-400/30">
                 <div class="absolute inset-0 flex h-full w-full justify-center [transform:skew(-12deg)_translateX(-150%)] group-hover:duration-1000 group-hover:[transform:skew(-12deg)_translateX(150%)]">
+
                     <div class="relative h-full w-10 bg-white/20"></div>
                 </div>
                 <i data-lucide="plus-circle" class="relative z-10 w-5 h-5"></i>
@@ -606,7 +623,8 @@ include('../includes/sidebar.php');
                 resultsBox.innerHTML = '';
                 if (data.length > 0) {
                     data.forEach(med => {
-                        const rxBadge = med.IsControlled == 1 ? `<span class="bg-rose-100 text-rose-700 text-[8px] px-1 py-0.5 rounded uppercase font-black border border-rose-200">Rx</span>` : '';
+                        const rxBadge = med.IsControlled == 1 ? `<span class="bg-amber-100 text-amber-700 text-[9px] px-1.5 py-0.5 rounded-full uppercase font-black border border-amber-200 dark:bg-amber-900/40 dark:text-amber-400 dark:border-amber-800 tracking-widest">Rx</span>` : '';
+                        let imgSrc = med.Image;
                         if (imgSrc && imgSrc !== 'default_med.png') {
                             if (!imgSrc.startsWith('uploads/') && !imgSrc.startsWith('../uploads/')) imgSrc = `../uploads/${imgSrc}`;
                             else if (imgSrc.startsWith('uploads/')) imgSrc = `../${imgSrc}`;
@@ -635,11 +653,11 @@ include('../includes/sidebar.php');
                                         </div>
                                         <div class="flex items-center gap-3">
                                             <span class="text-xs text-gray-500 font-bold">${med.ScientificName || ''}</span>
-                                            <span class="bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-gray-300 text-[10px] px-2 py-0.5 rounded-md border border-gray-200 dark:border-slate-600 font-bold">${med.CategoryName || 'غير مصنف'}</span>
+                                            <span class="bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-gray-300 text-[10px] px-2 py-0.5 rounded-full border border-gray-200 dark:border-slate-600 font-bold group-hover:bg-blue-100 group-hover:text-blue-700 group-hover:dark:bg-blue-900/40 group-hover:dark:text-blue-400 group-hover:border border-blue-200 group-hover:dark:border-blue-800 px-2.5 py-1 rounded-full text-xs font-bold">${med.CategoryName || 'غير مصنف'}</span>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="text-xs font-black text-gray-400 group-hover:text-[#0A7A48] transition-colors bg-gray-50 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-gray-100 dark:border-slate-700" dir="ltr">التكلفة: ${med.FixedCostPrice} ₪</div>
+                                <div class="bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-gray-300 text-[10px] px-2 py-0.5 rounded-full border border-gray-200 dark:border-slate-600 font-bold group-hover:bg-green-100 group-hover:text-green-700 group-hover:dark:bg-green-900/40 group-hover:dark:text-green-400 group-hover:border border-green-200 group-hover:dark:border-green-800 px-2.5 py-1 rounded-full text-xs font-bold" dir="ltr">التكلفة: ${med.FixedCostPrice} ₪</div>
                             </li>
                         `;
                     });
@@ -746,7 +764,6 @@ include('../includes/sidebar.php');
         lucide.createIcons();
     }
 
-    // 🚀 الدالة المصححة بالكامل هنا
     function editModal(stock) {
         document.getElementById('modalTitleText').innerText = "تعديل بيانات المخزون";
 
@@ -754,13 +771,11 @@ include('../includes/sidebar.php');
         document.getElementById('system_med_id').value = stock.SystemMedID;
         document.getElementById('price').value = stock.Price;
 
-        // نجلب السعر المحدث من الـ DB للحماية
         document.getElementById('cost').value = stock.FixedCostPrice;
         document.getElementById('stock').value = stock.Stock;
         document.getElementById('min_stock').value = stock.MinimumStock;
         document.getElementById('expiry').value = stock.ExpiryDate;
 
-        // نحسب الربح فوراً ليرى الصيدلاني نسبته الحالية
         calculateMargin();
 
         document.getElementById('selMedImg').src = stock.Image;
@@ -772,10 +787,7 @@ include('../includes/sidebar.php');
         else document.getElementById('selMedRx').classList.add('hidden');
 
         document.getElementById('searchSection').classList.add('hidden');
-
-        // 🚀 تم الإصلاح هنا (إخفاء زر العودة للبحث)
         document.getElementById('backToSearchBtn').classList.add('hidden');
-
         document.getElementById('selectedMedicineCard').classList.remove('hidden');
         document.getElementById('stockForm').classList.remove('hidden');
 
@@ -790,7 +802,7 @@ include('../includes/sidebar.php');
     function confirmDelete(id) {
         Swal.fire({
             title: 'إزالة الدواء من المخزون؟',
-            text: 'لن تتمكن من التراجع عن هذا، وسيتم مسحه من قائمة أدويتك المعروضة للمرضى.',
+            text: 'لن تتمكن من التراجع عن هذا، وسيتم مسحه من قائمة أدويتك المعروضة للمرضى، وإذا كان موجوداً في طلبات سابقة سيتم تعديل سعرها.',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#ef4444',

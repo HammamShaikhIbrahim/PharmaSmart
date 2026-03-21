@@ -27,7 +27,7 @@ if (isset($_GET['action']) && isset($_GET['order_id'])) {
     // التقاط سبب الرفض إن وُجد
     $reason = isset($_GET['reason']) ? mysqli_real_escape_string($conn, $_GET['reason']) : '';
 
-    $valid_actions = ['Accepted', 'Rejected', 'Delivered'];
+    $valid_actions =['Accepted', 'Rejected', 'Delivered'];
 
     if (in_array($action, $valid_actions)) {
 
@@ -44,7 +44,7 @@ if (isset($_GET['action']) && isset($_GET['order_id'])) {
             mysqli_query($conn, "UPDATE Prescription SET IsVerified = 1 WHERE OrderID = $order_id");
         }
 
-        // 🚀 خصم المخزون فقط عندما يتم التوصيل بنجاح
+        // خصم المخزون فقط عندما يتم التوصيل بنجاح
         if ($action == 'Delivered') {
             // جلب جميع الأدوية التابعة لهذا الطلب
             $items_query = mysqli_query($conn, "SELECT StockID, Quantity FROM OrderItems WHERE OrderID = $order_id");
@@ -77,7 +77,7 @@ $counts_sql = "SELECT o.Status, COUNT(DISTINCT o.OrderID) as count
                  GROUP BY o.Status";
 $counts_result = mysqli_query($conn, $counts_sql);
 
-$status_counts = ['Pending' => 0, 'Accepted' => 0, 'Delivered' => 0, 'Rejected' => 0];
+$status_counts =['Pending' => 0, 'Accepted' => 0, 'Delivered' => 0, 'Rejected' => 0];
 $total_all = 0;
 while ($row = mysqli_fetch_assoc($counts_result)) {
     $status_counts[$row['Status']] = $row['count'];
@@ -113,7 +113,7 @@ $orders_query = "
 $orders_result = mysqli_query($conn, $orders_query);
 
 // جلب تفاصيل الأدوية (Products inside the order)
-$order_items_data = [];
+$order_items_data =[];
 $items_query = "
     SELECT oi.OrderID, sm.Name, oi.Quantity, oi.SoldPrice, sm.IsControlled
     FROM OrderItems oi
@@ -127,7 +127,7 @@ while ($item = mysqli_fetch_assoc($items_result)) {
 }
 
 // تجميع الطلبات حسب المريض
-$grouped_orders = [];
+$grouped_orders =[];
 $has_orders = mysqli_num_rows($orders_result) > 0;
 if ($has_orders) {
     while ($order = mysqli_fetch_assoc($orders_result)) {
@@ -136,7 +136,7 @@ if ($has_orders) {
 }
 
 // ==========================================
-// 🚀 4. هندسة الـ AJAX (رسم الجدول برمجياً)
+// 4. هندسة الـ AJAX (رسم الجدول برمجياً)
 // ==========================================
 ob_start();
 if ($has_orders) {
@@ -164,21 +164,29 @@ if ($has_orders) {
                 $statusIcon = 'x-circle';
             }
 
-            $current_items = $order_items_data[$order['OrderID']] ?? [];
+            $current_items = $order_items_data[$order['OrderID']] ??[];
             $has_controlled = array_reduce($current_items, fn($carry, $item) => $carry || $item['IsControlled'] == 1, false);
+
+            // 🚀 التعديل الهام هنا: الاعتماد على الجمع الحي للأدوية الموجودة فقط لحل مشكلة الأسعار القديمة
+            $calculated_total = 0;
+            foreach ($current_items as $c_item) {
+                $calculated_total += ($c_item['Quantity'] * $c_item['SoldPrice']);
+            }
+            // في حال لم يتبق شيء في الطلب (حذفت كل الأدوية)، يكون المجموع 0، وإلا الإجمالي المحسوب
+            $final_total = (count($current_items) > 0) ? $calculated_total : 0;
 
             $order_json = htmlspecialchars(json_encode([
                 'id' => $order['OrderID'],
                 'date' => date('d M Y, h:i A', strtotime($order['OrderDate'])),
                 'status' => $order['Status'],
-                'total' => $order['TotalAmount'],
+                'total' => $final_total, // إرسال الإجمالي المصحح بدلاً من الإجمالي القديم
                 'patient' => $order['Fname'] . ' ' . $order['Lname'],
                 'phone' => $order['Phone'],
                 'address' => $order['DeliveryAddress'],
                 'lat' => $order['DeliveryLatitude'],
                 'lng' => $order['DeliveryLongitude'],
-                'rejection_reason' => $order['RejectionReason'], /* 💡 تمت الإضافة */
-                'is_verified' => $order['IsVerified'], /* 💡 لمعرفة إذا تم التحقق مسبقاً */
+                'rejection_reason' => $order['RejectionReason'],
+                'is_verified' => $order['IsVerified'],
                 'items' => $current_items,
                 'prescription' => $order['PrescriptionImage'],
                 'has_controlled' => $has_controlled
@@ -192,10 +200,10 @@ if ($has_orders) {
             $sub_indicator = !$is_main_row ? '<i data-lucide="corner-down-left" class="w-4 h-4 text-gray-500 inline-block mr-1 ml-1"></i>' : '';
 ?>
             <tr class="<?php echo $row_classes; ?>" onclick="viewOrderDetails('<?php echo $order_json; ?>')">
-                <td class="p-5 whitespace-nowrap">
-                    <div class="font-black text-gray-800 dark:text-white flex items-center gap-1.5" dir="ltr">
-                        <span class="text-[#0A7A48] dark:text-[#4ADE80] text-xs font-black">#</span>ORD-<?php echo $order['OrderID']; ?>
+                <td class="p-5 whitespace-nowrap text-right">
+                    <div class="font-black text-gray-800 dark:text-white flex items-center justify-end gap-1.5 w-full" dir="ltr">
                         <?php if (!$is_main_row) echo $sub_indicator; ?>
+                        <span class="text-[#0A7A48] dark:text-[#4ADE80] text-xs font-black">#</span>ORD-<?php echo $order['OrderID']; ?>
                     </div>
                 </td>
 
@@ -239,7 +247,8 @@ if ($has_orders) {
                 </td>
 
                 <td class="p-5 whitespace-nowrap text-center">
-                    <div class="font-black text-[#0A7A48] dark:text-[#4ADE80] text-[15px] mb-1.5" dir="ltr"><?php echo number_format($order['TotalAmount'], 2); ?> ₪</div>
+                    <!-- 🚀 طباعة الإجمالي المصحح في الجدول أيضاً -->
+                    <div class="font-black text-[#0A7A48] dark:text-[#4ADE80] text-[15px] mb-1.5" dir="ltr"><?php echo number_format($final_total, 2); ?> ₪</div>
                     <?php if ($order['PaymentMethod'] == 'COD'): ?>
                         <span class="inline-flex items-center gap-1 bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-gray-400 text-[10px] px-2 py-0.5 rounded-full font-bold border border-gray-200 dark:border-slate-600">
                             <i data-lucide="banknote" class="w-3 h-3"></i> COD
@@ -255,7 +264,7 @@ if ($has_orders) {
                     <span class="px-3.5 py-1.5 rounded-full text-xs font-bold inline-flex items-center justify-center gap-1.5 shadow-sm <?php echo $statusColor; ?>">
                         <i data-lucide="<?php echo $statusIcon; ?>" class="w-3.5 h-3.5"></i>
                         <?php
-                        $statusLabels = [
+                        $statusLabels =[
                             'Pending'   => 'قيد الانتظار',
                             'Accepted'  => 'جاري التجهيز',
                             'Delivered' => 'مكتمل',
@@ -369,57 +378,35 @@ include('../includes/sidebar.php');
         color: #94a3b8;
     }
 
-    label[for="filter-All"]:hover {
-        color: #0A7A48;
-    }
-
-    label[for="filter-Pending"]:hover {
-        color: #d97706;
-    }
-
-    label[for="filter-Accepted"]:hover {
-        color: #2563eb;
-    }
-
-    label[for="filter-Delivered"]:hover {
-        color: #059669;
-    }
-
-    label[for="filter-Rejected"]:hover {
-        color: #e11d48;
-    }
-
-    /* لون زر الرفض في الهوفر */
+    label[for="filter-All"]:hover { color: #0A7A48; }
+    label[for="filter-Pending"]:hover { color: #d97706; }
+    label[for="filter-Accepted"]:hover { color: #2563eb; }
+    label[for="filter-Delivered"]:hover { color: #059669; }
+    label[for="filter-Rejected"]:hover { color: #e11d48; }
 
     .glass-radio-group input:checked+label {
         color: #ffffff !important;
         text-shadow: none !important;
     }
 
-    /* تصميم العداد (دائماً ظاهر لعدم كسر الأبعاد) */
     .status-count {
         display: inline-flex;
         align-items: center;
         justify-content: center;
         background: rgba(100, 116, 139, 0.15);
-        /* لون رمادي خفيف جداً للحالة غير الفعالة */
         padding: 2px 8px;
         border-radius: 12px;
         font-size: 11px;
         font-weight: 900;
         color: #64748b;
-        /* نفس لون النص غير الفعال */
         transition: all 0.4s ease;
-        /* حركة ناعمة لتغيير اللون */
     }
 
-    /* العداد في الوضع الليلي للحالة غير الفعالة */
     .dark .status-count {
         background: rgba(148, 163, 184, 0.1);
         color: #94a3b8;
     }
 
-    /* تصميم العداد عندما يتم اختيار الفلتر (يصبح أبيض وشفاف) */
     .glass-radio-group input:checked+label .status-count {
         background: rgba(255, 255, 255, 0.3);
         color: #ffffff;
@@ -427,74 +414,34 @@ include('../includes/sidebar.php');
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
 
-    /* شريط الانزلاق معدل ليناسب 5 فلاتر */
     .glass-glider {
         position: absolute;
         top: 4px;
         bottom: 4px;
         width: calc((100% - 10px) / 5);
-        /* تم التعديل من 4 إلى 5 */
         border-radius: 0.7rem;
         z-index: 1;
         transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.4s ease, box-shadow 0.4s ease;
     }
 
-    #filter-All:checked~.glass-glider {
-        transform: translateX(0%);
-        background: #0A7A48;
-        box-shadow: 0 4px 12px rgba(10, 122, 72, 0.35);
-    }
+    #filter-All:checked~.glass-glider { transform: translateX(0%); background: #0A7A48; box-shadow: 0 4px 12px rgba(10, 122, 72, 0.35); }
+    #filter-Pending:checked~.glass-glider { transform: translateX(100%); background: #f59e0b; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35); }
+    #filter-Accepted:checked~.glass-glider { transform: translateX(200%); background: #3b82f6; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35); }
+    #filter-Delivered:checked~.glass-glider { transform: translateX(300%); background: #10b981; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35); }
+    #filter-Rejected:checked~.glass-glider { transform: translateX(400%); background: #f43f5e; box-shadow: 0 4px 12px rgba(244, 63, 94, 0.35); }
 
-    #filter-Pending:checked~.glass-glider {
-        transform: translateX(100%);
-        background: #f59e0b;
-        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
-    }
-
-    #filter-Accepted:checked~.glass-glider {
-        transform: translateX(200%);
-        background: #3b82f6;
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
-    }
-
-    #filter-Delivered:checked~.glass-glider {
-        transform: translateX(300%);
-        background: #10b981;
-        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
-    }
-
-    #filter-Rejected:checked~.glass-glider {
-        transform: translateX(400%);
-        background: #f43f5e;
-        box-shadow: 0 4px 12px rgba(244, 63, 94, 0.35);
-    }
-
-    /* دعم RTL */
-    html[dir="rtl"] #filter-Pending:checked~.glass-glider {
-        transform: translateX(-100%);
-    }
-
-    html[dir="rtl"] #filter-Accepted:checked~.glass-glider {
-        transform: translateX(-200%);
-    }
-
-    html[dir="rtl"] #filter-Delivered:checked~.glass-glider {
-        transform: translateX(-300%);
-    }
-
-    html[dir="rtl"] #filter-Rejected:checked~.glass-glider {
-        transform: translateX(-400%);
-    }
+    html[dir="rtl"] #filter-Pending:checked~.glass-glider { transform: translateX(-100%); }
+    html[dir="rtl"] #filter-Accepted:checked~.glass-glider { transform: translateX(-200%); }
+    html[dir="rtl"] #filter-Delivered:checked~.glass-glider { transform: translateX(-300%); }
+    html[dir="rtl"] #filter-Rejected:checked~.glass-glider { transform: translateX(-400%); }
 
     .modal-scroll::-webkit-scrollbar {
         width: 6px;
     }
-
     .modal-scroll::-webkit-scrollbar-thumb {
         background-color: rgba(10, 122, 72, 0.3);
         border-radius: 10px;
     }
-
     .dark .modal-scroll::-webkit-scrollbar-thumb {
         background-color: rgba(74, 222, 128, 0.3);
     }
@@ -509,7 +456,6 @@ include('../includes/sidebar.php');
         </h1>
 
         <div class="flex flex-col md:flex-row items-center gap-4 w-full xl:w-auto justify-end">
-            <!-- شريط البحث السريع -->
             <div class="w-full md:w-80">
                 <div class="relative group">
                     <input type="text" id="searchInput" placeholder="<?php echo isset($lang['search_order_patient']) ? $lang['search_order_patient'] : 'ابحث برقم الطلب أو المريض...'; ?>" value="<?php echo htmlspecialchars($search_query); ?>"
@@ -519,16 +465,15 @@ include('../includes/sidebar.php');
                 </div>
             </div>
 
-            <!-- الفلتر الزجاجي -->
             <div class="w-full xl:w-auto overflow-x-auto custom-scrollbar pb-2 -mb-2">
                 <div class="glass-radio-group shrink-0 mx-auto md:mx-0 min-w-max">
                     <?php
-                    $tabs = [
+                    $tabs =[
                         'All'       => isset($lang['all_orders'])        ? $lang['all_orders']        : 'الكل',
                         'Pending'   => isset($lang['pending_orders'])    ? $lang['pending_orders']    : 'قيد الانتظار',
                         'Accepted'  => isset($lang['filter_processing']) ? $lang['filter_processing'] : 'جاري التجهيز',
                         'Delivered' => isset($lang['filter_delivered'])  ? $lang['filter_delivered']  : 'مكتملة',
-                        'Rejected'  => isset($lang['filter_rejected'])   ? $lang['filter_rejected']   : 'مرفوض' // تم الإضافة
+                        'Rejected'  => isset($lang['filter_rejected'])   ? $lang['filter_rejected']   : 'مرفوض'
                     ];
                     foreach ($tabs as $key => $title):
                         $isChecked = ($filter_status == $key) ? 'checked' : '';
@@ -552,7 +497,7 @@ include('../includes/sidebar.php');
             <table class="w-full border-collapse min-w-[1050px]">
                 <thead id="tableHeader" class="bg-gray-50 dark:bg-slate-900/50 border-b border-gray-200 dark:border-slate-700 text-gray-600 dark:text-gray-400 text-sm <?php echo ($dir == 'rtl') ? 'text-right' : 'text-left'; ?>" <?php if (!$has_orders) echo 'style="display:none;"'; ?>>
                     <tr>
-                        <th class="p-5 font-bold whitespace-nowrap"><?php echo isset($lang['order_number']) ? $lang['order_number'] : 'رقم الطلب'; ?></th>
+                        <th class="p-5 font-bold whitespace-nowrap text-right"><?php echo isset($lang['order_number']) ? $lang['order_number'] : 'رقم الطلب'; ?></th>
                         <th class="p-5 font-bold whitespace-nowrap">
                             <div class="flex items-center gap-1.5">
                                 <i data-lucide="calendar" class="w-4 h-4 text-[#0A7A48]"></i>
@@ -578,18 +523,18 @@ include('../includes/sidebar.php');
 <!-- البطاقة المنبثقة للطلب (المودال) -->
 <div id="orderModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-[100] hidden flex justify-center items-center transition-opacity p-4">
 
-    <!-- 🚀 التعديل هنا: الحاوية الأم أخذت لون الثيم الأساسي مع overflow-hidden لضمان تطابق الحواف الدائرية -->
-    <div id="modalContentWrapper" class="bg-white dark:bg-slate-900 w-full max-h-[90vh] rounded-[2rem] shadow-2xl overflow-hidden flex flex-col md:flex-row transform transition-all border border-gray-200 dark:border-slate-700 relative">
+    <!-- النافذة الثابتة كعمود واحد -->
+    <div id="modalContentWrapper" class="bg-white dark:bg-slate-900 w-full max-w-xl max-h-[90vh] rounded-[2rem] shadow-2xl overflow-hidden flex flex-col transform transition-all border border-gray-200 dark:border-slate-700 relative">
 
-        <!-- 🚀 زر الإغلاق الجديد: موقعه عائم وثابت في زاوية المودال بغض النظر عن المحتوى -->
         <button onclick="closeOrderModal()" class="absolute top-5 rtl:left-5 ltr:right-5 flex items-center justify-center w-8 h-8 rounded-full bg-gray-100/80 text-gray-500 hover:bg-rose-500 hover:text-white dark:bg-slate-800/80 dark:text-gray-400 dark:hover:bg-rose-500 dark:hover:text-white backdrop-blur-sm transition-all shadow-sm z-50">
             <i data-lucide="x" class="w-4 h-4"></i>
         </button>
 
-        <!-- الجانب الأيمن: الفاتورة والمنتجات -->
-        <div id="invoiceSection" class="flex-1 flex flex-col relative z-10 w-full transition-all duration-300">
+        <!-- المحتوى الموحد -->
+        <div id="invoiceSection" class="flex-1 flex flex-col relative z-10 w-full min-h-0 transition-all duration-300">
 
-            <div id="modalHeader" class="p-5 border-b border-gray-100 dark:border-slate-700 transition-colors relative overflow-hidden">
+            <!-- الهيدر الثابت -->
+            <div id="modalHeader" class="shrink-0 p-5 border-b border-gray-100 dark:border-slate-700 transition-colors relative overflow-hidden">
                 <div class="flex justify-between items-start relative z-10">
                     <div>
                         <h2 class="text-xl font-black text-gray-800 dark:text-white flex items-center gap-2 m-0">
@@ -598,14 +543,13 @@ include('../includes/sidebar.php');
                         </h2>
                         <p id="modalOrderDate" class="text-xs text-gray-500 font-bold mt-1" dir="ltr"></p>
                     </div>
-
-                    <!-- الختم الديناميكي -->
-                    <div id="statusStamp" class="hidden absolute top-0 left-1/2 transform -translate-x-1/2 rotate-[-10deg] border-4 font-black text-2xl px-5 py-1 rounded-xl opacity-20 select-none pointer-events-none uppercase tracking-widest">
-                    </div>
+                    <div id="statusStamp" class="hidden absolute top-0 left-1/2 transform -translate-x-1/2 rotate-[-10deg] border-4 font-black text-2xl px-5 py-1 rounded-xl opacity-20 select-none pointer-events-none uppercase tracking-widest"></div>
                 </div>
             </div>
 
+            <!-- جسم المودال القابل للسكرول -->
             <div class="p-5 overflow-y-auto modal-scroll flex-1 space-y-5 relative">
+                
                 <!-- تنبيه سبب الرفض -->
                 <div id="rejectionAlert" class="hidden bg-rose-50 dark:bg-rose-900/20 border-l-4 border-rose-500 p-4 rounded-xl">
                     <div class="flex items-start gap-3">
@@ -635,7 +579,6 @@ include('../includes/sidebar.php');
                         <i data-lucide="map-pin" class="w-4 h-4 text-[#0A7A48] dark:text-[#4ADE80]"></i>
                         <p id="modalPatientAddress" class="text-sm font-bold text-gray-600 dark:text-gray-300 leading-relaxed"></p>
                     </div>
-                    <!-- خريطة موقع التوصيل -->
                     <div id="mapWrapper" class="hidden mt-3 rounded-xl overflow-hidden border border-gray-200 dark:border-slate-600 h-32 w-full relative z-0 shadow-inner">
                         <div id="deliveryMap" class="absolute inset-0"></div>
                     </div>
@@ -644,15 +587,39 @@ include('../includes/sidebar.php');
                     </p>
                 </div>
 
-                <!-- المشتريات -->
+                <!-- قسم المشتريات -->
                 <div>
                     <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-3"><?php echo isset($lang['purchases']) ? $lang['purchases'] : 'المشتريات'; ?></h3>
                     <div class="space-y-2" id="modalItemsList"></div>
                 </div>
+
+                <!-- قسم الوصفة الطبية -->
+                <div id="unifiedPrescriptionContainer" class="hidden flex-col items-center justify-center bg-amber-50/30 dark:bg-amber-900/10 border border-amber-100 dark:border-slate-700/50 rounded-2xl p-4 relative">
+                    <div id="rxHeader" class="w-full mb-3 flex items-center gap-3">
+                        <!-- يُحقن بواسطة الجافاسكربت -->
+                    </div>
+                    
+                    <a id="prescriptionImgLink" href="#" target="_blank" class="block w-full max-w-[250px] relative group rounded-xl overflow-hidden border-4 border-white dark:border-slate-800 shadow-lg mb-4 bg-gray-200 dark:bg-slate-800 ring-2 ring-transparent group-hover:ring-amber-400 transition-all duration-300">
+                        <img id="prescriptionImg" src="" onerror="this.src='https://placehold.co/400x600/e2e8f0/475569?text=صورة+غير+متوفرة';" alt="Prescription" class="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-110 min-h-[150px]">
+                        <div class="absolute inset-0 bg-amber-900/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                            <i data-lucide="zoom-in" class="text-white w-8 h-8 drop-shadow-md"></i>
+                        </div>
+                    </a>
+
+                    <div id="rxCheckboxContainer" class="w-full max-w-[250px] bg-white dark:bg-slate-800 p-3 rounded-xl border border-amber-100 dark:border-slate-700 shadow-sm transition-opacity duration-300">
+                        <div class="flex items-start gap-2">
+                            <input type="checkbox" id="verifyPrescriptionCheck" class="w-4 h-4 text-amber-500 rounded border-gray-300 focus:ring-amber-500 accent-amber-500 mt-0.5 shrink-0 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <label for="verifyPrescriptionCheck" class="text-xs font-bold text-gray-800 dark:text-gray-200 cursor-pointer select-none leading-tight">
+                                أقر بأني راجعت الوصفة الطبية وصحتها.
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
-            <!-- الفوتر (المبلغ والأزرار) -->
-            <div id="modalFooter" class="p-5 border-t border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-900/50">
+            <!-- الفوتر (المبلغ والأزرار الثابتة في الأسفل) -->
+            <div id="modalFooter" class="shrink-0 p-5 border-t border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-900/50">
                 <div class="flex justify-between items-end mb-4">
                     <span class="text-sm font-bold text-gray-500"><?php echo isset($lang['total_required']) ? $lang['total_required'] : 'الإجمالي المطلوب:'; ?></span>
                     <h2 id="modalTotalAmount" class="text-2xl font-black text-gray-900 dark:text-white" dir="ltr"></h2>
@@ -661,35 +628,9 @@ include('../includes/sidebar.php');
             </div>
         </div>
 
-        <!-- الجانب الأيسر: الوصفة الطبية (🚀 التعديل هنا: ثيم Amber متناسق) -->
-        <div id="prescriptionSection" class="hidden flex-1 flex-col bg-amber-50/30 dark:bg-amber-900/10 rtl:border-r ltr:border-l border-gray-200 dark:border-slate-700 w-full md:w-1/2 transition-all duration-300 relative">
-            <div id="rxHeader" class="p-5 border-b border-amber-100 dark:border-slate-700/50 flex items-center gap-3">
-                <!-- يُحقن بواسطة الجافاسكربت -->
-            </div>
-            <div class="flex-1 p-5 flex flex-col items-center justify-center overflow-y-auto modal-scroll">
-
-                <!-- 🚀 تأثير Ring بلون Amber عند مرور الماوس -->
-                <a id="prescriptionImgLink" href="#" target="_blank" class="block w-full max-w-[250px] relative group rounded-xl overflow-hidden border-4 border-white dark:border-slate-800 shadow-lg mb-4 bg-gray-200 dark:bg-slate-800 ring-2 ring-transparent group-hover:ring-amber-400 transition-all duration-300">
-                    <img id="prescriptionImg" src="" onerror="this.src='https://placehold.co/400x600/e2e8f0/475569?text=صورة+غير+متوفرة';" alt="Prescription" class="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-110 min-h-[150px]">
-                    <div class="absolute inset-0 bg-amber-900/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                        <i data-lucide="zoom-in" class="text-white w-8 h-8 drop-shadow-md"></i>
-                    </div>
-                </a>
-
-                <!-- 🚀 Checkbox بلون Amber -->
-                <div id="rxCheckboxContainer" class="w-full max-w-[250px] bg-white dark:bg-slate-800 p-3 rounded-xl border border-amber-100 dark:border-slate-700 shadow-sm transition-opacity duration-300">
-                    <div class="flex items-start gap-2">
-                        <input type="checkbox" id="verifyPrescriptionCheck" class="w-4 h-4 text-amber-500 rounded border-gray-300 focus:ring-amber-500 accent-amber-500 mt-0.5 shrink-0 disabled:opacity-50 disabled:cursor-not-allowed">
-                        <label for="verifyPrescriptionCheck" class="text-xs font-bold text-gray-800 dark:text-gray-200 cursor-pointer select-none leading-tight">
-                            أقر بأني راجعت الوصفة الطبية وصحتها.
-                        </label>
-                    </div>
-                </div>
-            </div>
-        </div>
-
     </div>
 </div>
+
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         lucide.createIcons();
@@ -703,7 +644,6 @@ include('../includes/sidebar.php');
     const txtDelivered = "<?php echo isset($lang['delivered_successfully']) ? $lang['delivered_successfully'] : 'تم تسليم الطلب بنجاح'; ?>";
     const txtActionTaken = "<?php echo isset($lang['action_taken']) ? $lang['action_taken'] : 'تم اتخاذ إجراء مسبقاً'; ?>";
 
-    // AJAX Fetch
     let timeoutId;
     async function fetchData(status, searchQuery) {
         const container = document.getElementById('ordersTableContainer');
@@ -716,9 +656,7 @@ include('../includes/sidebar.php');
         }
 
         const newUrl = `?status=${status}&search=${encodeURIComponent(searchQuery)}`;
-        window.history.pushState({
-            path: newUrl
-        }, '', newUrl);
+        window.history.pushState({ path: newUrl }, '', newUrl);
 
         clearTimeout(timeoutId);
         timeoutId = setTimeout(async () => {
@@ -765,9 +703,8 @@ include('../includes/sidebar.php');
     }
 
     let currentOrderData = null;
-    let deliveryMapInstance = null; // متغير لحفظ الخريطة
+    let deliveryMapInstance = null;
 
-    // الدبوس المخصص للخريطة (نفس المستخدم في صفحة الأدمن)
     const customMapIcon = L.divIcon({
         className: 'custom-leaflet-marker',
         html: `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0A7A48" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0px 3px 4px rgba(0,0,0,0.3));">
@@ -775,14 +712,13 @@ include('../includes/sidebar.php');
                 <circle cx="12" cy="10" r="3" fill="#0A7A48"></circle>
                </svg>`,
         iconSize: [32, 32],
-        iconAnchor: [16, 32],
+        iconAnchor:[16, 32],
     });
 
     function viewOrderDetails(jsonString) {
         const order = JSON.parse(jsonString);
         currentOrderData = order;
 
-        // تعبئة البيانات الأساسية
         document.getElementById('modalOrderId').innerText = `#${order.id}`;
         document.getElementById('modalOrderDate').innerText = order.date;
         document.getElementById('modalPatientName').innerText = order.patient;
@@ -790,7 +726,6 @@ include('../includes/sidebar.php');
         document.getElementById('modalPatientAddress').innerText = order.address || txtPickup;
         document.getElementById('modalTotalAmount').innerText = parseFloat(order.total).toFixed(2) + ' ₪';
 
-        // تعبئة المشتريات
         const itemsList = document.getElementById('modalItemsList');
         itemsList.innerHTML = '';
         order.items.forEach(item => {
@@ -808,10 +743,8 @@ include('../includes/sidebar.php');
             `;
         });
 
-        // تعريف المتغيرات
         const modalWrapper = document.getElementById('modalContentWrapper');
-        const prescriptionSection = document.getElementById('prescriptionSection');
-        const invoiceSection = document.getElementById('invoiceSection');
+        const unifiedPrescriptionContainer = document.getElementById('unifiedPrescriptionContainer');
         const rxHeader = document.getElementById('rxHeader');
         const verifyCheckbox = document.getElementById('verifyPrescriptionCheck');
         const rxCheckboxContainer = document.getElementById('rxCheckboxContainer');
@@ -822,16 +755,11 @@ include('../includes/sidebar.php');
         const rejectionAlert = document.getElementById('rejectionAlert');
         const actionsContainer = document.getElementById('dynamicActionButtons');
 
-        // ==========================================
-        // 💡 1. منطق التصميم (الأختام والألوان والأزرار)
-        // ==========================================
-
-        // إعادة الضبط للافتراضي
-        modalHeader.className = 'p-5 border-b border-gray-100 dark:border-slate-700 transition-colors relative overflow-hidden';
+        modalHeader.className = 'shrink-0 p-5 border-b border-gray-100 dark:border-slate-700 transition-colors relative overflow-hidden';
         statusStamp.className = 'hidden absolute top-4 left-1/2 transform -translate-x-1/2 rotate-[-10deg] border-4 font-black text-2xl px-5 py-1 rounded-xl opacity-20 select-none pointer-events-none uppercase tracking-widest z-0';
         modalFooter.classList.remove('hidden');
         rejectionAlert.classList.add('hidden');
-        verifyCheckbox.disabled = false; // تفعيل الوصفة افتراضياً
+        verifyCheckbox.disabled = false;
         rxCheckboxContainer.classList.remove('opacity-50');
 
         if (order.status === 'Delivered') {
@@ -839,8 +767,8 @@ include('../includes/sidebar.php');
             statusStamp.classList.remove('hidden');
             statusStamp.classList.add('border-emerald-500', 'text-emerald-500');
             statusStamp.innerText = 'COMPLETED';
-            modalFooter.classList.add('hidden'); // إخفاء الفوتر والأزرار
-            verifyCheckbox.disabled = true; // تعطيل زر الوصفة
+            modalFooter.classList.add('hidden');
+            verifyCheckbox.disabled = true;
             rxCheckboxContainer.classList.add('opacity-50');
 
         } else if (order.status === 'Rejected') {
@@ -848,11 +776,10 @@ include('../includes/sidebar.php');
             statusStamp.classList.remove('hidden');
             statusStamp.classList.add('border-rose-500', 'text-rose-500');
             statusStamp.innerText = 'REJECTED';
-            modalFooter.classList.add('hidden'); // إخفاء الفوتر
-            verifyCheckbox.disabled = true; // تعطيل زر الوصفة
+            modalFooter.classList.add('hidden');
+            verifyCheckbox.disabled = true;
             rxCheckboxContainer.classList.add('opacity-50');
 
-            // إظهار سبب الرفض
             rejectionAlert.classList.remove('hidden');
             document.getElementById('rejectionReasonText').innerText = order.rejection_reason || 'تم الإلغاء بدون كتابة سبب';
 
@@ -861,7 +788,7 @@ include('../includes/sidebar.php');
             statusStamp.classList.remove('hidden');
             statusStamp.classList.add('border-blue-500', 'text-blue-500');
             statusStamp.innerText = 'PROCESSING';
-            verifyCheckbox.disabled = true; // تم التحقق منه مسبقاً
+            verifyCheckbox.disabled = true;
             rxCheckboxContainer.classList.add('opacity-50');
 
             actionsContainer.innerHTML = `
@@ -870,15 +797,12 @@ include('../includes/sidebar.php');
                 </button>
             `;
         } else if (order.status === 'Pending') {
-            // 💡 تصميم حالة قيد الانتظار (جديد)
             modalHeader.classList.add('bg-amber-50', 'dark:bg-amber-900/20');
 
-            // إظهار ختم PENDING
             statusStamp.classList.remove('hidden');
             statusStamp.classList.add('border-amber-500', 'text-amber-500');
             statusStamp.innerText = 'PENDING';
 
-            // الأزرار تبقى ظاهرة لأن الطلب يحتاج لاتخاذ قرار
             actionsContainer.innerHTML = `
                 <button onclick="confirmOrderStatus(${order.id}, 'Rejected')" class="w-1/3 bg-gray-100 hover:bg-rose-100 text-gray-600 hover:text-rose-600 dark:bg-slate-700 dark:text-gray-300 dark:hover:bg-rose-900/30 py-2.5 rounded-xl font-bold transition text-sm shadow-sm">${txtReject}</button>
                 <button onclick="attemptAcceptOrder()" class="w-2/3 bg-[#0A7A48] hover:bg-[#044E29] text-white py-2.5 rounded-xl font-bold transition shadow-lg shadow-green-900/20 flex items-center justify-center gap-2 text-sm">
@@ -887,25 +811,15 @@ include('../includes/sidebar.php');
             `;
         }
 
-        // ==========================================
-        // 💡 2. منطق عرض الوصفة الطبية وتحديد حجم النافذة
-        // ==========================================
-
         if (order.prescription) {
-            // هناك وصفة، نوسع النافذة
-            modalWrapper.classList.remove('max-w-2xl');
-            modalWrapper.classList.add('max-w-5xl');
-            prescriptionSection.classList.remove('hidden');
-            prescriptionSection.classList.add('md:flex');
-            invoiceSection.classList.remove('md:w-full');
-            invoiceSection.classList.add('md:w-1/2');
+            unifiedPrescriptionContainer.classList.remove('hidden');
+            unifiedPrescriptionContainer.classList.add('flex');
 
             const imgUrl = `../${order.prescription}`;
             document.getElementById('prescriptionImg').src = imgUrl;
             document.getElementById('prescriptionImgLink').href = imgUrl;
 
             if (order.has_controlled) {
-                // 🚀 حقن ترويسة بثيم Amber للأدوية المراقبة
                 rxHeader.innerHTML = `
                     <div class="p-2 bg-amber-100 dark:bg-amber-900/40 rounded-lg text-amber-600 dark:text-amber-400">
                         <i data-lucide="shield-alert" class="w-5 h-5"></i>
@@ -917,7 +831,6 @@ include('../includes/sidebar.php');
                 `;
                 rxCheckboxContainer.classList.remove('hidden');
 
-                // إذا كان معلق، نطلب منه الموافقة. إذا غير ذلك، نجعله Checked
                 if (order.status === 'Pending') {
                     verifyCheckbox.checked = false;
                 } else {
@@ -925,7 +838,6 @@ include('../includes/sidebar.php');
                 }
 
             } else {
-                // 🚀 حقن ترويسة هادئة للوصفات العادية المرفقة
                 rxHeader.innerHTML = `
                     <div class="p-2 bg-gray-100 dark:bg-slate-800 rounded-lg text-gray-600 dark:text-gray-400">
                         <i data-lucide="file-text" class="w-5 h-5"></i>
@@ -938,19 +850,11 @@ include('../includes/sidebar.php');
                 verifyCheckbox.checked = true;
             }
         } else {
-            // لا يوجد وصفة -> نافذة صغيرة
-            modalWrapper.classList.remove('max-w-5xl');
-            modalWrapper.classList.add('max-w-2xl');
-            prescriptionSection.classList.add('hidden');
-            prescriptionSection.classList.remove('md:flex');
-            invoiceSection.classList.remove('md:w-1/2');
-            invoiceSection.classList.add('md:w-full');
+            unifiedPrescriptionContainer.classList.add('hidden');
+            unifiedPrescriptionContainer.classList.remove('flex');
             verifyCheckbox.checked = true;
         }
 
-        // ==========================================
-        // 💡 3. إعداد الخريطة
-        // ==========================================
         const mapWrapper = document.getElementById('mapWrapper');
         const noLocationMsg = document.getElementById('noLocationMsg');
 
@@ -972,12 +876,8 @@ include('../includes/sidebar.php');
                 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' :
                 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
 
-            L.tileLayer(tileUrl, {
-                maxZoom: 19
-            }).addTo(deliveryMapInstance);
-            L.marker([order.lat, order.lng], {
-                icon: customMapIcon
-            }).addTo(deliveryMapInstance);
+            L.tileLayer(tileUrl, { maxZoom: 19 }).addTo(deliveryMapInstance);
+            L.marker([order.lat, order.lng], { icon: customMapIcon }).addTo(deliveryMapInstance);
 
         } else {
             mapWrapper.classList.add('hidden');
@@ -987,7 +887,6 @@ include('../includes/sidebar.php');
         lucide.createIcons();
         document.getElementById('orderModal').classList.remove('hidden');
 
-        // تحديث أبعاد الخريطة
         setTimeout(() => {
             if (deliveryMapInstance) {
                 deliveryMapInstance.invalidateSize();
