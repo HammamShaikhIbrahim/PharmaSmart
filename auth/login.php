@@ -47,153 +47,125 @@ if (isset($_POST['login'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PharmaSmart - <?php echo $lang['login_title']; ?></title>
-
+    
     <script src="https://kit.fontawesome.com/804071b851.js" crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
 
     <script>
         tailwind.config = {
             darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Cairo', 'sans-serif'] }
+                }
+            }
         }
     </script>
-
-    <script>
-        if (localStorage.getItem('color-theme') === 'dark') {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-            localStorage.setItem('color-theme', 'light');
-        }
-    </script>
-
-    <style>
-        body,
-        html {
-            height: 100%;
-            margin: 0;
-            overflow: hidden;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        /* تأثيرات الإضاءة والظلال تاعات الأشكال*/
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
-        }
-
-        .dark .glass-panel {
-            background: rgba(15, 23, 42, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
-        }
-    </style>
 </head>
 
-<body class="bg-gradient-to-br from-teal-50 to-emerald-200 dark:from-slate-900 dark:to-teal-950 flex items-center justify-center relative transition-colors duration-500">
+<body class="bg-white dark:bg-slate-950 text-gray-800 dark:text-gray-200 transition-colors duration-500 overflow-hidden h-screen flex">
 
-    <!-- ==========================================
-            الأشكال الطبية ثلاثية الأبعاد
-    ========================================== -->
-    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
-
-        <!-- شكل الكبسولة -->
-        <div class="absolute top-10 left-20 w-32 h-64 rounded-full transform rotate-[35deg]
-                    bg-gradient-to-b from-emerald-300 to-teal-500 dark:from-emerald-600 dark:to-teal-800
-                    shadow-[inset_15px_15px_30px_rgba(255,255,255,0.7),inset_-10px_-10px_30px_rgba(0,0,0,0.2),10px_20px_40px_rgba(20,184,166,0.3)]">
-        </div>
-
-        <!-- شكل القرص-->
-        <div class="absolute top-1/4 right-20 w-48 h-48 rounded-full transform -rotate-[15deg]
-                    bg-gradient-to-tr from-green-200 to-emerald-400 dark:from-green-700 dark:to-emerald-600
-                    shadow-[inset_-10px_-10px_30px_rgba(0,0,0,0.15),inset_15px_15px_30px_rgba(255,255,255,0.8),0_20px_40px_rgba(16,185,129,0.2)]">
-            <div class="absolute top-1/2 left-4 right-4 h-1 bg-white/40 dark:bg-black/10 rounded-full transform -translate-y-1/2 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)]"></div>
-        </div>
-
-        <!-- شكل الزائد -->
-        <div class="absolute bottom-20 left-1/4 w-32 h-32 transform rotate-[15deg] opacity-80">
-            <div class="absolute inset-x-10 inset-y-0 rounded-2xl bg-gradient-to-br from-teal-300 to-cyan-500 dark:from-teal-600 dark:to-cyan-800 shadow-[inset_5px_5px_15px_rgba(255,255,255,0.6),inset_-5px_-5px_15px_rgba(0,0,0,0.2)]"></div>
-            <div class="absolute inset-y-10 inset-x-0 rounded-2xl bg-gradient-to-br from-teal-300 to-cyan-500 dark:from-teal-600 dark:to-cyan-800 shadow-[inset_5px_5px_15px_rgba(255,255,255,0.6),inset_-5px_-5px_15px_rgba(0,0,0,0.2)]"></div>
-        </div>
-        <!-- كبسولة صغيرة -->
-        <div class="absolute bottom-1/3 right-1/3 w-20 h-40 rounded-full transform -rotate-[40deg] blur-md
-                    bg-gradient-to-r from-emerald-400 to-green-300 dark:from-emerald-700 dark:to-green-800
-                    shadow-[inset_5px_5px_15px_rgba(255,255,255,0.5)]">
-        </div>
-
-    </div>
-
-    <!-- ==========================================
-            ازرار التحكم في الثيم واللغة
-    ========================================== -->
-    <div class="absolute top-6 right-6 flex items-center gap-3 z-50">
-
-        <!-- زر الوضع الليلي/النهاري -->
-        <button id="theme-toggle" type="button" class="glass-panel p-3 rounded-2xl text-gray-700 dark:text-white transition-all duration-300 hover:bg-white/40 dark:hover:bg-slate-800/70 hover:shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:-translate-y-1 focus:outline-none flex items-center justify-center group">
-            <i id="theme-toggle-light-icon" data-lucide="sun" class="hidden w-5 h-5 text-amber-400 transition-transform duration-500 group-hover:rotate-90"></i>
-            <i id="theme-toggle-dark-icon" data-lucide="moon" class="hidden w-5 h-5 text-amber-400 transition-transform duration-500 group-hover:-rotate-12"></i>
-        </button>
-
-        <!-- زر تغيير اللغة -->
-        <a href="?lang=<?php echo $lang['switch_lang_code']; ?>"
-            class="glass-panel text-gray-800 dark:text-white font-bold px-5 py-3 rounded-2xl transition-all duration-300 hover:bg-white/40 dark:hover:bg-slate-800/70 hover:shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:-translate-y-1 flex items-center gap-2 text-sm group">
-            <i data-lucide="globe" class="w-4 h-4 text-emerald-600 dark:text-emerald-400 transition-transform duration-500 group-hover:rotate-180"></i>
-            <span class="group-hover:text-emerald-700 dark:group-hover:text-emerald-300 transition-colors"><?php echo $lang['switch_lang_text']; ?></span>
-        </a>
-
-    </div>
-
-    <!-- ==========================================
-            صندوق تسجيل الدخول 
-    ========================================== -->
-    <div class="glass-panel p-10 md:p-12 rounded-[2.5rem] w-full max-w-md z-10 transition-all duration-300 mx-4">
-
-        <div class="text-center mb-10">
-            <div class="inline-flex items-center justify-center w-20 h-20 bg-white/30 dark:bg-slate-800/50 backdrop-blur-md rounded-3xl mb-5 text-emerald-600 dark:text-emerald-400 shadow-inner border border-white/40 dark:border-white/10">
-                <i data-lucide="shield-plus" class="w-10 h-10"></i>
+    <!-- ========================================== -->
+    <!-- 1. القسم التعريفي (1/3 - الهوية الطبية) -->
+    <!-- ========================================== -->
+    <div class="hidden lg:flex lg:w-1/3 bg-gradient-to-br from-emerald-600 to-teal-800 flex-col justify-between p-12 relative overflow-hidden h-full shadow-2xl z-10">
+        
+        <!-- الأشكال الطبية ثلاثية الأبعاد (من تصميمك الأصلي محصورة هنا) -->
+        <div class="absolute inset-0 pointer-events-none z-0">
+            <!-- شكل الكبسولة -->
+            <div class="absolute top-10 -left-10 w-32 h-64 rounded-full transform rotate-[35deg] bg-gradient-to-b from-emerald-400 to-teal-500 shadow-[inset_15px_15px_30px_rgba(255,255,255,0.4),inset_-10px_-10px_30px_rgba(0,0,0,0.2),10px_20px_40px_rgba(0,0,0,0.3)] opacity-80"></div>
+            <!-- شكل القرص -->
+            <div class="absolute bottom-20 -right-10 w-48 h-48 rounded-full transform -rotate-[15deg] bg-gradient-to-tr from-green-300 to-emerald-500 shadow-[inset_-10px_-10px_30px_rgba(0,0,0,0.15),inset_15px_15px_30px_rgba(255,255,255,0.5),0_20px_40px_rgba(0,0,0,0.3)] opacity-90">
+                <div class="absolute top-1/2 left-4 right-4 h-1 bg-white/30 rounded-full transform -translate-y-1/2"></div>
             </div>
-            <h2 class="text-4xl font-black text-gray-900 dark:text-white tracking-tight mb-2">PharmaSmart</h2>
-            <p class="text-sm font-bold text-gray-600 dark:text-gray-300 opacity-80"><?php echo $lang['login_subtitle']; ?></p>
+            <!-- علامة الزائد الطبية -->
+            <div class="absolute top-1/2 left-1/2 w-24 h-24 transform -translate-x-1/2 -translate-y-1/2 rotate-[15deg] opacity-20">
+                <div class="absolute inset-x-8 inset-y-0 rounded-xl bg-white"></div>
+                <div class="absolute inset-y-8 inset-x-0 rounded-xl bg-white"></div>
+            </div>
         </div>
 
-        <form method="POST" class="space-y-6 text-<?php echo ($dir == 'rtl') ? 'right' : 'left'; ?>">
-
-            <div>
-                <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-2 ml-1"><?php echo $lang['email']; ?></label>
-                <div class="relative">
-                    <input type="email" name="email" required placeholder="Email" dir="ltr"
-                        class="w-full rtl:pl-4 rtl:pr-14 ltr:pr-4 ltr:pl-14 py-4 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm border border-white/50 dark:border-slate-700 focus:bg-white dark:focus:bg-slate-800 focus:border-emerald-500 rounded-2xl text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 outline-none transition-all shadow-inner">
-                    <i data-lucide="mail" class="absolute rtl:right-5 ltr:left-5 top-4 text-emerald-600 dark:text-emerald-400 w-5 h-5 pointer-events-none"></i>
-                </div>
+        <div class="relative z-10">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl mb-8 text-white shadow-inner border border-white/30">
+                <i data-lucide="shield-plus" class="w-8 h-8"></i>
             </div>
-
-            <div>
-                <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-2 ml-1"><?php echo $lang['password']; ?></label>
-                <div class="relative">
-                    <input type="password" name="password" required placeholder="••••••••" dir="ltr"
-                        class="w-full rtl:pl-4 rtl:pr-14 ltr:pr-4 ltr:pl-14 py-4 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm border border-white/50 dark:border-slate-700 focus:bg-white dark:focus:bg-slate-800 focus:border-emerald-500 rounded-2xl text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 outline-none transition-all shadow-inner">
-                    <i data-lucide="lock" class="absolute rtl:right-5 ltr:left-5 top-4 text-emerald-600 dark:text-emerald-400 w-5 h-5 pointer-events-none"></i>
-                </div>
-            </div>
-
-            <button type="submit" name="login" class="w-full bg-emerald-600 text-white py-4 rounded-2xl hover:bg-emerald-700 transition-all font-bold text-lg mt-8 shadow-[0_10px_20px_rgba(16,185,129,0.3)] active:scale-[0.98] flex justify-center items-center gap-2 border border-emerald-500/50">
-                <?php echo $lang['btn_login']; ?>
-                <i data-lucide="<?php echo ($dir == 'rtl') ? 'arrow-left' : 'arrow-right'; ?>" class="w-5 h-5"></i>
-            </button>
-
-        </form>
-
-        <div class="mt-8 text-center pt-6 border-t border-white/30 dark:border-slate-700/50">
-            <p class="text-sm font-bold text-gray-700 dark:text-gray-300">
-                <?php echo $lang['new_account']; ?>
-                <a href="register.php" class="text-emerald-700 dark:text-emerald-400 font-black hover:underline mx-1"><?php echo $lang['register_link']; ?></a>
+            <h1 class="text-4xl font-black text-white tracking-tight mb-4 leading-tight">PharmaSmart</h1>
+            <p class="text-emerald-50 font-bold text-base leading-relaxed opacity-90">
+                <?php echo $lang['login_subtitle']; ?>.<br>
+                بوابتك الرقمية الموثوقة لإدارة صيدليتك ومخزونك الدوائي باحترافية.
             </p>
+        </div>
+
+        <div class="relative z-10">
+            <p class="text-emerald-200/70 text-xs font-bold">&copy; <?php echo date('Y'); ?> PharmaSmart. All rights reserved.</p>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 2. قسم الفورم (2/3 - أبيض ونظيف) -->
+    <!-- ========================================== -->
+    <div class="w-full lg:w-2/3 flex flex-col relative h-full bg-gray-50 dark:bg-slate-900 overflow-y-auto">
+        
+        <!-- أزرار التحكم باللغة والثيم -->
+        <div class="absolute top-6 rtl:left-6 ltr:right-6 flex items-center gap-3 z-50">
+            <button id="theme-toggle" type="button" class="p-2.5 rounded-xl bg-white dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all border border-gray-200 dark:border-slate-700 shadow-sm">
+                <i id="theme-toggle-light-icon" data-lucide="sun" class="hidden w-5 h-5"></i>
+                <i id="theme-toggle-dark-icon" data-lucide="moon" class="hidden w-5 h-5"></i>
+            </button>
+            <a href="?lang=<?php echo $lang['switch_lang_code']; ?>" class="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all border border-gray-200 dark:border-slate-700 shadow-sm flex items-center gap-2 font-bold text-sm">
+                <i data-lucide="globe" class="w-4 h-4"></i>
+                <span><?php echo $lang['switch_lang_text']; ?></span>
+            </a>
+        </div>
+
+        <!-- الفورم -->
+        <div class="flex-1 flex items-center justify-center p-8 w-full">
+            <div class="w-full max-w-md bg-white dark:bg-slate-800 p-8 sm:p-10 rounded-[2rem] shadow-xl border border-gray-100 dark:border-slate-700/50">
+                
+                <!-- لوجو يظهر فقط في الجوال -->
+                <div class="lg:hidden inline-flex items-center justify-center w-14 h-14 bg-emerald-600 rounded-2xl mb-6 text-white shadow-lg">
+                    <i data-lucide="shield-plus" class="w-7 h-7"></i>
+                </div>
+
+                <div class="mb-8 text-<?php echo ($dir == 'rtl') ? 'right' : 'left'; ?>">
+                    <h2 class="text-3xl font-black text-gray-900 dark:text-white mb-2"><?php echo $lang['login_title']; ?></h2>
+                    <p class="text-gray-500 dark:text-gray-400 font-bold text-sm">أدخل بريدك الإلكتروني وكلمة المرور للدخول.</p>
+                </div>
+
+                <form method="POST" class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2"><?php echo $lang['email']; ?></label>
+                        <div class="relative group">
+                            <input type="email" name="email" required placeholder="name@pharma.com" dir="ltr"
+                                class="w-full h-12 rtl:pl-4 rtl:pr-11 ltr:pr-4 ltr:pl-11 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 focus:border-emerald-500 dark:focus:border-emerald-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none transition-all font-bold">
+                            <i data-lucide="mail" class="absolute top-0 bottom-0 my-auto rtl:right-4 ltr:left-4 text-gray-400 group-focus-within:text-emerald-500 w-5 h-5 transition-colors"></i>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2"><?php echo $lang['password']; ?></label>
+                        <div class="relative group">
+                            <input type="password" name="password" required placeholder="••••••••" dir="ltr"
+                                class="w-full h-12 rtl:pl-4 rtl:pr-11 ltr:pr-4 ltr:pl-11 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 focus:border-emerald-500 dark:focus:border-emerald-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none transition-all font-bold">
+                            <i data-lucide="lock" class="absolute top-0 bottom-0 my-auto rtl:right-4 ltr:left-4 text-gray-400 group-focus-within:text-emerald-500 w-5 h-5 transition-colors"></i>
+                        </div>
+                    </div>
+
+                    <button type="submit" name="login" class="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl transition-all font-black text-base mt-6 shadow-md hover:shadow-lg flex justify-center items-center gap-2">
+                        <?php echo $lang['btn_login']; ?>
+                        <i data-lucide="<?php echo ($dir == 'rtl') ? 'arrow-left' : 'arrow-right'; ?>" class="w-5 h-5"></i>
+                    </button>
+                </form>
+
+                <div class="mt-8 text-center text-sm font-bold text-gray-500 dark:text-gray-400">
+                    <?php echo $lang['new_account']; ?>
+                    <a href="register.php" class="text-emerald-600 dark:text-emerald-400 font-black hover:underline mx-1"><?php echo $lang['register_link']; ?></a>
+                </div>
+
+            </div>
         </div>
     </div>
 
@@ -207,13 +179,8 @@ if (isset($_POST['login'])) {
                     text: '<?php echo $error; ?>',
                     confirmButtonText: '<?php echo $lang['ok_btn']; ?>',
                     confirmButtonColor: '#10b981',
-                    allowOutsideClick: false,
-                    background: document.documentElement.classList.contains('dark') ? '#1e293b' : 'rgba(255,255,255,0.9)',
-                    backdrop: 'rgba(0,0,0,0.4)',
-                    color: document.documentElement.classList.contains('dark') ? '#f8fafc' : '#1f2937',
-                    customClass: {
-                        popup: 'backdrop-blur-xl border border-white/20'
-                    }
+                    background: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff',
+                    color: document.documentElement.classList.contains('dark') ? '#f8fafc' : '#1f2937'
                 });
             });
         </script>
@@ -225,31 +192,19 @@ if (isset($_POST['login'])) {
         var themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
         var themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
 
-        if (localStorage.getItem('color-theme') === 'light' || (!('color-theme' in localStorage))) {
-            themeToggleDarkIcon.classList.remove('hidden');
-        } else {
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             themeToggleLightIcon.classList.remove('hidden');
+            document.documentElement.classList.add('dark');
+        } else {
+            themeToggleDarkIcon.classList.remove('hidden');
+            document.documentElement.classList.remove('dark');
         }
-
-        function updateThemeIcons() {
-            var isDark = document.documentElement.classList.contains('dark');
-            var sunIcon = document.getElementById('theme-toggle-light-icon');
-            var moonIcon = document.getElementById('theme-toggle-dark-icon');
-
-            if (isDark) {
-                sunIcon.classList.remove('hidden');
-                moonIcon.classList.add('hidden');
-            } else {
-                sunIcon.classList.add('hidden');
-                moonIcon.classList.remove('hidden');
-            }
-        }
-
-        updateThemeIcons();
 
         var themeToggleBtn = document.getElementById('theme-toggle');
         themeToggleBtn.addEventListener('click', function() {
             document.documentElement.classList.toggle('dark');
+            themeToggleLightIcon.classList.toggle('hidden');
+            themeToggleDarkIcon.classList.toggle('hidden');
 
             if (document.documentElement.classList.contains('dark')) {
                 localStorage.setItem('color-theme', 'dark');
@@ -258,20 +213,7 @@ if (isset($_POST['login'])) {
                 localStorage.setItem('color-theme', 'light');
                 document.cookie = "theme=light; path=/";
             }
-            updateThemeIcons();
         });
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Cairo', 'sans-serif'],
-                    }
-                }
-            }
-        }
     </script>
-
 </body>
-
 </html>
