@@ -257,7 +257,8 @@ if (isset($_POST['register'])) {
                 </form>
 
                 <div class="mt-8 text-center text-sm font-bold text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-slate-700 pt-6">
-                    <?php echo $lang['already_have_account']; ?> 
+                    <?php echo $lang['already_have_account'];
+                     ?> 
                     <a href="login.php" class="text-emerald-600 dark:text-emerald-400 font-black hover:underline mx-1"><?php echo $lang['login_link']; ?></a>
                 </div>
 
