@@ -24,9 +24,17 @@ $pendingOrders = mysqli_fetch_assoc(mysqli_query($conn, $ordersQuery))['PendingC
 $lowStockQuery = "SELECT COUNT(*) as LowStockCount FROM PharmacyStock WHERE PharmacistID = $pharmacist_id AND Stock <= MinimumStock";
 $lowStockCount = mysqli_fetch_assoc(mysqli_query($conn, $lowStockQuery))['LowStockCount'];
 
-// 💡 التعديل هنا: جلب بناءً على الأشهر المحددة من قبل الصيدلاني في قاعدة البيانات
-$expiryQuery = "SELECT COUNT(*) as ExpiringCount FROM PharmacyStock WHERE PharmacistID = $pharmacist_id AND ExpiryDate BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL ExpiryAlertMonths MONTH)";
-$expiringCount = mysqli_fetch_assoc(mysqli_query($conn, $expiryQuery))['ExpiringCount'];
+// ==========================================
+// 💡 فصلنا إحصائيات الصلاحية إلى قسمين (قريباً + منتهي فعلياً)
+// ==========================================
+
+// 1. الأدوية التي ستنتهي قريباً (لون برتقالي)
+$expiringSoonQuery = "SELECT COUNT(*) as Count FROM PharmacyStock WHERE PharmacistID = $pharmacist_id AND ExpiryDate >= CURDATE() AND ExpiryDate <= DATE_ADD(CURDATE(), INTERVAL ExpiryAlertMonths MONTH)";
+$expiringSoonCount = mysqli_fetch_assoc(mysqli_query($conn, $expiringSoonQuery))['Count'];
+
+// 2. الأدوية المنتهية الصلاحية فعلياً (لون أحمر Rose)
+$alreadyExpiredQuery = "SELECT COUNT(*) as Count FROM PharmacyStock WHERE PharmacistID = $pharmacist_id AND ExpiryDate < CURDATE()";
+$alreadyExpiredCount = mysqli_fetch_assoc(mysqli_query($conn, $alreadyExpiredQuery))['Count'];
 
 // ==========================================
 // 2. الطلبات الأخيرة
@@ -333,7 +341,25 @@ include('../includes/sidebar.php');
                     <i data-lucide="calendar-off" class="w-6 h-6 text-orange-500 opacity-80"></i>
                     <h3 class="text-base font-black text-gray-800 dark:text-white">تنبيهات الصلاحية</h3>
                 </div>
-                <?php if ($expiringCount > 0): ?><span class="bg-orange-50 text-orange-600 border border-orange-200 dark:bg-orange-900/30 dark:border-orange-800/50 dark:text-orange-400 px-3 py-1 rounded-full text-xs font-bold shadow-sm"><?php echo $expiringCount; ?> عناصر</span><?php endif; ?>
+
+                <!-- حاوية التنبيهات (البادجات) -->
+                <div class="flex items-center gap-2">
+
+                    <!-- 🔴 بادج الأدوية المنتهية فعلياً (يظهر فقط إذا كان هناك أدوية منتهية) -->
+                    <?php if ($alreadyExpiredCount > 0): ?>
+                        <span class="bg-rose-50 text-rose-600 border border-rose-200 dark:bg-rose-900/30 dark:border-rose-800/50 dark:text-rose-400 px-3 py-1 rounded-full text-xs font-bold shadow-sm">
+                            <?php echo $alreadyExpiredCount; ?> منتهي
+                        </span>
+                    <?php endif; ?>
+
+                    <!-- 🟠 بادج الأدوية التي ستنتهي قريباً (يظهر فقط إذا كان هناك أدوية تقترب من الانتهاء) -->
+                    <?php if ($expiringSoonCount > 0): ?>
+                        <span class="bg-orange-50 text-orange-600 border border-orange-200 dark:bg-orange-900/30 dark:border-orange-800/50 dark:text-orange-400 px-3 py-1 rounded-full text-xs font-bold shadow-sm flex items-center gap-1 transition-all">
+                            <?php echo $expiringSoonCount; ?> قريباً
+                        </span>
+                    <?php endif; ?>
+
+                </div>
             </div>
             <div class="p-2 flex-1">
                 <?php if (mysqli_num_rows($expiringListResult) > 0): ?>

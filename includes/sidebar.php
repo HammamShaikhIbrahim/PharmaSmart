@@ -19,10 +19,10 @@ $role_id = isset($_SESSION['role_id']) ? $_SESSION['role_id'] : 0;
 
 if ($role_id == 1) {
     // ---- الأدمن (Admin) - نظام أزرق ----
-    $role_icon = 'shield-check'; 
+    $role_icon = 'shield-check';
     $sidebar_bg = 'bg-[#011C3B] dark:bg-[#010C22]';
     $text_color = 'text-white';
-    $title_color = 'text-[#048AC1]'; 
+    $title_color = 'text-[#048AC1]';
 
     $link_classes = 'flex items-center gap-3 p-3 rounded-xl transition duration-200 hover:bg-[#024F86] text-gray-300 hover:text-white font-medium whitespace-nowrap';
     $active_classes = 'flex items-center gap-3 p-3 rounded-xl transition duration-200 bg-[#048AC1] text-white font-bold shadow-lg shadow-blue-900/30 whitespace-nowrap';
@@ -84,7 +84,7 @@ if ($role_id == 1) {
             <!-- 🚀 الكتالوج الموحد للأدوية (قريباً) -->
             <a href="#" onclick="event.preventDefault(); showComingSoon('admin_catalog');" class="<?php echo $link_classes; ?> justify-between opacity-80 hover:opacity-100 border border-transparent hover:border-amber-500/30">
                 <div class="flex items-center gap-3">
-                    <i data-lucide="database" class="flex-shrink-0 text-amber-400"></i> 
+                    <i data-lucide="database" class="flex-shrink-0 text-amber-400"></i>
                     <span><?php echo isset($lang['system_medicines']) ? $lang['system_medicines'] : 'مخزون الأدوية'; ?></span>
                 </div>
                 <span class="bg-amber-500/20 text-amber-300 text-[9px] font-black px-2 py-0.5 rounded-full border border-amber-500/30 flex-shrink-0 uppercase tracking-widest">
@@ -95,7 +95,7 @@ if ($role_id == 1) {
             <!-- 🚀 التقارير الشاملة للمنصة (قريباً) -->
             <a href="#" onclick="event.preventDefault(); showComingSoon('admin_reports');" class="<?php echo $link_classes; ?> justify-between opacity-80 hover:opacity-100 border border-transparent hover:border-amber-500/30">
                 <div class="flex items-center gap-3">
-                    <i data-lucide="chart-line" class="flex-shrink-0 text-amber-400"></i> 
+                    <i data-lucide="chart-line" class="flex-shrink-0 text-amber-400"></i>
                     <span><?php echo isset($lang['reports']) ? $lang['reports'] : 'التقارير '; ?></span>
                 </div>
                 <span class="bg-amber-500/20 text-amber-300 text-[9px] font-black px-2 py-0.5 rounded-full border border-amber-500/30 flex-shrink-0 uppercase tracking-widest">
@@ -103,9 +103,9 @@ if ($role_id == 1) {
                 </span>
             </a>
 
-        <!-- ========================================== -->
-        <!-- روابط الصيدلي (Pharmacist Links) -->
-        <!-- ========================================== -->
+            <!-- ========================================== -->
+            <!-- روابط الصيدلي (Pharmacist Links) -->
+            <!-- ========================================== -->
         <?php elseif ($role_id == 2): ?>
 
             <a href="../pharmacist/dashboard.php" class="<?php echo ($current_page == 'dashboard.php') ? $active_classes : $link_classes; ?>">
@@ -123,18 +123,38 @@ if ($role_id == 1) {
             <!-- 🚀 ميزة المحادثات (قريباً) -->
             <a href="#" onclick="event.preventDefault(); showComingSoon('chat');" class="<?php echo $link_classes; ?> justify-between opacity-80 hover:opacity-100 border border-transparent hover:border-amber-500/30">
                 <div class="flex items-center gap-3">
-                    <i data-lucide="message-square" class="flex-shrink-0 text-amber-400"></i> 
+                    <i data-lucide="message-square" class="flex-shrink-0 text-amber-400"></i>
                     <span><?php echo isset($lang['chats']) ? $lang['chats'] : 'المحادثات'; ?></span>
                 </div>
                 <span class="bg-amber-500/20 text-amber-300 text-[9px] font-black px-2 py-0.5 rounded-full border border-amber-500/30 flex-shrink-0 uppercase tracking-widest">
                     <?php echo (isset($dir) && $dir == 'rtl') ? 'قريباً' : 'SOON'; ?>
                 </span>
             </a>
-             <!-- 🚀 التقارير الشاملة للصيدلية (قريباً) -->
+            <!-- 🚀 التقارير الشاملة للصيدلية (قريباً) -->
             <a href="#" onclick="event.preventDefault(); showComingSoon('pharmacist_reports');" class="<?php echo $link_classes; ?> justify-between opacity-80 hover:opacity-100 border border-transparent hover:border-amber-500/30">
                 <div class="flex items-center gap-3">
-                    <i data-lucide="chart-line" class="flex-shrink-0 text-amber-400"></i> 
+                    <i data-lucide="chart-line" class="flex-shrink-0 text-amber-400"></i>
                     <span><?php echo isset($lang['reports']) ? $lang['reports'] : 'التقارير '; ?></span>
+                </div>
+                <span class="bg-amber-500/20 text-amber-300 text-[9px] font-black px-2 py-0.5 rounded-full border border-amber-500/30 flex-shrink-0 uppercase tracking-widest">
+                    <?php echo (isset($dir) && $dir == 'rtl') ? 'قريباً' : 'SOON'; ?>
+                </span>
+            </a>
+            <!-- 🚀  المبيعات-->
+            <a href="#" onclick="event.preventDefault(); showComingSoon('sales');" class="<?php echo $link_classes; ?> justify-between opacity-80 hover:opacity-100 border border-transparent hover:border-amber-500/30">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="calculator" class="flex-shrink-0 text-amber-400"></i>
+                    <span><?php echo isset($lang['sales']) ? $lang['sales'] : 'المبيعات'; ?></span>
+                </div>
+                <span class="bg-amber-500/20 text-amber-300 text-[9px] font-black px-2 py-0.5 rounded-full border border-amber-500/30 flex-shrink-0 uppercase tracking-widest">
+                    <?php echo (isset($dir) && $dir == 'rtl') ? 'قريباً' : 'SOON'; ?>
+                </span>
+            </a>
+            <!-- 🚀 الموردين -->
+            <a href="#" onclick="event.preventDefault(); showComingSoon('suppliers');" class="<?php echo $link_classes; ?> justify-between opacity-80 hover:opacity-100 border border-transparent hover:border-amber-500/30">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="truck" class="flex-shrink-0 text-amber-400"></i>
+                    <span><?php echo isset($lang['suppliers']) ? $lang['suppliers'] : 'الموردين'; ?></span>
                 </div>
                 <span class="bg-amber-500/20 text-amber-300 text-[9px] font-black px-2 py-0.5 rounded-full border border-amber-500/30 flex-shrink-0 uppercase tracking-widest">
                     <?php echo (isset($dir) && $dir == 'rtl') ? 'قريباً' : 'SOON'; ?>
@@ -154,50 +174,58 @@ if ($role_id == 1) {
 
 <!-- سكربت رسائل (قريباً) الديناميكي -->
 <script>
-function showComingSoon(feature) {
-    const isRtl = document.documentElement.dir === 'rtl' || document.documentElement.lang === 'ar';
-    const titleText = isRtl ? 'قريباً جداً!' : 'Coming Soon!';
-    const btnText = isRtl ? 'حسناً' : 'OK';
+    function showComingSoon(feature) {
+        const isRtl = document.documentElement.dir === 'rtl' || document.documentElement.lang === 'ar';
+        const titleText = isRtl ? 'قريباً جداً!' : 'Coming Soon!';
+        const btnText = isRtl ? 'حسناً' : 'OK';
 
-    // 💡 تحديد لون الزر بناءً على دور المستخدم (أزرق للأدمن، أخضر للصيدلاني)
-    const isPharmacist = <?php echo ($role_id == 2) ? 'true' : 'false'; ?>;
-    const btnColor = isPharmacist ? '#0A7A48' : '#048AC1';
-    let bodyText = '';
+        // 💡 تحديد لون الزر بناءً على دور المستخدم (أزرق للأدمن، أخضر للصيدلاني)
+        const isPharmacist = <?php echo ($role_id == 2) ? 'true' : 'false'; ?>;
+        const btnColor = isPharmacist ? '#0A7A48' : '#048AC1';
+        let bodyText = '';
 
-    // تحديد الرسالة بناءً على الزر المضغوط
-    if (feature === 'admin_catalog') {
-        bodyText = isRtl 
-            ? 'جاري العمل على واجهة إدارة "الكتالوج الموحد" والتي ستمكنك من (إضافة، تعديل، إخفاء) الأدوية والتصنيفات المركزية للمنصة.' 
-            : 'The System Medicines Catalog management is under development.';
-    } else if (feature === 'admin_reports') {
-        bodyText = isRtl 
-            ? 'نعمل على تصميم لوحة "التقارير الشاملة" لتعرض لك إحصائيات المبيعات، نمو المنصة، والمنتجات الأكثر طلباً في رسوم بيانية تفاعلية.' 
-            : 'Global Reports and Analytics dashboard is under development.';
-    } else if (feature === 'chat') {
-        bodyText = isRtl 
-            ? 'ميزة المحادثات المباشرة قيد التطوير وسيتم إتاحتها قريباً لتسهيل تواصلك المباشر والآمن مع المرضى.' 
-            : 'The chat feature is under development and will be available soon to help you communicate with patients.';
-    } else if (feature === 'pharmacist_reports') {
-        bodyText = isRtl 
-            ? 'نعمل على تصميم لوحة "التقارير الشاملة" لتعرض لك إحصائيات المبيعات، نمو الصيدلية والمنتجات الأكثر طلباً في رسوم بيانية تفاعلية.' 
-            : 'Pharmacist Reports and Analytics dashboard is under development.';
-    } else {
-        bodyText = isRtl ? 'هذه الميزة قيد التطوير وسيتم إتاحتها قريباً.' : 'This feature is under development.';
+        // تحديد الرسالة بناءً على الزر المضغوط
+        if (feature === 'admin_catalog') {
+            bodyText = isRtl ?
+                'جاري العمل على واجهة إدارة "الكتالوج الموحد" والتي ستمكنك من (إضافة، تعديل، إخفاء) الأدوية والتصنيفات المركزية للمنصة.' :
+                'The System Medicines Catalog management is under development.';
+        } else if (feature === 'admin_reports') {
+            bodyText = isRtl ?
+                'نعمل على تصميم لوحة "التقارير الشاملة" لتعرض لك إحصائيات المبيعات، نمو المنصة، والمنتجات الأكثر طلباً في رسوم بيانية تفاعلية.' :
+                'Global Reports and Analytics dashboard is under development.';
+        } else if (feature === 'chat') {
+            bodyText = isRtl ?
+                'ميزة المحادثات المباشرة قيد التطوير وسيتم إتاحتها قريباً لتسهيل تواصلك المباشر والآمن مع المرضى.' :
+                'The chat feature is under development and will be available soon to help you communicate with patients.';
+        } else if (feature === 'pharmacist_reports') {
+            bodyText = isRtl ?
+                'نعمل على تصميم لوحة "التقارير الشاملة" لتعرض لك إحصائيات المبيعات، نمو الصيدلية والمنتجات الأكثر طلباً في رسوم بيانية تفاعلية.' :
+                'Pharmacist Reports and Analytics dashboard is under development.';
+        } else if (feature === 'sales') {
+            bodyText = isRtl ?
+                'ميزة إدارة المشتريات والمبيعات قيد التطوير وسيتم إتاحتها قريباً لتسهيل تتبع عمليات البيع والشراء في الصيدلية.' :
+                'The sales management feature is under development and will be available soon to help you track sales and purchases in your pharmacy.';
+        } else if (feature === 'suppliers') {
+            bodyText = isRtl ?
+                'ميزة إدارة الموردين قيد التطوير وسيتم إتاحتها قريباً لتسهيل تتبع معلومات الموردين والتعاملات معهم.' :
+                'The suppliers management feature is under development and will be available soon to help you track supplier information and interactions.';
+        } else {
+            bodyText = isRtl ? 'هذه الميزة قيد التطوير وسيتم إتاحتها قريباً.' : 'This feature is under development.';
+        }
+
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: 'info',
+                title: titleText,
+                text: bodyText,
+                confirmButtonColor: btnColor,
+                confirmButtonText: btnText,
+                background: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff',
+                color: document.documentElement.classList.contains('dark') ? '#f8fafc' : '#1f2937',
+                iconColor: '#F59E0B' // الأيقونة برتقالية دائماً للتنبيه
+            });
+        } else {
+            alert(bodyText);
+        }
     }
-
-    if (typeof Swal !== 'undefined') {
-        Swal.fire({
-            icon: 'info',
-            title: titleText,
-            text: bodyText,
-            confirmButtonColor: btnColor,
-            confirmButtonText: btnText,
-            background: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff',
-            color: document.documentElement.classList.contains('dark') ? '#f8fafc' : '#1f2937',
-            iconColor: '#F59E0B' // الأيقونة برتقالية دائماً للتنبيه
-        });
-    } else {
-        alert(bodyText);
-    }
-}
 </script>

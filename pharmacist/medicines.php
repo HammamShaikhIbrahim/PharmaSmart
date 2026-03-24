@@ -451,10 +451,10 @@ include('../includes/sidebar.php');
         </div>
 
         <!-- محتوى النافذة (مع زيادة الـ Padding Bottom لمنع التصاق العناصر) -->
-        <div class="p-6 pb-10 overflow-y-auto flex-1 custom-scrollbar relative">
+        <div class="p-6 pb-5 overflow-y-auto flex-1 custom-scrollbar relative">
 
             <!-- 1. قسم البحث -->
-            <div id="searchSection" class="mb-6 relative z-20 flex flex-col h-[400px]">
+            <div id="searchSection" class="mb-6 relative z-20 flex flex-col h-[480px]">
                 <div class="bg-white dark:bg-slate-800 p-6 rounded-t-2xl border border-gray-200 dark:border-slate-700 border-b-0 shadow-sm">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5 gap-3">
                         <label class="block text-sm font-bold text-gray-700 dark:text-gray-300">1. ابحث عن الدواء في الكتالوج الموحد:</label>
@@ -465,8 +465,12 @@ include('../includes/sidebar.php');
                     </div>
 
                     <div class="flex flex-col md:flex-row gap-5 relative">
+
+                        <!-- 1. قسم القائمة المنسدلة (التصنيفات) -->
                         <div class="w-full md:w-1/2 relative">
-                            <select id="systemSearchCategory" onchange="triggerSystemSearch()" class="w-full h-[50px] bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl px-4 text-sm font-bold text-gray-900 dark:text-white outline-none focus:border-[#0A7A48] focus:ring-2 focus:ring-[#0A7A48]/20 cursor-pointer transition-all">
+                            <select id="systemSearchCategory" onchange="triggerSystemSearch()"
+                                class="appearance-none w-full h-[50px] bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-bold text-gray-900 dark:text-white outline-none focus:border-[#0A7A48] focus:ring-2 focus:ring-[#0A7A48]/20 cursor-pointer transition-all rtl:pr-4 rtl:pl-11 ltr:pl-4 ltr:pr-11">
+
                                 <option value="0">جميع التصنيفات</option>
                                 <?php
                                 mysqli_data_seek($categories_query, 0);
@@ -475,11 +479,17 @@ include('../includes/sidebar.php');
                                 }
                                 ?>
                             </select>
+
+                            <!-- الأيقونة الجديدة: pointer-events-none عشان لما الماوس يكبس عليها، الكبسة تخترقها وتفتح القائمة -->
+                            <i data-lucide="chevron-down" id="categoryDropdownIcon"
+                                class="absolute top-0 bottom-0 my-auto w-5 h-5 text-gray-400 pointer-events-none transition-transform duration-300 rtl:left-4 ltr:right-4"></i>
                         </div>
+
+                        <!-- 2. قسم مربع البحث -->
                         <div class="w-full md:w-1/2 relative">
                             <input type="text" id="systemSearchInput" oninput="triggerSystemSearch()" placeholder="اكتب اسم الدواء التجاري أو العلمي..." autocomplete="off"
                                 class="w-full h-[50px] bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl px-4 rtl:pr-11 ltr:pl-11 text-sm font-bold text-gray-900 dark:text-white outline-none focus:border-[#0A7A48] focus:ring-2 focus:ring-[#0A7A48]/20 transition-all placeholder-gray-400">
-                            <i data-lucide="search" class="absolute top-0 bottom-0 my-auto <?php echo ($dir == 'rtl') ? 'right-4' : 'left-4'; ?> w-5 h-5 text-gray-400"></i>
+                            <i data-lucide="search" class="absolute top-0 bottom-0 my-auto <?php echo ($dir == 'rtl') ? 'right-4' : 'left-4'; ?> w-5 h-5 text-gray-400 pointer-events-none"></i>
                         </div>
                     </div>
                 </div>
@@ -496,7 +506,7 @@ include('../includes/sidebar.php');
             </div>
 
             <!-- 2. كرت الدواء المختار (بدون صورة) -->
-            <div id="selectedMedicineCard" class="hidden mb-6 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-6 rounded-2xl flex flex-col relative shadow-sm">
+            <div id="selectedMedicineCard" class="hidden mb-4 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-6 rounded-2xl flex flex-col relative shadow-sm">
                 <div class="flex items-center gap-2 mb-2">
                     <h3 id="selMedName" class="font-black text-gray-800 dark:text-white text-xl"></h3>
                     <span id="selMedRx" class="hidden bg-amber-100 text-amber-700 text-[10px] px-1.5 py-0.5 rounded-full uppercase font-black border border-amber-200 dark:bg-amber-900/40 dark:border-amber-800 dark:text-amber-400 tracking-widest shadow-sm">Rx</span>
@@ -508,7 +518,7 @@ include('../includes/sidebar.php');
             </div>
 
             <!-- 3. فورم إدخال بيانات المخزون -->
-            <form id="stockForm" method="POST" class="hidden flex flex-col gap-6">
+            <form id="stockForm" method="POST" class="hidden flex flex-col gap-2">
                 <input type="hidden" name="stock_id" id="stock_id" value="">
                 <input type="hidden" name="system_med_id" id="system_med_id" value="">
 
@@ -709,7 +719,7 @@ include('../includes/sidebar.php');
                     });
                 } else {
                     resultsBox.innerHTML = `
-                        <li class="p-8 text-center flex flex-col items-center bg-gray-50/50 dark:bg-slate-800/30 rounded-xl m-2 border border-dashed border-gray-200 dark:border-slate-700 transition-all">
+                        <li class="p-8 mt-6 text-center flex flex-col items-center bg-gray-50/50 dark:bg-slate-800/30 rounded-xl m-2 border border-dashed border-gray-200 dark:border-slate-700 transition-all">
                             <div class="relative w-20 h-20 mb-5">
                                 <div class="absolute inset-0 bg-[#0A7A48] rounded-full opacity-20 animate-ping"></div>
                                 <div class="relative flex items-center justify-center w-full h-full bg-[#E6F7ED] dark:bg-[#044E29]/40 rounded-full shadow-inner border border-[#0A7A48]/10 dark:border-[#4ADE80]/10">
