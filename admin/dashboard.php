@@ -30,15 +30,14 @@ $pendingPharma = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as c FR
 // جلب عدد "المرضى" المسجلين في النظام (RoleID=3)
 $patientsCount = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as c FROM User WHERE RoleID=3"))['c'];
 
-
 // ==========================================
 // 3. جلب بيانات الصيدليات لعرضها على الخريطة
 // ==========================================
 
 // 💡 تعديل الاستعلام: بنجيب كل الصيدليات (المفعلة والمعلقة) اللي عندها إحداثيات (Latitude مش فاضي)
 // عشان نرسمهم على الخريطة، وبعدين بنفلترهم بالجافاسكربت (أخضر للمفعل، أصفر للمعلق)
-$query = "SELECT u.Fname, u.Lname, u.Phone, p.PharmacyName, p.Location, p.WorkingHours, p.LicenseNumber, p.Latitude, p.Longitude, p.IsApproved 
-          FROM Pharmacist p JOIN User u ON p.PharmacistID = u.UserID 
+$query = "SELECT u.Fname, u.Lname, u.Phone, p.PharmacyName, p.Location, p.WorkingHours, p.LicenseNumber, p.Latitude, p.Longitude, p.IsApproved
+          FROM Pharmacist p JOIN User u ON p.PharmacistID = u.UserID
           WHERE p.Latitude IS NOT NULL";
 $result = mysqli_query($conn, $query);
 
@@ -179,7 +178,7 @@ html[dir="rtl"] #filter-pending:checked ~ .glass-glider {
 </style>
 
 <!-- ==========================================
-     بداية محتوى الصفحة الفعلي (Main Content)
+   بداية محتوى الصفحة الفعلي (Main Content)
 =========================================== -->
 <main class="flex-1 p-8 bg-blue-50 dark:bg-slate-900 h-full overflow-y-auto transition-colors duration-300">
 

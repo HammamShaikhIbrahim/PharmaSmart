@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_stock'])) {
     } else {
         $check = mysqli_query($conn, "SELECT StockID FROM PharmacyStock WHERE PharmacistID=$pharmacist_id AND SystemMedID=$system_med_id");
         if (mysqli_num_rows($check) > 0) {
-            $error = "هذا الدواء موجود مسبقاً في مخزونك! يمكنك تعديل كميته بدلاً من إضافته مرة أخرى.";
+            $error = $lang['med_exists_error'];
         } else {
             $sql = "INSERT INTO PharmacyStock (SystemMedID, PharmacistID, Price, CostPrice, Stock, MinimumStock, ExpiryDate, ExpiryAlertMonths)
                     VALUES ($system_med_id, $pharmacist_id, $price, $cost, $stock, $min_stock, '$expiry', $expiry_alert_months)";
@@ -109,7 +109,7 @@ if (isset($_GET['search_system_med'])) {
     ";
 
     $sys_res = mysqli_query($conn, $sys_query);
-    $results = [];
+    $results =[];
     while ($row = mysqli_fetch_assoc($sys_res)) {
         $results[] = $row;
     }
@@ -187,7 +187,7 @@ if (isset($_GET['ajax_table'])) {
                 </td>
                 <td class="p-4 text-gray-500 dark:text-gray-400 font-medium">
                     <span class="bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400 border border-blue-200 dark:border-blue-800 px-2.5 py-1 rounded-full text-xs font-bold">
-                        <?php echo htmlspecialchars($med['CategoryName'] ?? 'غير مصنف'); ?>
+                        <?php echo htmlspecialchars($med['CategoryName'] ?? $lang['uncategorized']); ?>
                     </span>
                 </td>
                 <td class="p-4 text-center">
@@ -197,8 +197,8 @@ if (isset($_GET['ajax_table'])) {
                         <span class="bg-[#E6F7ED] text-[#0A7A48] dark:bg-[#044E29]/50 dark:text-[#4ADE80] px-3 py-1.5 rounded-full font-black text-sm inline-block min-w-[40px] shadow-sm border border-transparent dark:border-[#0A7A48]/30"><?php echo $med['Stock']; ?></span>
                     <?php endif; ?>
                 </td>
-                <td class="p-4 font-black text-gray-800 dark:text-white text-[15px]"><span dir="ltr"><?php echo $med['Price']; ?> ₪</span></td>
-                <td class="p-4 text-gray-500 dark:text-gray-400 font-bold"><span dir="ltr"><?php echo $med['CostPrice']; ?> ₪</span></td>
+                <td class="p-4 font-black text-gray-800 dark:text-white text-[15px]"><span dir="ltr"><?php echo $med['Price']; ?> <?php echo $lang['currency']; ?></span></td>
+                <td class="p-4 text-gray-500 dark:text-gray-400 font-bold"><span dir="ltr"><?php echo $med['CostPrice']; ?> <?php echo $lang['currency']; ?></span></td>
                 <td class="p-4 font-black <?php echo $margin > 20 ? 'text-emerald-500' : ($margin > 0 ? 'text-amber-500' : 'text-rose-500'); ?>" dir="ltr"><?php echo $margin; ?>%</td>
                 <td class="p-4 font-medium" dir="ltr">
                     <span class="border <?php echo $expiry_class; ?> px-3 py-1.5 rounded-full text-xs font-bold inline-block shadow-sm">
@@ -207,10 +207,10 @@ if (isset($_GET['ajax_table'])) {
                 </td>
                 <td class="p-4 text-center">
                     <div class="flex items-center justify-center gap-1">
-                        <button id="edit-btn-<?php echo $med['StockID']; ?>" onclick='editModal(<?php echo $med_json; ?>)' class="edit-button text-[#0A7A48] dark:text-[#4ADE80]" title="تعديل السعر/الكمية">
+                        <button id="edit-btn-<?php echo $med['StockID']; ?>" onclick='editModal(<?php echo $med_json; ?>)' class="edit-button text-[#0A7A48] dark:text-[#4ADE80]" title="<?php echo $lang['edit_price_qty']; ?>">
                             <i data-lucide="edit-3" class="w-4 h-4"></i>
                         </button>
-                        <button onclick="confirmDelete(<?php echo $med['StockID']; ?>)" class="bin-button text-rose-500" title="إزالة من المخزون">
+                        <button onclick="confirmDelete(<?php echo $med['StockID']; ?>)" class="bin-button text-rose-500" title="<?php echo $lang['remove_from_stock']; ?>">
                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                         </button>
                     </div>
@@ -229,8 +229,8 @@ if (isset($_GET['ajax_table'])) {
                             <i data-lucide="package-x" class="w-10 h-10 text-[#0A7A48] dark:text-[#4ADE80]"></i>
                         </div>
                     </div>
-                    <h3 class="text-lg font-black text-gray-800 dark:text-white mb-2">لا يوجد أدوية مطابقة في مخزونك</h3>
-                    <p class="text-sm font-bold text-gray-500 dark:text-gray-400">جرب كتابة اسم مختلف أو قم بإضافة دواء جديد لمخزونك.</p>
+                    <h3 class="text-lg font-black text-gray-800 dark:text-white mb-2"><?php echo $lang['no_matching_meds']; ?></h3>
+                    <p class="text-sm font-bold text-gray-500 dark:text-gray-400"><?php echo $lang['try_different_search_add']; ?></p>
                 </div>
             </td>
         </tr>
@@ -262,21 +262,10 @@ include('../includes/sidebar.php');
         transition: all 0.3s ease;
     }
 
-    .edit-button:hover {
-        background-color: rgba(10, 122, 72, 0.1);
-    }
-
-    .dark .edit-button:hover {
-        background-color: rgba(74, 222, 128, 0.2);
-    }
-
-    .bin-button:hover {
-        background-color: rgba(225, 29, 72, 0.1);
-    }
-
-    .dark .bin-button:hover {
-        background-color: rgba(225, 29, 72, 0.3);
-    }
+    .edit-button:hover { background-color: rgba(10, 122, 72, 0.1); }
+    .dark .edit-button:hover { background-color: rgba(74, 222, 128, 0.2); }
+    .bin-button:hover { background-color: rgba(225, 29, 72, 0.1); }
+    .dark .bin-button:hover { background-color: rgba(225, 29, 72, 0.3); }
 
     input[type="number"]::-webkit-inner-spin-button,
     input[type="number"]::-webkit-outer-spin-button {
@@ -284,14 +273,8 @@ include('../includes/sidebar.php');
         margin: 0;
     }
 
-    .search-dropdown {
-        overflow-y: auto;
-    }
-
-    .search-dropdown::-webkit-scrollbar {
-        width: 6px;
-    }
-
+    .search-dropdown { overflow-y: auto; }
+    .search-dropdown::-webkit-scrollbar { width: 6px; }
     .search-dropdown::-webkit-scrollbar-thumb {
         background-color: rgba(10, 122, 72, 0.3);
         border-radius: 10px;
@@ -314,7 +297,6 @@ include('../includes/sidebar.php');
         gap: 8px;
         box-shadow: 0 4px 15px rgba(10, 122, 72, 0.2);
     }
-
     .btn-uiverse-add::before {
         content: '';
         position: absolute;
@@ -328,19 +310,12 @@ include('../includes/sidebar.php');
         background-color: #044E29;
         transition: all 0.6s cubic-bezier(0.23, 1, 0.320, 1);
     }
-
-    .btn-uiverse-add:hover::before {
-        scale: 5;
-    }
-
+    .btn-uiverse-add:hover::before { scale: 5; }
     .btn-uiverse-add:hover {
         box-shadow: 0 6px 20px rgba(10, 122, 72, 0.4);
         transform: translateY(-2px);
     }
-
-    .btn-uiverse-add:active {
-        scale: 0.95;
-    }
+    .btn-uiverse-add:active { scale: 0.95; }
 
     /* ====== زر مسح الباركود (في المودال) ====== */
     .btn-uiverse-custom {
@@ -360,17 +335,14 @@ include('../includes/sidebar.php');
         overflow: hidden;
         z-index: 1;
     }
-
     .dark .btn-uiverse-custom {
         background: rgba(74, 222, 128, 0.1);
         color: #4ADE80;
     }
-
     .btn-uiverse-custom:hover {
         background: #0A7A48;
         color: white;
     }
-
     .dark .btn-uiverse-custom:hover {
         background: #4ADE80;
         color: #0f172a;
@@ -394,19 +366,20 @@ include('../includes/sidebar.php');
 
         <div class="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
             <div class="w-full md:w-96 relative group">
-                <input type="text" id="searchInput" oninput="fetchTableData()" placeholder="ابحث في مخزونك (اسم، باركود)..."
+                <input type="text" id="searchInput" oninput="fetchTableData()" placeholder="<?php echo $lang['search_inventory_placeholder']; ?>"
                     class="w-full p-3 rounded-2xl border border-gray-200 dark:bg-slate-800 dark:border-slate-700 dark:text-white shadow-sm focus:ring-2 focus:ring-[#0A7A48] focus:border-[#0A7A48] outline-none transition-all text-sm">
                 <i data-lucide="search" class="top-3.5 text-gray-400 group-focus-within:text-[#0A7A48] transition-colors <?php echo ($dir == 'rtl') ? 'absolute left-3' : 'absolute right-3'; ?> w-5 h-5"></i>
             </div>
 
             <!-- الزر الأصلي المذهل لإضافة دواء -->
-            <button onclick="openModal()" class="w-full md:w-auto group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-2xl bg-[#0A7A48] px-6 py-3 font-bold text-white shadow-lg shadow-green-900/20 transition-all duration-300 hover:scale-[1.02] active:scale-95 border border-transparent hover:border-green-400/30">
+            <button onclick="openModal()" class="w-full md:w-auto group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-2xl bg-[#0A7A48] px-6 py-3 font-bold text-white shadow-lg shadow-green-900/20 transition-all duration-300 hover:scale-[1.02] active:scale-95 border border-transparent hover:border-green-400/30" fdprocessedid="3tgygd">
                 <div class="absolute inset-0 flex h-full w-full justify-center [transform:skew(-12deg)_translateX(-150%)] group-hover:duration-1000 group-hover:[transform:skew(-12deg)_translateX(150%)]">
                     <div class="relative h-full w-10 bg-white/20"></div>
                 </div>
-                <i data-lucide="plus-circle" class="relative z-10 w-5 h-5"></i>
-                <span class="relative z-10 text-sm">إضافة دواء للمخزون</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="plus-circle" aria-hidden="true" class="lucide lucide-plus-circle relative z-10 w-5 h-5"><circle cx="12" cy="12" r="10"></circle><path d="M8 12h8"></path><path d="M12 8v8"></path></svg>
+                <span class="relative z-10 text-sm"><?php echo $lang['add_med_to_stock']; ?></span>
             </button>
+
         </div>
     </div>
 
@@ -418,9 +391,9 @@ include('../includes/sidebar.php');
                         <th class="p-4 font-bold"><?php echo $lang['product']; ?></th>
                         <th class="p-4 font-bold"><?php echo $lang['category']; ?></th>
                         <th class="p-4 font-bold text-center"><?php echo $lang['stock']; ?></th>
-                        <th class="p-4 font-bold">سعر البيع</th>
-                        <th class="p-4 font-bold">التكلفة</th>
-                        <th class="p-4 font-bold">الربح</th>
+                        <th class="p-4 font-bold"><?php echo $lang['price']; ?></th>
+                        <th class="p-4 font-bold"><?php echo $lang['cost']; ?></th>
+                        <th class="p-4 font-bold"><?php echo $lang['margin']; ?></th>
                         <th class="p-4 font-bold"><?php echo $lang['expiry']; ?></th>
                         <th class="p-4 font-bold text-center"><?php echo $lang['actions']; ?></th>
                     </tr>
@@ -443,35 +416,33 @@ include('../includes/sidebar.php');
                 <div class="p-2 text-[#0A7A48] dark:text-[#4ADE80]">
                     <i data-lucide="briefcase-medical" class="w-5 h-5"></i>
                 </div>
-                <span id="modalTitleText">إضافة دواء للمخزون</span>
+                <span id="modalTitleText"><?php echo $lang['add_med_to_stock']; ?></span>
             </h2>
             <button onclick="closeModal()" class="text-gray-400 hover:text-rose-500 bg-white dark:bg-slate-800 shadow-sm border border-gray-200 dark:border-slate-600 p-1.5 rounded-full transition">
                 <i data-lucide="x" class="w-4 h-4"></i>
             </button>
         </div>
 
-        <!-- محتوى النافذة (مع زيادة الـ Padding Bottom لمنع التصاق العناصر) -->
+        <!-- محتوى النافذة -->
         <div class="p-6 pb-5 overflow-y-auto flex-1 custom-scrollbar relative">
 
             <!-- 1. قسم البحث -->
             <div id="searchSection" class="mb-6 relative z-20 flex flex-col h-[480px]">
                 <div class="bg-white dark:bg-slate-800 p-6 rounded-t-2xl border border-gray-200 dark:border-slate-700 border-b-0 shadow-sm">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5 gap-3">
-                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300">1. ابحث عن الدواء في الكتالوج الموحد:</label>
-                        <!-- 💡 الزر الجديد لاستدعاء التنبيه -->
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300"><?php echo $lang['search_in_catalog']; ?></label>
                         <button type="button" onclick="showBarcodeComingSoon()" class="btn-uiverse-custom">
-                            <i data-lucide="scan-barcode" class="w-4 h-4"></i> مسح باركود / إضافة يدوية
+                            <i data-lucide="scan-barcode" class="w-4 h-4"></i> <?php echo $lang['scan_barcode_manual']; ?>
                         </button>
                     </div>
 
                     <div class="flex flex-col md:flex-row gap-5 relative">
-
                         <!-- 1. قسم القائمة المنسدلة (التصنيفات) -->
                         <div class="w-full md:w-1/2 relative">
                             <select id="systemSearchCategory" onchange="triggerSystemSearch()"
                                 class="appearance-none w-full h-[50px] bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-bold text-gray-900 dark:text-white outline-none focus:border-[#0A7A48] focus:ring-2 focus:ring-[#0A7A48]/20 cursor-pointer transition-all rtl:pr-4 rtl:pl-11 ltr:pl-4 ltr:pr-11">
 
-                                <option value="0">جميع التصنيفات</option>
+                                <option value="0"><?php echo $lang['all_categories']; ?></option>
                                 <?php
                                 mysqli_data_seek($categories_query, 0);
                                 while ($cat = mysqli_fetch_assoc($categories_query)) {
@@ -479,15 +450,13 @@ include('../includes/sidebar.php');
                                 }
                                 ?>
                             </select>
-
-                            <!-- الأيقونة الجديدة: pointer-events-none عشان لما الماوس يكبس عليها، الكبسة تخترقها وتفتح القائمة -->
                             <i data-lucide="chevron-down" id="categoryDropdownIcon"
                                 class="absolute top-0 bottom-0 my-auto w-5 h-5 text-gray-400 pointer-events-none transition-transform duration-300 rtl:left-4 ltr:right-4"></i>
                         </div>
 
                         <!-- 2. قسم مربع البحث -->
                         <div class="w-full md:w-1/2 relative">
-                            <input type="text" id="systemSearchInput" oninput="triggerSystemSearch()" placeholder="اكتب اسم الدواء التجاري أو العلمي..." autocomplete="off"
+                            <input type="text" id="systemSearchInput" oninput="triggerSystemSearch()" placeholder="<?php echo $lang['search_med_name_scientific']; ?>" autocomplete="off"
                                 class="w-full h-[50px] bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl px-4 rtl:pr-11 ltr:pl-11 text-sm font-bold text-gray-900 dark:text-white outline-none focus:border-[#0A7A48] focus:ring-2 focus:ring-[#0A7A48]/20 transition-all placeholder-gray-400">
                             <i data-lucide="search" class="absolute top-0 bottom-0 my-auto <?php echo ($dir == 'rtl') ? 'right-4' : 'left-4'; ?> w-5 h-5 text-gray-400 pointer-events-none"></i>
                         </div>
@@ -497,7 +466,7 @@ include('../includes/sidebar.php');
                 <!-- قائمة النتائج (بدون صور) -->
                 <div class="flex-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-b-2xl overflow-hidden flex flex-col relative shadow-sm">
                     <div class="px-5 py-3 bg-gray-50/80 dark:bg-slate-900/50 border-b border-gray-100 dark:border-slate-700">
-                        <span id="resultsTitle" class="text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider">الأدوية المقترحة لك:</span>
+                        <span id="resultsTitle" class="text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider"><?php echo $lang['suggested_meds']; ?></span>
                     </div>
                     <ul id="systemSearchResults" class="flex-1 overflow-y-auto search-dropdown p-2 divide-y divide-gray-50 dark:divide-slate-700/50">
                         <!-- تعبأ بـ AJAX -->
@@ -524,7 +493,7 @@ include('../includes/sidebar.php');
 
                 <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-200 dark:border-slate-700 shadow-sm">
                     <h3 class="text-xs font-black text-gray-400 dark:text-gray-500 mb-6 uppercase tracking-wider flex items-center gap-2">
-                        <i data-lucide="settings-2" class="w-4 h-4"></i> إعدادات المخزون والسعر والتنبيهات
+                        <i data-lucide="settings-2" class="w-4 h-4"></i> <?php echo $lang['stock_price_alerts_settings']; ?>
                     </h3>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -532,39 +501,39 @@ include('../includes/sidebar.php');
                         <!-- حقل التكلفة (مغلق ومحمي) -->
                         <div>
                             <div class="flex justify-between items-end mb-2">
-                                <label id="costLabel" class="block text-xs font-bold text-gray-600 dark:text-gray-400">سعر التكلفة (₪)</label>
-                                <span id="dynamicMargin" class="text-[10px] font-black text-gray-400 transition-colors">الربح: 0%</span>
+                                <label id="costLabel" class="block text-xs font-bold text-gray-600 dark:text-gray-400"><?php echo $lang['cost_price_ils']; ?></label>
+                                <span id="dynamicMargin" class="text-[10px] font-black text-gray-400 transition-colors"><?php echo $lang['profit_0']; ?></span>
                             </div>
-                            <input type="number" step="0.01" name="cost" id="cost" readonly class="w-full h-[50px] bg-gray-100 dark:bg-slate-900/80 border border-gray-200 dark:border-slate-700 rounded-xl px-4 text-sm outline-none text-gray-500 font-bold cursor-not-allowed opacity-80 shadow-inner" dir="ltr" title="سعر التكلفة محدد من الإدارة">
+                            <input type="number" step="0.01" name="cost" id="cost" readonly class="w-full h-[50px] bg-gray-100 dark:bg-slate-900/80 border border-gray-200 dark:border-slate-700 rounded-xl px-4 text-sm outline-none text-gray-500 font-bold cursor-not-allowed opacity-80 shadow-inner" dir="ltr" title="<?php echo $lang['cost_determined_admin']; ?>">
                         </div>
 
                         <!-- حقل سعر البيع -->
                         <div>
-                            <label class="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-2">سعر البيع للجمهور (₪)</label>
+                            <label class="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-2"><?php echo $lang['sell_price_public']; ?></label>
                             <input type="number" min="0.01" step="0.01" name="price" id="price" required class="w-full h-[50px] bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl px-4 text-sm outline-none focus:border-[#0A7A48] focus:ring-2 focus:ring-[#0A7A48]/20 dark:text-white font-black text-[#0A7A48] dark:text-[#4ADE80] transition-all" dir="ltr">
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-2">الكمية الحالية المتوفرة</label>
+                            <label class="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-2"><?php echo $lang['current_qty']; ?></label>
                             <input type="number" min="0" step="1" name="stock" id="stock" required class="w-full h-[50px] bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl px-4 text-sm outline-none focus:border-[#0A7A48] focus:ring-2 focus:ring-[#0A7A48]/20 dark:text-white font-black text-center transition-all" dir="ltr">
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-2">حد التنبيه بنقص المخزون</label>
+                            <label class="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-2"><?php echo $lang['low_stock_alert_limit']; ?></label>
                             <input type="number" min="0" step="1" name="min_stock" id="min_stock" value="10" required class="w-full h-[50px] bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-slate-700 rounded-xl px-4 text-sm outline-none focus:border-[#0A7A48] focus:ring-2 focus:ring-[#0A7A48]/20 dark:text-white font-bold text-gray-500 text-center transition-all" dir="ltr">
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-2">تاريخ انتهاء الصلاحية</label>
+                            <label class="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-2"><?php echo $lang['expiry_date_label']; ?></label>
                             <input type="date" name="expiry" id="expiry" required class="w-full h-[50px] bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl px-4 text-sm outline-none focus:border-[#0A7A48] focus:ring-2 focus:ring-[#0A7A48]/20 dark:text-white dark:[color-scheme:dark] font-bold transition-all" dir="ltr">
                         </div>
 
                         <!-- التنبيه للصلاحية -->
                         <div>
-                            <label class="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-2">تنبيه الصلاحية قبل (بالأشهر)</label>
+                            <label class="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-2"><?php echo $lang['expiry_alert_months_label']; ?></label>
                             <div class="relative group">
                                 <input type="number" min="1" step="1" name="expiry_alert_months" id="expiry_alert_months" value="1" required class="w-full h-[50px] bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-slate-700 rounded-xl px-4 text-sm outline-none focus:border-[#0A7A48] focus:ring-2 focus:ring-[#0A7A48]/20 dark:text-white font-bold text-center transition-all" dir="ltr">
-                                <span class="absolute left-4 top-4 text-xs text-gray-400 font-bold pointer-events-none group-focus-within:text-[#0A7A48] dark:group-focus-within:text-[#4ADE80] transition-colors">أشهر</span>
+                                <span class="absolute left-4 top-4 text-xs text-gray-400 font-bold pointer-events-none group-focus-within:text-[#0A7A48] dark:group-focus-within:text-[#4ADE80] transition-colors"><?php echo $lang['months']; ?></span>
                             </div>
                         </div>
                     </div>
@@ -573,16 +542,16 @@ include('../includes/sidebar.php');
                 <!-- الأزرار السفلية -->
                 <div class="mt-4 pt-5 border-t border-gray-200 dark:border-slate-700 flex flex-col-reverse md:flex-row justify-between items-center gap-4">
                     <button type="button" onclick="closeModal()" class="w-full md:w-auto px-6 py-3 rounded-xl border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 font-bold hover:bg-gray-50 dark:hover:bg-slate-800 transition text-sm bg-transparent">
-                        إغلاق النافذة
+                        <?php echo $lang['close_window']; ?>
                     </button>
 
                     <div class="flex w-full md:w-auto gap-3">
                         <button type="button" id="backToSearchBtn" onclick="resetSearch()" class="w-full md:w-auto px-5 py-3 rounded-xl bg-white text-blue-600 dark:bg-slate-800 dark:text-blue-400 font-bold hover:bg-blue-50 dark:hover:bg-slate-700 transition text-sm flex items-center justify-center gap-2 border border-gray-200 dark:border-slate-700 shadow-sm">
-                            <i data-lucide="arrow-right" class="w-4 h-4"></i> عودة للبحث
+                            <i data-lucide="arrow-right" class="w-4 h-4"></i> <?php echo $lang['back_to_search']; ?>
                         </button>
 
                         <button type="submit" name="save_stock" class="w-full md:w-auto bg-[#0A7A48] hover:bg-[#044E29] text-white px-8 py-3 rounded-xl font-bold transition-all shadow-lg shadow-green-900/30 text-sm flex items-center justify-center gap-2 border border-transparent">
-                            <i data-lucide="save" class="w-4 h-4"></i> حفظ في المخزون
+                            <i data-lucide="save" class="w-4 h-4"></i> <?php echo $lang['save_to_stock']; ?>
                         </button>
                     </div>
                 </div>
@@ -592,24 +561,38 @@ include('../includes/sidebar.php');
 </div>
 
 <script>
+    // JS Translations Constants
+    const txtComingSoonTitle = "<?php echo isset($lang['coming_soon_title']) ? $lang['coming_soon_title'] : 'قريباً جداً!'; ?>";
+    const txtOkBtn = "<?php echo isset($lang['ok_btn']) ? $lang['ok_btn'] : 'حسناً'; ?>";
+    const txtBarcodeFeatureSoon = "<?php echo isset($lang['barcode_feature_soon']) ? $lang['barcode_feature_soon'] : 'ميزة مسح الباركود...'; ?>";
+    const txtLatestAddedMeds = "<?php echo isset($lang['latest_added_meds']) ? $lang['latest_added_meds'] : 'أحدث الأدوية المضافة للكتالوج:'; ?>";
+    const txtCustomSearchResults = "<?php echo isset($lang['custom_search_results']) ? $lang['custom_search_results'] : 'نتائج البحث المخصصة:'; ?>";
+    const txtUncategorized = "<?php echo isset($lang['uncategorized']) ? $lang['uncategorized'] : 'غير مصنف'; ?>";
+    const txtCostPriceVal = "<?php echo isset($lang['cost_price_val']) ? $lang['cost_price_val'] : 'التكلفة: '; ?>";
+    const txtCurrency = "<?php echo isset($lang['currency']) ? $lang['currency'] : '₪'; ?>";
+    const txtNoMatchingMedsCatalog = "<?php echo isset($lang['no_matching_meds_catalog']) ? $lang['no_matching_meds_catalog'] : 'لم يتم العثور على أدوية مطابقة.'; ?>";
+    const txtCheckNameManualSoon = "<?php echo isset($lang['check_name_manual_soon']) ? $lang['check_name_manual_soon'] : 'تأكد من الاسم، الميزة اليدوية ستتوفر قريباً.'; ?>";
+    const txtAddNewMedToStock = "<?php echo isset($lang['add_new_med_to_stock']) ? $lang['add_new_med_to_stock'] : 'إضافة دواء جديد للمخزون'; ?>";
+    const txtProfit0 = "<?php echo isset($lang['profit_0']) ? $lang['profit_0'] : 'الربح: 0%'; ?>";
+    const txtProfit = "<?php echo isset($lang['profit']) ? $lang['profit'] : 'الربح: '; ?>";
+    const txtLoss = "<?php echo isset($lang['loss']) ? $lang['loss'] : 'خسارة!'; ?>";
+    const txtEditStockData = "<?php echo isset($lang['edit_stock_data']) ? $lang['edit_stock_data'] : 'تعديل بيانات المخزون'; ?>";
+    const txtRemoveMedTitle = "<?php echo isset($lang['remove_med_title']) ? $lang['remove_med_title'] : 'إزالة الدواء من المخزون؟'; ?>";
+    const txtRemoveMedText = "<?php echo isset($lang['remove_med_text']) ? $lang['remove_med_text'] : 'لن تتمكن من التراجع عن هذا...'; ?>";
+    const txtYesRemove = "<?php echo isset($lang['yes_remove']) ? $lang['yes_remove'] : 'نعم، إزالة'; ?>";
+    const txtCancel = "<?php echo isset($lang['cancel']) ? $lang['cancel'] : 'إلغاء'; ?>";
+
     let fetchTimeoutId;
     let searchSysTimeoutId;
 
     // 💡 الدالة الجديدة للتنبيه
     function showBarcodeComingSoon() {
-        const isRtl = document.documentElement.dir === 'rtl' || document.documentElement.lang === 'ar';
-        const titleText = isRtl ? 'قريباً جداً!' : 'Coming Soon!';
-        const btnText = isRtl ? 'حسناً' : 'OK';
-        const bodyText = isRtl ?
-            'ميزة "مسح الباركود والإضافة اليدوية" قيد التطوير حالياً. سيتم إتاحتها قريباً لتسهيل إضافة الأدوية غير الموجودة في الكتالوج باستخدام كاميرا الجهاز.' :
-            'The "Barcode Scan & Custom Add" feature is under development and will be available soon.';
-
         Swal.fire({
             icon: 'info',
-            title: titleText,
-            text: bodyText,
+            title: txtComingSoonTitle,
+            text: txtBarcodeFeatureSoon,
             confirmButtonColor: '#0A7A48', // لون الصيدلاني
-            confirmButtonText: btnText,
+            confirmButtonText: txtOkBtn,
             background: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff',
             color: document.documentElement.classList.contains('dark') ? '#f8fafc' : '#1f2937',
             iconColor: '#F59E0B' // لون برتقالي للتنبيه
@@ -674,9 +657,9 @@ include('../includes/sidebar.php');
         const resultsTitle = document.getElementById('resultsTitle');
 
         if (query.length === 0 && catId == 0) {
-            resultsTitle.innerText = "أحدث الأدوية المضافة للكتالوج:";
+            resultsTitle.innerText = txtLatestAddedMeds;
         } else {
-            resultsTitle.innerText = "نتائج البحث المخصصة:";
+            resultsTitle.innerText = txtCustomSearchResults;
         }
 
         clearTimeout(searchSysTimeoutId);
@@ -695,7 +678,7 @@ include('../includes/sidebar.php');
                             name: med.Name,
                             scientific: med.ScientificName || '',
                             rx: med.IsControlled,
-                            cat: med.CategoryName || 'غير مصنف',
+                            cat: med.CategoryName || txtUncategorized,
                             fixed_cost: med.FixedCostPrice
                         }).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
 
@@ -709,11 +692,11 @@ include('../includes/sidebar.php');
                                         </div>
                                         <div class="flex items-center gap-3">
                                             <span class="text-xs text-gray-500 font-bold">${med.ScientificName || ''}</span>
-                                            <span class="bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-gray-300 text-[10px] px-2 py-0.5 rounded-full border border-gray-200 dark:border-slate-600 font-bold group-hover:bg-blue-100 group-hover:text-blue-700 group-hover:dark:bg-blue-900/40 group-hover:dark:text-blue-400 group-hover:border border-blue-200 group-hover:dark:border-blue-800 px-2.5 py-1 rounded-full text-xs font-bold transition-colors">${med.CategoryName || 'غير مصنف'}</span>
+                                            <span class="bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-gray-300 text-[10px] px-2 py-0.5 rounded-full border border-gray-200 dark:border-slate-600 font-bold group-hover:bg-blue-100 group-hover:text-blue-700 group-hover:dark:bg-blue-900/40 group-hover:dark:text-blue-400 group-hover:border border-blue-200 group-hover:dark:border-blue-800 px-2.5 py-1 rounded-full text-xs font-bold transition-colors">${med.CategoryName || txtUncategorized}</span>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-gray-300 text-[10px] px-2 py-0.5 rounded-full border border-gray-200 dark:border-slate-600 font-bold group-hover:bg-green-100 group-hover:text-green-700 group-hover:dark:bg-green-900/40 group-hover:dark:text-green-400 group-hover:border border-green-200 group-hover:dark:border-green-800 px-2.5 py-1 rounded-full text-xs font-bold transition-colors" dir="ltr">التكلفة: ${med.FixedCostPrice} ₪</div>
+                                <div class="bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-gray-300 text-[10px] px-2 py-0.5 rounded-full border border-gray-200 dark:border-slate-600 font-bold group-hover:bg-green-100 group-hover:text-green-700 group-hover:dark:bg-green-900/40 group-hover:dark:text-green-400 group-hover:border border-green-200 group-hover:dark:border-green-800 px-2.5 py-1 rounded-full text-xs font-bold transition-colors" dir="ltr">${txtCostPriceVal} ${med.FixedCostPrice} ${txtCurrency}</div>
                             </li>
                         `;
                     });
@@ -726,8 +709,8 @@ include('../includes/sidebar.php');
                                     <i data-lucide="package-search" class="w-8 h-8 text-[#0A7A48] dark:text-[#4ADE80]"></i>
                                 </div>
                             </div>
-                            <span class="text-sm font-black text-gray-700 dark:text-gray-300 mb-1.5">لم يتم العثور على أدوية مطابقة.</span>
-                            <span class="text-xs font-bold text-gray-400">تأكد من الاسم، الميزة اليدوية ستتوفر قريباً.</span>
+                            <span class="text-sm font-black text-gray-700 dark:text-gray-300 mb-1.5">${txtNoMatchingMedsCatalog}</span>
+                            <span class="text-xs font-bold text-gray-400">${txtCheckNameManualSoon}</span>
                         </li>
                     `;
                     lucide.createIcons();
@@ -742,7 +725,7 @@ include('../includes/sidebar.php');
     const modal = document.getElementById('medicineModal');
 
     function openModal() {
-        document.getElementById('modalTitleText').innerText = "إضافة دواء جديد للمخزون";
+        document.getElementById('modalTitleText').innerText = txtAddNewMedToStock;
         resetSearch();
         modal.classList.remove('hidden');
         triggerSystemSearch();
@@ -755,7 +738,7 @@ include('../includes/sidebar.php');
         document.getElementById('expiry_alert_months').value = "1";
         document.getElementById('systemSearchInput').value = "";
         document.getElementById('systemSearchCategory').value = "0";
-        document.getElementById('dynamicMargin').innerText = "الربح: 0%";
+        document.getElementById('dynamicMargin').innerText = txtProfit0;
         document.getElementById('dynamicMargin').className = "text-[10px] font-black text-gray-400 transition-colors";
 
         document.getElementById('searchSection').classList.remove('hidden');
@@ -773,13 +756,13 @@ include('../includes/sidebar.php');
 
         if (price > cost && cost > 0) {
             let margin = Math.round(((price - cost) / price) * 100);
-            marginSpan.innerText = `الربح: ${margin}%`;
+            marginSpan.innerText = `${txtProfit}${margin}%`;
             marginSpan.className = "text-[10px] font-black text-emerald-500 animate-pulse";
         } else if (price < cost && price > 0) {
-            marginSpan.innerText = `خسارة!`;
+            marginSpan.innerText = txtLoss;
             marginSpan.className = "text-[10px] font-black text-rose-500 animate-pulse";
         } else {
-            marginSpan.innerText = `الربح: 0%`;
+            marginSpan.innerText = txtProfit0;
             marginSpan.className = "text-[10px] font-black text-gray-400 transition-colors";
         }
     }
@@ -792,7 +775,7 @@ include('../includes/sidebar.php');
         document.getElementById('system_med_id').value = med.id;
         document.getElementById('selMedName').innerText = med.name;
         document.getElementById('selMedScientific').innerText = med.scientific;
-        document.querySelector('#selMedCategory span').innerText = med.cat;
+        document.querySelector('#selMedCategory span').innerText = med.cat || txtUncategorized;
 
         document.getElementById('cost').value = med.fixed_cost;
         document.getElementById('price').value = "";
@@ -811,7 +794,7 @@ include('../includes/sidebar.php');
     }
 
     function editModal(stock) {
-        document.getElementById('modalTitleText').innerText = "تعديل بيانات المخزون";
+        document.getElementById('modalTitleText').innerText = txtEditStockData;
 
         document.getElementById('stock_id').value = stock.StockID;
         document.getElementById('system_med_id').value = stock.SystemMedID;
@@ -827,7 +810,7 @@ include('../includes/sidebar.php');
 
         document.getElementById('selMedName').innerText = stock.Name;
         document.getElementById('selMedScientific').innerText = stock.ScientificName || '';
-        document.querySelector('#selMedCategory span').innerText = stock.CategoryName || 'غير مصنف';
+        document.querySelector('#selMedCategory span').innerText = stock.CategoryName || txtUncategorized;
 
         if (stock.IsControlled == 1) document.getElementById('selMedRx').classList.remove('hidden');
         else document.getElementById('selMedRx').classList.add('hidden');
@@ -852,14 +835,14 @@ include('../includes/sidebar.php');
 
     function confirmDelete(id) {
         Swal.fire({
-            title: 'إزالة الدواء من المخزون؟',
-            text: 'لن تتمكن من التراجع عن هذا، وسيتم مسحه من قائمة أدويتك المعروضة للمرضى، وإذا كان موجوداً في طلبات سابقة سيتم تعديل سعرها.',
+            title: txtRemoveMedTitle,
+            text: txtRemoveMedText,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#ef4444',
             cancelButtonColor: '#6b7280',
-            confirmButtonText: 'نعم، إزالة',
-            cancelButtonText: 'إلغاء',
+            confirmButtonText: txtYesRemove,
+            cancelButtonText: txtCancel,
             background: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff',
             color: document.documentElement.classList.contains('dark') ? '#f8fafc' : '#1f2937'
         }).then((result) => {

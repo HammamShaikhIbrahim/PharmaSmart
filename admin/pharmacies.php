@@ -1,4 +1,5 @@
 <?php
+
 // ==========================================
 // 1. الإعدادات الأساسية والحماية
 // ==========================================
@@ -49,13 +50,13 @@ if ($status_filter == 'active') {
 $query = "SELECT u.UserID, u.Fname, u.Lname, u.Phone, u.Email, u.CreatedAt, p.*
           FROM User u
           JOIN Pharmacist p ON u.UserID = p.PharmacistID
-          WHERE (p.PharmacyName LIKE '%$search%' OR u.Fname LIKE '%$search%') 
+          WHERE (p.PharmacyName LIKE '%$search%' OR u.Fname LIKE '%$search%')
           $status_condition
           ORDER BY p.IsApproved ASC, u.CreatedAt DESC";
 
 $result = mysqli_query($conn, $query);
 
-// 🚀 معالجة طلب AJAX 
+// 🚀 معالجة طلب AJAX
 if (isset($_GET['ajax'])) {
     ob_start();
     if (mysqli_num_rows($result) > 0) {
@@ -90,13 +91,13 @@ if (isset($_GET['ajax'])) {
                 <td class="p-6 text-center">
                     <div class="flex justify-center items-center gap-1">
                         <?php if ($row['IsApproved'] == 0): ?>
-                            <a href="pharmacies.php?action=approve&id=<?php echo $row['PharmacistID']; ?>" class="p-2 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-colors" title="قبول وتفعيل"><i data-lucide="check-circle-2" class="w-5 h-5"></i></a>
-                            <button onclick="confirmAction(<?php echo $row['UserID']; ?>, 'reject')" class="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg transition-colors" title="رفض الطلب">
+                            <a href="pharmacies.php?action=approve&id=<?php echo $row['PharmacistID']; ?>" class="p-2 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-colors" title="<?php echo $lang['approve_activate']; ?>"><i data-lucide="check-circle-2" class="w-5 h-5"></i></a>
+                            <button onclick="confirmAction(<?php echo $row['UserID']; ?>, 'reject')" class="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg transition-colors" title="<?php echo $lang['reject_request']; ?>">
                                 <i data-lucide="trash-2" class="w-5 h-5"></i>
                             </button>
                         <?php else: ?>
-                            <button onclick="confirmAction(<?php echo $row['PharmacistID']; ?>, 'suspend')" class="p-2 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/30 rounded-lg transition-colors" title="إيقاف مؤقت"><i data-lucide="pause-circle" class="w-5 h-5"></i></button>
-                            <button onclick="confirmAction(<?php echo $row['UserID']; ?>, 'delete')" class="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg transition-colors" title="حذف نهائي">
+                            <button onclick="confirmAction(<?php echo $row['PharmacistID']; ?>, 'suspend')" class="p-2 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/30 rounded-lg transition-colors" title="<?php echo $lang['suspend_temp']; ?>"><i data-lucide="pause-circle" class="w-5 h-5"></i></button>
+                            <button onclick="confirmAction(<?php echo $row['UserID']; ?>, 'delete')" class="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg transition-colors" title="<?php echo $lang['delete_permanently']; ?>">
                                 <i data-lucide="trash-2" class="w-5 h-5"></i>
                             </button>
                         <?php endif; ?>
@@ -117,8 +118,8 @@ if (isset($_GET['ajax'])) {
                             <i data-lucide="search-x" class="w-10 h-10 text-[#048AC1]"></i>
                         </div>
                     </div>
-                    <h3 class="text-lg font-black text-gray-800 dark:text-white mb-2">لا توجد صيدليات مطابقة</h3>
-                    <p class="text-sm font-bold text-gray-500 dark:text-gray-400">حاول تغيير كلمة البحث أو اختيار فلتر آخر.</p>
+                    <h3 class="text-lg font-black text-gray-800 dark:text-white mb-2"><?php echo $lang['no_matching_pharmacies']; ?></h3>
+                    <p class="text-sm font-bold text-gray-500 dark:text-gray-400"><?php echo $lang['try_changing_search']; ?></p>
                 </div>
             </td>
         </tr>
@@ -181,17 +182,9 @@ include('../includes/sidebar.php');
         color: #94a3b8;
     }
 
-    label[for="filter-all"]:hover {
-        color: #048AC1;
-    }
-
-    label[for="filter-active"]:hover {
-        color: #10b981;
-    }
-
-    label[for="filter-pending"]:hover {
-        color: #f59e0b;
-    }
+    label[for="filter-all"]:hover { color: #048AC1; }
+    label[for="filter-active"]:hover { color: #10b981; }
+    label[for="filter-pending"]:hover { color: #f59e0b; }
 
     .glass-radio-group input:checked+label {
         color: #ffffff !important;
@@ -226,13 +219,8 @@ include('../includes/sidebar.php');
         box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);
     }
 
-    html[dir="rtl"] #filter-active:checked~.glass-glider {
-        transform: translateX(-100%);
-    }
-
-    html[dir="rtl"] #filter-pending:checked~.glass-glider {
-        transform: translateX(-200%);
-    }
+    html[dir="rtl"] #filter-active:checked~.glass-glider { transform: translateX(-100%); }
+    html[dir="rtl"] #filter-pending:checked~.glass-glider { transform: translateX(-200%); }
 </style>
 
 <main class="flex-1 p-8 bg-blue-50 dark:bg-slate-900 h-full overflow-y-auto transition-colors duration-300 relative">
@@ -248,7 +236,6 @@ include('../includes/sidebar.php');
         <!-- أدوات التحكم (الفلتر + البحث المباشر) -->
         <div class="flex flex-col md:flex-row items-center gap-4 w-full xl:w-auto justify-end">
 
-
             <!-- 🚀 البحث السريع (AJAX Live Search) -->
             <div class="w-full md:w-80">
                 <div class="relative group">
@@ -258,6 +245,7 @@ include('../includes/sidebar.php');
                     <i data-lucide="search" class="top-3.5 text-gray-400 group-focus-within:text-[#048AC1] transition-colors <?php echo ($dir == 'rtl') ? 'absolute left-4' : 'absolute right-4'; ?> w-5 h-5"></i>
                 </div>
             </div>
+
             <!-- الفلتر الزجاجي -->
             <div class="overflow-x-auto custom-scrollbar pb-2 -mb-2 w-full md:w-auto">
                 <div class="glass-radio-group shrink-0 mx-auto md:mx-0">
@@ -277,7 +265,6 @@ include('../includes/sidebar.php');
         </div>
     </div>
 
-    <!-- الجدول -->
     <!-- الجدول (ديناميكي الحجم يتناسب مع عدد النتائج) -->
     <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-md border border-gray-200 dark:border-slate-700 overflow-hidden mb-6">
         <div class="overflow-x-auto" id="tableContainer" style="transition: opacity 0.3s ease;">

@@ -1,7 +1,9 @@
 <?php
+    
 // ==========================================
 // 1. الإعدادات الأساسية والحماية
 // ==========================================
+
 include('../config/database.php');
 session_start();
 
@@ -15,6 +17,7 @@ require_once('../includes/lang.php');
 // ==========================================
 // 2. معالجة عملية الحذف (Delete Patient)
 // ==========================================
+
 if (isset($_GET['delete_id'])) {
     $id = intval($_GET['delete_id']);
     mysqli_query($conn, "DELETE FROM Chat WHERE SenderID = $id OR ReceiverID = $id");
@@ -26,15 +29,17 @@ if (isset($_GET['delete_id'])) {
 // ==========================================
 // 3. نظام البحث وجلب بيانات المرضى
 // ==========================================
+
 $search = mysqli_real_escape_string($conn, $_GET['search'] ?? '');
 
 // 💡 استخدمنا CONCAT لدمج الاسم الأول والأخير معاً ليتمكن الأدمن من البحث بالاسم الكامل
-$query = "SELECT u.*, p.Address, 
-          TIMESTAMPDIFF(YEAR, p.DOB, CURDATE()) AS Age 
-          FROM User u 
-          LEFT JOIN Patient p ON u.UserID = p.PatientID 
-          WHERE u.RoleID = 3 AND (u.Fname LIKE '%$search%' OR u.Lname LIKE '%$search%' OR CONCAT(u.Fname, ' ', u.Lname) LIKE '%$search%')
-          ORDER BY u.CreatedAt DESC";
+$query = "SELECT u.*, p.Address,
+            TIMESTAMPDIFF(YEAR, p.DOB, CURDATE()) AS Age
+            FROM User u
+            LEFT JOIN Patient p ON u.UserID = p.PatientID
+            WHERE u.RoleID = 3 AND (u.Fname LIKE '%$search%' OR u.Lname LIKE '%$search%' OR CONCAT(u.Fname, ' ', u.Lname) LIKE '%$search%')
+            ORDER BY u.CreatedAt DESC";
+
 $result = mysqli_query($conn, $query);
 
 // 🚀 معالجة طلب AJAX للبحث المباشر
@@ -73,7 +78,7 @@ if (isset($_GET['ajax'])) {
                 </td>
                 <td class="p-6 text-center">
                     <div class="flex justify-center">
-                        <button onclick="confirmDelete(<?php echo $row['UserID']; ?>)" class="bin-button text-rose-500" title="حذف المريض">
+                        <button onclick="confirmDelete(<?php echo $row['UserID']; ?>)" class="bin-button text-rose-500" title="<?php echo isset($lang['delete_patient']) ? $lang['delete_patient'] : 'حذف المريض'; ?>">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
                                 <path d="M3 6h18" class="bin-top"></path>
                                 <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" class="bin-top"></path>
@@ -99,8 +104,8 @@ if (isset($_GET['ajax'])) {
                             <i data-lucide="users" class="w-10 h-10 text-[#048AC1]"></i>
                         </div>
                     </div>
-                    <h3 class="text-lg font-black text-gray-800 dark:text-white mb-2">لا يوجد مرضى مطابقين</h3>
-                    <p class="text-sm font-bold text-gray-500 dark:text-gray-400">تأكد من كتابة الاسم بشكل صحيح.</p>
+                    <h3 class="text-lg font-black text-gray-800 dark:text-white mb-2"><?php echo isset($lang['no_matching_patients']) ? $lang['no_matching_patients'] : 'لا يوجد مرضى مطابقين'; ?></h3>
+                    <p class="text-sm font-bold text-gray-500 dark:text-gray-400"><?php echo isset($lang['check_patient_name']) ? $lang['check_patient_name'] : 'تأكد من كتابة الاسم بشكل صحيح.'; ?></p>
                 </div>
             </td>
         </tr>
@@ -247,9 +252,8 @@ include('../includes/sidebar.php');
         }, 300);
     }
 
-    // جلب البيانات فور تحميل الصفحة لأول مرة 
+    // جلب البيانات فور تحميل الصفحة لأول مرة
     document.addEventListener('DOMContentLoaded', fetchTableData);
-
 
     // 🚀 دالة التأكيد (SweetAlert)
     function confirmDelete(id) {

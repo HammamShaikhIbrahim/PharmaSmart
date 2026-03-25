@@ -27,7 +27,7 @@ if (isset($_GET['action']) && isset($_GET['order_id'])) {
     // التقاط سبب الرفض إن وُجد
     $reason = isset($_GET['reason']) ? mysqli_real_escape_string($conn, $_GET['reason']) : '';
 
-    $valid_actions = ['Accepted', 'Rejected', 'Delivered'];
+    $valid_actions =['Accepted', 'Rejected', 'Delivered'];
 
     if (in_array($action, $valid_actions)) {
 
@@ -77,7 +77,7 @@ $counts_sql = "SELECT o.Status, COUNT(DISTINCT o.OrderID) as count
                  GROUP BY o.Status";
 $counts_result = mysqli_query($conn, $counts_sql);
 
-$status_counts = ['Pending' => 0, 'Accepted' => 0, 'Delivered' => 0, 'Rejected' => 0];
+$status_counts =['Pending' => 0, 'Accepted' => 0, 'Delivered' => 0, 'Rejected' => 0];
 $total_all = 0;
 while ($row = mysqli_fetch_assoc($counts_result)) {
     $status_counts[$row['Status']] = $row['count'];
@@ -113,7 +113,7 @@ $orders_query = "
 $orders_result = mysqli_query($conn, $orders_query);
 
 // جلب تفاصيل الأدوية (Products inside the order)
-$order_items_data = [];
+$order_items_data =[];
 $items_query = "
     SELECT oi.OrderID, sm.Name, oi.Quantity, oi.SoldPrice, sm.IsControlled
     FROM OrderItems oi
@@ -127,7 +127,7 @@ while ($item = mysqli_fetch_assoc($items_result)) {
 }
 
 // تجميع الطلبات حسب المريض
-$grouped_orders = [];
+$grouped_orders =[];
 $has_orders = mysqli_num_rows($orders_result) > 0;
 if ($has_orders) {
     while ($order = mysqli_fetch_assoc($orders_result)) {
@@ -164,7 +164,7 @@ if ($has_orders) {
                 $statusIcon = 'x-circle';
             }
 
-            $current_items = $order_items_data[$order['OrderID']] ?? [];
+            $current_items = $order_items_data[$order['OrderID']] ??[];
             $has_controlled = array_reduce($current_items, fn($carry, $item) => $carry || $item['IsControlled'] == 1, false);
 
             // حساب الإجمالي المحسوب بناءً على الأصناف الحالية في الطلب (بعد أي تعديلات محتملة)
@@ -191,7 +191,6 @@ if ($has_orders) {
                 'prescription' => $order['PrescriptionImage'],
                 'has_controlled' => $has_controlled
             ]));
-
 
             $row_classes = $is_main_row
                 ? "hover:bg-[#E6F7ED] dark:hover:bg-[#044E29]/30 transition-colors duration-200 group cursor-pointer border-b border-transparent hover:border-gray-100 dark:hover:border-slate-700"
@@ -224,14 +223,14 @@ if ($has_orders) {
                     </div>
                     <div class="text-sm text-gray-600 dark:text-gray-300 font-medium flex items-center gap-2">
                         <i data-lucide="phone" class="w-4 h-4 text-[#0A7A48] shrink-0"></i>
-                        <span dir="ltr"><?php echo htmlspecialchars($order['Phone'] ?? 'لا يوجد رقم'); ?></span>
+                        <span dir="ltr"><?php echo htmlspecialchars($order['Phone'] ?? $lang['no_phone']); ?></span>
                     </div>
                 </td>
 
                 <td class="p-5">
                     <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 font-medium">
                         <i data-lucide="map-pin" class="w-4 h-4 text-[#0A7A48] shrink-0"></i>
-                        <span class="leading-relaxed font-medium line-clamp-2"><?php echo htmlspecialchars($order['DeliveryAddress'] ?? 'الاستلام من الصيدلية'); ?></span>
+                        <span class="leading-relaxed font-medium line-clamp-2"><?php echo htmlspecialchars($order['DeliveryAddress'] ?? $lang['pickup_pharmacy']); ?></span>
                     </div>
                 </td>
 
@@ -247,7 +246,6 @@ if ($has_orders) {
                 </td>
 
                 <td class="p-5 whitespace-nowrap text-center">
-                    <!-- 🚀 طباعة الإجمالي المصحح في الجدول أيضاً -->
                     <div class="font-black text-[#0A7A48] dark:text-[#4ADE80] text-[15px] mb-1.5" dir="ltr"><?php echo number_format($final_total, 2); ?> ₪</div>
                     <?php if ($order['PaymentMethod'] == 'COD'): ?>
                         <span class="inline-flex items-center gap-1 bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-gray-400 text-[10px] px-2 py-0.5 rounded-full font-bold border border-gray-200 dark:border-slate-600">
@@ -264,11 +262,11 @@ if ($has_orders) {
                     <span class="px-3.5 py-1.5 rounded-full text-xs font-bold inline-flex items-center justify-center gap-1.5 shadow-sm <?php echo $statusColor; ?>">
                         <i data-lucide="<?php echo $statusIcon; ?>" class="w-3.5 h-3.5"></i>
                         <?php
-                        $statusLabels = [
-                            'Pending'   => 'قيد الانتظار',
-                            'Accepted'  => 'جاري التجهيز',
-                            'Delivered' => 'مكتمل',
-                            'Rejected'  => 'مرفوض',
+                        $statusLabels =[
+                            'Pending'   => $lang['status_pending'],
+                            'Accepted'  => $lang['status_processing'],
+                            'Delivered' => $lang['status_delivered'],
+                            'Rejected'  => $lang['status_rejected'],
                         ];
                         echo $statusLabels[$order['Status']] ?? $order['Status'];
                         ?>
@@ -305,7 +303,7 @@ if ($has_orders) {
                     </div>
                 </div>
                 <h3 class="text-lg font-black text-gray-800 dark:text-white mb-2"><?php echo isset($lang['no_orders_desc']) ? $lang['no_orders_desc'] : 'لا يوجد طلبات مطابقة للبحث أو الفلتر'; ?></h3>
-                <p class="text-sm font-bold text-gray-500 dark:text-gray-400">حاول تغيير كلمة البحث أو اختيار فلتر آخر.</p>
+                <p class="text-sm font-bold text-gray-500 dark:text-gray-400"><?php echo $lang['try_changing_search']; ?></p>
             </div>
         </td>
     </tr>
@@ -378,25 +376,11 @@ include('../includes/sidebar.php');
         color: #94a3b8;
     }
 
-    label[for="filter-All"]:hover {
-        color: #0A7A48;
-    }
-
-    label[for="filter-Pending"]:hover {
-        color: #d97706;
-    }
-
-    label[for="filter-Accepted"]:hover {
-        color: #2563eb;
-    }
-
-    label[for="filter-Delivered"]:hover {
-        color: #059669;
-    }
-
-    label[for="filter-Rejected"]:hover {
-        color: #e11d48;
-    }
+    label[for="filter-All"]:hover { color: #0A7A48; }
+    label[for="filter-Pending"]:hover { color: #d97706; }
+    label[for="filter-Accepted"]:hover { color: #2563eb; }
+    label[for="filter-Delivered"]:hover { color: #059669; }
+    label[for="filter-Rejected"]:hover { color: #e11d48; }
 
     .glass-radio-group input:checked+label {
         color: #ffffff !important;
@@ -468,34 +452,17 @@ include('../includes/sidebar.php');
         box-shadow: 0 4px 12px rgba(244, 63, 94, 0.35);
     }
 
-    html[dir="rtl"] #filter-Pending:checked~.glass-glider {
-        transform: translateX(-100%);
-    }
+    html[dir="rtl"] #filter-Pending:checked~.glass-glider { transform: translateX(-100%); }
+    html[dir="rtl"] #filter-Accepted:checked~.glass-glider { transform: translateX(-200%); }
+    html[dir="rtl"] #filter-Delivered:checked~.glass-glider { transform: translateX(-300%); }
+    html[dir="rtl"] #filter-Rejected:checked~.glass-glider { transform: translateX(-400%); }
 
-    html[dir="rtl"] #filter-Accepted:checked~.glass-glider {
-        transform: translateX(-200%);
-    }
-
-    html[dir="rtl"] #filter-Delivered:checked~.glass-glider {
-        transform: translateX(-300%);
-    }
-
-    html[dir="rtl"] #filter-Rejected:checked~.glass-glider {
-        transform: translateX(-400%);
-    }
-
-    .modal-scroll::-webkit-scrollbar {
-        width: 6px;
-    }
-
+    .modal-scroll::-webkit-scrollbar { width: 6px; }
     .modal-scroll::-webkit-scrollbar-thumb {
         background-color: rgba(10, 122, 72, 0.3);
         border-radius: 10px;
     }
-
-    .dark .modal-scroll::-webkit-scrollbar-thumb {
-        background-color: rgba(74, 222, 128, 0.3);
-    }
+    .dark .modal-scroll::-webkit-scrollbar-thumb { background-color: rgba(74, 222, 128, 0.3); }
 </style>
 
 <main class="flex-1 p-8 bg-[#F2FBF5] dark:bg-slate-900 h-full overflow-y-auto transition-colors duration-300 relative">
@@ -519,7 +486,7 @@ include('../includes/sidebar.php');
             <div class="w-full xl:w-auto overflow-x-auto custom-scrollbar pb-2 -mb-2">
                 <div class="glass-radio-group shrink-0 mx-auto md:mx-0 min-w-max">
                     <?php
-                    $tabs = [
+                    $tabs =[
                         'All'       => isset($lang['all_orders'])        ? $lang['all_orders']        : 'الكل',
                         'Pending'   => isset($lang['pending_orders'])    ? $lang['pending_orders']    : 'قيد الانتظار',
                         'Accepted'  => isset($lang['filter_processing']) ? $lang['filter_processing'] : 'جاري التجهيز',
@@ -606,7 +573,7 @@ include('../includes/sidebar.php');
                     <div class="flex items-start gap-3">
                         <i data-lucide="info" class="w-5 h-5 text-rose-500 shrink-0 mt-0.5"></i>
                         <div>
-                            <h4 class="text-sm font-black text-rose-800 dark:text-rose-400 mb-1">سبب إلغاء الطلب:</h4>
+                            <h4 class="text-sm font-black text-rose-800 dark:text-rose-400 mb-1"><?php echo $lang['rejection_reason_title']; ?></h4>
                             <p id="rejectionReasonText" class="text-xs font-bold text-rose-600 dark:text-rose-300"></p>
                         </div>
                     </div>
@@ -634,7 +601,7 @@ include('../includes/sidebar.php');
                         <div id="deliveryMap" class="absolute inset-0"></div>
                     </div>
                     <p id="noLocationMsg" class="hidden mt-2 text-xs text-amber-600 dark:text-amber-400 font-bold flex items-center gap-1">
-                        <i data-lucide="info" class="w-3 h-3"></i> لم يقم المريض بتحديد موقعه على الخريطة
+                        <i data-lucide="info" class="w-3 h-3"></i> <?php echo $lang['no_location_provided']; ?>
                     </p>
                 </div>
 
@@ -661,7 +628,7 @@ include('../includes/sidebar.php');
                         <div class="flex items-start gap-2">
                             <input type="checkbox" id="verifyPrescriptionCheck" class="w-4 h-4 text-amber-500 rounded border-gray-300 focus:ring-amber-500 accent-amber-500 mt-0.5 shrink-0 disabled:opacity-50 disabled:cursor-not-allowed">
                             <label for="verifyPrescriptionCheck" class="text-xs font-bold text-gray-800 dark:text-gray-200 cursor-pointer select-none leading-tight">
-                                أقر بأني راجعت الوصفة الطبية وصحتها.
+                                <?php echo $lang['rx_verify_check']; ?>
                             </label>
                         </div>
                     </div>
@@ -694,6 +661,26 @@ include('../includes/sidebar.php');
     const txtAccept = "<?php echo isset($lang['accept_prepare']) ? $lang['accept_prepare'] : 'قبول وتجهيز'; ?>";
     const txtDelivered = "<?php echo isset($lang['delivered_successfully']) ? $lang['delivered_successfully'] : 'تم تسليم الطلب بنجاح'; ?>";
     const txtActionTaken = "<?php echo isset($lang['action_taken']) ? $lang['action_taken'] : 'تم اتخاذ إجراء مسبقاً'; ?>";
+    
+    // متغيرات جديدة خاصة بالـ JavaScript لدعم اللغة
+    const txtSecurityAlert = "<?php echo $lang['security_alert']; ?>";
+    const txtRxReviewReq = "<?php echo $lang['rx_review_required_alert']; ?>";
+    const txtRejectOrderTitle = "<?php echo $lang['reject_order_title']; ?>";
+    const txtRejectOrderText = "<?php echo $lang['reject_order_text']; ?>";
+    const txtRejectOrderPlaceholder = "<?php echo $lang['reject_order_placeholder']; ?>";
+    const txtConfirmReject = "<?php echo $lang['confirm_reject']; ?>";
+    const txtCancel = "<?php echo $lang['cancel']; ?>";
+    const txtRejectReasonReq = "<?php echo $lang['reject_reason_required']; ?>";
+    const txtCanceledNoReason = "<?php echo $lang['canceled_without_reason']; ?>";
+    const txtAcceptOrderTitle = "<?php echo $lang['accept_order_title']; ?>";
+    const txtAcceptOrderText = "<?php echo $lang['accept_order_text']; ?>";
+    const txtYesAccept = "<?php echo $lang['yes_accept']; ?>";
+    const txtConfirmDeliveryTitle = "<?php echo $lang['confirm_delivery_title']; ?>";
+    const txtConfirmDeliveryText = "<?php echo $lang['confirm_delivery_text']; ?>";
+    const txtYesDelivered = "<?php echo $lang['yes_delivered']; ?>";
+    const txtControlledMedsRx = "<?php echo $lang['controlled_meds_rx']; ?>";
+    const txtRxVerificationReq = "<?php echo $lang['rx_verification_required']; ?>";
+    const txtExtraAttachmentRx = "<?php echo $lang['extra_attachment_rx']; ?>";
 
     let timeoutId;
     async function fetchData(status, searchQuery) {
@@ -834,7 +821,7 @@ include('../includes/sidebar.php');
             rxCheckboxContainer.classList.add('opacity-50');
 
             rejectionAlert.classList.remove('hidden');
-            document.getElementById('rejectionReasonText').innerText = order.rejection_reason || 'تم الإلغاء بدون كتابة سبب';
+            document.getElementById('rejectionReasonText').innerText = order.rejection_reason || txtCanceledNoReason;
 
         } else if (order.status === 'Accepted') {
             modalHeader.classList.add('bg-blue-50', 'dark:bg-blue-900/20');
@@ -878,8 +865,8 @@ include('../includes/sidebar.php');
                         <i data-lucide="shield-alert" class="w-5 h-5"></i>
                     </div>
                     <div>
-                        <h3 class="font-black text-amber-800 dark:text-amber-400 text-sm">أدوية مراقبة (Rx)</h3>
-                        <p class="text-[10px] text-amber-600/80 dark:text-amber-500/80 font-bold">يلزم التحقق من الوصفة</p>
+                        <h3 class="font-black text-amber-800 dark:text-amber-400 text-sm">${txtControlledMedsRx}</h3>
+                        <p class="text-[10px] text-amber-600/80 dark:text-amber-500/80 font-bold">${txtRxVerificationReq}</p>
                     </div>
                 `;
                 rxCheckboxContainer.classList.remove('hidden');
@@ -896,7 +883,7 @@ include('../includes/sidebar.php');
                         <i data-lucide="file-text" class="w-5 h-5"></i>
                     </div>
                     <div>
-                        <h3 class="font-black text-gray-800 dark:text-gray-200 text-sm">مرفق إضافي (وصفة)</h3>
+                        <h3 class="font-black text-gray-800 dark:text-gray-200 text-sm">${txtExtraAttachmentRx}</h3>
                     </div>
                 `;
                 rxCheckboxContainer.classList.add('hidden');
@@ -959,8 +946,8 @@ include('../includes/sidebar.php');
         if (currentOrderData.has_controlled && !document.getElementById('verifyPrescriptionCheck').checked) {
             Swal.fire({
                 icon: 'warning',
-                title: 'تنبيه أمني',
-                text: 'يجب مراجعة الوصفة الطبية وإقرار صحتها قبل قبول الطلب.',
+                title: txtSecurityAlert,
+                text: txtRxReviewReq,
                 confirmButtonColor: '#f43f5e',
                 background: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff',
                 color: document.documentElement.classList.contains('dark') ? '#f8fafc' : '#1f2937'
@@ -973,20 +960,20 @@ include('../includes/sidebar.php');
     function confirmOrderStatus(orderId, action) {
         if (action === 'Rejected') {
             Swal.fire({
-                title: 'رفض الطلب؟',
-                text: 'يرجى كتابة سبب الرفض (سيظهر للمريض):',
+                title: txtRejectOrderTitle,
+                text: txtRejectOrderText,
                 input: 'text',
-                inputPlaceholder: 'مثال: الدواء غير متوفر حالياً...',
+                inputPlaceholder: txtRejectOrderPlaceholder,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#f43f5e',
                 cancelButtonColor: '#6b7280',
-                confirmButtonText: 'تأكيد الرفض',
-                cancelButtonText: 'إلغاء',
+                confirmButtonText: txtConfirmReject,
+                cancelButtonText: txtCancel,
                 background: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff',
                 color: document.documentElement.classList.contains('dark') ? '#f8fafc' : '#1f2937',
                 inputValidator: (value) => {
-                    if (!value) return 'يجب كتابة سبب الرفض لإشعار المريض!';
+                    if (!value) return txtRejectReasonReq;
                 }
             }).then((res) => {
                 if (res.isConfirmed) {
@@ -999,14 +986,14 @@ include('../includes/sidebar.php');
 
         let title, text, btnText, btnColor;
         if (action === 'Accepted') {
-            title = 'قبول الطلب؟';
-            text = 'سيتم إشعار المريض بأنك تقوم بتجهيز الطلب.';
-            btnText = 'نعم، أقبل';
+            title = txtAcceptOrderTitle;
+            text = txtAcceptOrderText;
+            btnText = txtYesAccept;
             btnColor = '#0A7A48';
         } else if (action === 'Delivered') {
-            title = 'تأكيد التسليم؟';
-            text = 'هل تم تسليم الطلب للعميل؟';
-            btnText = 'نعم، تم التسليم';
+            title = txtConfirmDeliveryTitle;
+            text = txtConfirmDeliveryText;
+            btnText = txtYesDelivered;
             btnColor = '#0A7A48';
         }
 
@@ -1018,7 +1005,7 @@ include('../includes/sidebar.php');
             confirmButtonColor: btnColor,
             cancelButtonColor: '#6b7280',
             confirmButtonText: btnText,
-            cancelButtonText: 'إلغاء',
+            cancelButtonText: txtCancel,
             background: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff',
             color: document.documentElement.classList.contains('dark') ? '#f8fafc' : '#1f2937'
         }).then((res) => {

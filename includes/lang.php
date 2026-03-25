@@ -2,6 +2,7 @@
 if (isset($_GET['lang'])) {
     $_SESSION['lang'] = $_GET['lang'];
 }
+
 $current_lang = isset($_SESSION['lang']) ? $_SESSION['lang'] : 'ar';
 $dir = ($current_lang == 'ar') ? 'rtl' : 'ltr';
 
@@ -9,7 +10,7 @@ $lang = array();
 
 if ($current_lang == 'ar') {
 
-    //login page
+    // تسجيل الدخول | Login Page
     $lang['login_title'] = "تسجيل الدخول";
     $lang['login_subtitle'] = "بوابتك لإدارة الصيدلية باحترافية";
     $lang['email'] = "البريد الإلكتروني";
@@ -18,7 +19,7 @@ if ($current_lang == 'ar') {
     $lang['new_account'] = "صيدلية جديدة؟";
     $lang['register_link'] = "قدم طلب انضمام";
 
-    //register page
+    // تسجيل صيدلية جديدة | Register Page
     $lang['email_exists_error'] = "عذراً، هذا البريد الإلكتروني مسجل مسبقاً!";
     $lang['location_error'] = "يرجى تحديد موقع الصيدلية بدقة على الخريطة.";
     $lang['registration_success'] = "تم إرسال طلب انضمامك بنجاح! يرجى انتظار تفعيل حسابك من الإدارة.";
@@ -31,8 +32,6 @@ if ($current_lang == 'ar') {
     $lang['first_name'] = "الاسم الأول";
     $lang['last_name'] = "اسم العائلة";
     $lang['phone'] = "رقم الهاتف";
-    $lang['email'] = "البريد الإلكتروني";
-    $lang['password'] = "كلمة المرور";
     $lang['pharmacy_info'] = "بيانات الصيدلية";
     $lang['pharmacy_name'] = "اسم الصيدلية الرسمي";
     $lang['license_num'] = "رقم الترخيص من وزارة الصحة";
@@ -49,7 +48,7 @@ if ($current_lang == 'ar') {
     $lang['success'] = "اكتمل الطلب!";
     $lang['error'] = "خطأ";
 
-    // أخطاء تسجيل الدخول (عربي)
+    // أخطاء تسجيل الدخول | Login Errors
     $lang['err_patient'] = "عذراً، نظام الويب مخصص للصيادلة والإدارة فقط. يرجى استخدام تطبيق الموبايل.";
     $lang['err_pending'] = "حسابك معلق حالياً، يرجى انتظار موافقة الإدارة.";
     $lang['err_pass'] = "كلمة المرور غير صحيحة.";
@@ -57,7 +56,7 @@ if ($current_lang == 'ar') {
     $lang['err_title'] = "خطأ في تسجيل الدخول";
     $lang['ok_btn'] = "حسناً";
 
-    // عام
+    // عام ومصطلحات متكررة | General & Common Terms
     $lang['dashboard'] = "لوحة القيادة";
     $lang['pharmacies'] = "إدارة الصيدليات";
     $lang['patients'] = "إدارة المرضى";
@@ -71,9 +70,7 @@ if ($current_lang == 'ar') {
     $lang['switch_lang_text'] = "English";
     $lang['switch_lang_code'] = "en";
 
-    //Admin Pages
-
-    // الداشبورد
+    // لوحة التحكم (المدير) | Admin Dashboard
     $lang['admin_panel'] = "لوحة الإدارة";
     $lang['pharmacy_system'] = "نظام إدارة الصيدلية";
     $lang['active_pharma'] = "الصيدليات العاملة";
@@ -87,8 +84,8 @@ if ($current_lang == 'ar') {
     $lang['live_update'] = "تحديث مباشر";
     $lang['pharma_info'] = "معلومات الصيدلية";
     $lang['click_map'] = "اضغط على أي نقطة في الخريطة لعرض التفاصيل.";
-
-    // معلومات الصيدلية (الجافاسكربت)
+    
+    // معلومات الصيدلية في الخريطة | Pharmacy Info (JS Map)
     $lang['pharmacist_name'] = "الصيدلاني";
     $lang['address'] = "العنوان";
     $lang['working_hours'] = "الدوام";
@@ -96,30 +93,38 @@ if ($current_lang == 'ar') {
     $lang['license_num'] = "رقم الترخيص";
     $lang['not_available'] = "غير متوفر";
 
-    // جدول الصيدليات
+    // جدول إدارة الصيدليات (الأدمن) | Pharmacies Table (Admin)
     $lang['pharmacy_name'] = "الصيدلية";
     $lang['owner'] = "المالك";
-    $lang['phone'] = "الهاتف";
+    $lang['contact_info'] = "الاتصال";
     $lang['location_work'] = "الموقع / العمل";
     $lang['join_date'] = "تاريخ الانضمام";
     $lang['active'] = "نشط";
     $lang['pending'] = "معلق";
     $lang['search_pharmacy'] = "ابحث عن صيدلية بالاسم...";
+    $lang['approve_activate'] = "قبول وتفعيل";
+    $lang['reject_request'] = "رفض الطلب";
+    $lang['suspend_temp'] = "إيقاف مؤقت";
+    $lang['delete_permanently'] = "حذف نهائي";
+    $lang['no_matching_pharmacies'] = "لا توجد صيدليات مطابقة";
+    $lang['try_changing_search'] = "حاول تغيير كلمة البحث أو اختيار فلتر آخر.";
 
-    // جدول المرضى
+    // جدول إدارة المرضى | Patients Table
     $lang['patient_name'] = "المريض";
-    $lang['contact_info'] = "بيانات الاتصال";
     $lang['age'] = "العمر";
     $lang['years'] = "سنة";
     $lang['not_specified'] = "غير محدد";
     $lang['search_patient'] = "ابحث عن مريض بالاسم...";
     $lang['no_data'] = "لا يوجد بيانات";
+    $lang['delete_patient'] = "حذف المريض";
+    $lang['no_matching_patients'] = "لا يوجد مرضى مطابقين";
+    $lang['check_patient_name'] = "تأكد من كتابة الاسم بشكل صحيح.";
 
-    // Admin vs Pharmacist
+    // الأدوار | Roles
     $lang['admin'] = "مدير";
     $lang['pharmacist'] = "صيدلي";
 
-    // SweetAlert Translations
+    // تنبيهات الحذف والإيقاف | SweetAlert Translations
     $lang['swal_title'] = "هل أنت متأكد؟";
     $lang['swal_text'] = "لن تتمكن من التراجع عن هذا الإجراء!";
     $lang['swal_confirm'] = "نعم، احذف!";
@@ -127,13 +132,12 @@ if ($current_lang == 'ar') {
     $lang['suspend_title'] = "تعليق الحساب؟";
     $lang['suspend_text'] = "سيتم إيقاف الصيدلية مؤقتاً عن العمل.";
     $lang['suspend_confirm'] = "نعم، علق الحساب";
+    $lang['coming_soon_title'] = "قريباً جداً!";
 
-    // Pharmacy Pages
-
-    //الداشبورد
+    // لوحة التحكم (الصيدلي) | Pharmacist Dashboard
     $lang['todays_sales'] = "مبيعات اليوم";
-    $lang['currency'] = "₪"; // أو العملة التي تفضلها
-    $lang['pending_orders'] = "قيد الانتظار"; // تم التعديل لحل مشكلة الفلتر
+    $lang['currency'] = "₪";
+    $lang['pending_orders'] = "قيد الانتظار";
     $lang['low_stock_items'] = "نواقص المخزون";
     $lang['expiring_soon'] = "قريب الانتهاء";
     $lang['recent_orders'] = "أحدث الطلبات";
@@ -147,14 +151,26 @@ if ($current_lang == 'ar') {
     $lang['days'] = "يوم";
     $lang['view_all'] = "عرض الكل";
     $lang['no_recent_orders'] = "لا يوجد طلبات حديثة";
-    $lang['stock_excellent'] = "المخزون ممتاز، لا يوجد نواقص!";
+    $lang['stock_excellent'] = "المخزون ممتاز، لا يوجد نواقص";
     $lang['manage_inventory'] = "إدارة المخزون";
     $lang['no_low_stock_items'] = "لا توجد عناصر ناقصة في المخزون";
+    $lang['new_badge'] = "جديد";
+    $lang['needs_your_approval'] = "تحتاج موافقتك!";
+    $lang['no_pending_orders_now'] = "لا توجد طلبات قيد الانتظار حالياً.";
+    $lang['items_word'] = "عناصر";
+    $lang['qty_word'] = "الكمية";
+    $lang['update_qty'] = "تحديث الكمية";
+    $lang['expiry_alerts'] = "تنبيهات الصلاحية";
+    $lang['expired_word'] = "منتهي";
+    $lang['soon_word'] = "قريباً";
+    $lang['update_expiry'] = "تحديث الصلاحية";
+    $lang['all_meds_valid'] = "جميع الأدوية صالحة تماماً";
 
-    // صفحة الأدوية والمخزون
+    // صفحة الأدوية والمخزون | Medicines & Stock Page
     $lang['product_inventory'] = "مخزون الأدوية";
-    $lang['add_product'] = "إضافة دواء";
-    $lang['search_product'] = "ابحث عن دواء بالاسم...";
+    $lang['search_inventory_placeholder'] = "ابحث في مخزونك (اسم، باركود)...";
+    $lang['add_med_to_stock'] = "إضافة دواء للمخزون";
+    $lang['add_new_med_to_stock'] = "إضافة دواء جديد للمخزون";
     $lang['product'] = "المنتج";
     $lang['category'] = "التصنيف";
     $lang['stock'] = "المخزون";
@@ -162,41 +178,67 @@ if ($current_lang == 'ar') {
     $lang['cost'] = "التكلفة";
     $lang['margin'] = "الربح";
     $lang['expiry'] = "تاريخ الانتهاء";
-    $lang['add_new_product'] = "إضافة دواء جديد";
-    $lang['edit_product'] = "تعديل بيانات الدواء";
-    $lang['product_name'] = "اسم الدواء";
-    $lang['min_stock'] = "الحد الأدنى للمخزون";
-    $lang['description'] = "الوصف / ملاحظات";
-    $lang['product_image'] = "صورة الدواء";
-    $lang['is_controlled'] = "دواء مراقب (يحتاج وصفة طبية)";
-    $lang['cancel'] = "إلغاء";
-    $lang['confirm'] = "تأكيد";
     $lang['uncategorized'] = "غير مصنف";
-    $lang['select_category'] = "اختر تصنيفاً...";
-    $lang['controlled_description'] = "هذا دواء مراقب ويتطلب وصفة طبية.";
-    $lang['no_medicines'] = "لا يوجد أدوية في المخزون حالياً";
-    $lang['no_medicines_description'] = "ابدأ بإضافة أول دواء لمخزونك عبر الزر بالأعلى لتتمكن من استقبال الطلبات.";
-    $lang['select_image'] = "اختر صورة";
-    $lang['file_selected'] = "تم اختيار الملف:";
-    $lang['select_file'] = "اختر ملف";
+    $lang['no_matching_meds'] = "لا يوجد أدوية مطابقة في مخزونك";
+    $lang['try_different_search_add'] = "جرب كتابة اسم مختلف أو قم بإضافة دواء جديد لمخزونك.";
+    $lang['edit_price_qty'] = "تعديل السعر/الكمية";
+    $lang['remove_from_stock'] = "إزالة من المخزون";
+    $lang['expired_since'] = "منتهي منذ ";
+    $lang['expires_today'] = "ينتهي اليوم!";
+    $lang['remaining'] = "باقي ";
+    $lang['day_s'] = " يوم";
 
-    // إضافة: صفحة إدارة الطلبات (Orders Page)
-    // -----------------------------------------
+    // نافذة إضافة وتعديل الدواء | Modal Add/Edit Stock
+    $lang['med_exists_error'] = "هذا الدواء موجود مسبقاً في مخزونك! يمكنك تعديل كميته بدلاً من إضافته مرة أخرى.";
+    $lang['search_in_catalog'] = "1. ابحث عن الدواء في الكتالوج الموحد:";
+    $lang['scan_barcode_manual'] = "مسح باركود / إضافة يدوية";
+    $lang['all_categories'] = "جميع التصنيفات";
+    $lang['search_med_name_scientific'] = "اكتب اسم الدواء التجاري أو العلمي...";
+    $lang['suggested_meds'] = "الأدوية المقترحة لك:";
+    $lang['latest_added_meds'] = "أحدث الأدوية المضافة للكتالوج:";
+    $lang['custom_search_results'] = "نتائج البحث المخصصة:";
+    $lang['cost_price_val'] = "التكلفة: ";
+    $lang['no_matching_meds_catalog'] = "لم يتم العثور على أدوية مطابقة.";
+    $lang['check_name_manual_soon'] = "تأكد من الاسم، الميزة اليدوية ستتوفر قريباً.";
+    $lang['stock_price_alerts_settings'] = "إعدادات المخزون والسعر والتنبيهات";
+    $lang['cost_price_ils'] = "سعر التكلفة (₪)";
+    $lang['profit_0'] = "الربح: 0%";
+    $lang['cost_determined_admin'] = "سعر التكلفة محدد من الإدارة";
+    $lang['sell_price_public'] = "سعر البيع للجمهور (₪)";
+    $lang['current_qty'] = "الكمية الحالية المتوفرة";
+    $lang['low_stock_alert_limit'] = "حد التنبيه بنقص المخزون";
+    $lang['expiry_date_label'] = "تاريخ انتهاء الصلاحية";
+    $lang['expiry_alert_months_label'] = "تنبيه الصلاحية قبل (بالأشهر)";
+    $lang['months'] = "أشهر";
+    $lang['close_window'] = "إغلاق النافذة";
+    $lang['back_to_search'] = "عودة للبحث";
+    $lang['save_to_stock'] = "حفظ في المخزون";
+    $lang['edit_stock_data'] = "تعديل بيانات المخزون";
+    $lang['profit'] = "الربح: ";
+    $lang['loss'] = "خسارة!";
+    $lang['remove_med_title'] = "إزالة الدواء من المخزون؟";
+    $lang['remove_med_text'] = "لن تتمكن من التراجع عن هذا، وسيتم مسحه من قائمة أدويتك المعروضة للمرضى، وإذا كان موجوداً في طلبات سابقة سيتم تعديل سعرها.";
+    $lang['yes_remove'] = "نعم، إزالة";
+    $lang['barcode_feature_soon'] = "ميزة 'مسح الباركود والإضافة اليدوية' قيد التطوير حالياً. سيتم إتاحتها قريباً لتسهيل إضافة الأدوية غير الموجودة في الكتالوج باستخدام كاميرا الجهاز.";
+
+    // إدارة الطلبات | Orders Page
     $lang['manage_orders'] = "إدارة الطلبات";
     $lang['filter_processing'] = "جاري التجهيز";
     $lang['filter_delivered'] = "مكتملة";
-    $lang['status_pending'] = "بانتظار الموافقة";
-    $lang['status_processing'] = "قيد التجهيز والتوصيل";
-    $lang['status_delivered'] = "تم التسليم";
+    $lang['status_pending'] = "قيد الانتظار";
+    $lang['status_processing'] = "جاري التجهيز";
+    $lang['status_delivered'] = "مكتمل";
     $lang['status_rejected'] = "مرفوض";
     $lang['order_number'] = "رقم الطلب";
+    $lang['order_date'] = "تاريخ الطلب";
     $lang['rx_alert'] = "يحتوي على أدوية مراقبة (يستلزم مراجعة الوصفة)";
     $lang['details_btn'] = "التفاصيل";
     $lang['delivered_btn'] = "تم التوصيل";
     $lang['no_orders'] = "لا توجد طلبات";
-    $lang['no_orders_desc'] = "لم يتم العثور على أي طلبات مطابقة للفلتر الحالي.";
+    $lang['no_orders_desc'] = "لا يوجد طلبات مطابقة للبحث أو الفلتر";
+    $lang['try_changing_search'] = "حاول تغيير كلمة البحث أو اختيار فلتر آخر.";
 
-    // نافذة تفاصيل الطلب (Modal)
+    // نافذة تفاصيل الطلب | Order Details Modal
     $lang['order_details'] = "تفاصيل الطلب";
     $lang['customer_info'] = "بيانات العميل";
     $lang['payment_summary'] = "ملخص الدفع";
@@ -207,12 +249,12 @@ if ($current_lang == 'ar') {
     $lang['item_total'] = "الإجمالي";
     $lang['attached_rx'] = "الوصفة الطبية المرفقة (مطلوبة)";
     $lang['rx_protocol'] = "بناءً على بروتوكول وزارة الصحة، يرجى التحقق مما يلي قبل قبول الطلب:";
-    $lang['rx_verify_check'] = "أقر بأني راجعت الوصفة الطبية، وصحتها، ومطابقتها للأدوية المطلوبة.";
+    $lang['rx_verify_check'] = "أقر بأني راجعت الوصفة الطبية وصحتها.";
     $lang['close'] = "إغلاق";
     $lang['accept_prepare'] = "قبول وتجهيز";
     $lang['confirm_delivery'] = "تأكيد التسليم";
 
-    // كلمات إضافية للنافذة (Modal Translations)
+    // كلمات إضافية للنافذة | Extra Modal Translations
     $lang['order_summary'] = "ملخص الطلب";
     $lang['purchases'] = "المشتريات";
     $lang['prescription_rx'] = "الوصفة الطبية (Rx)";
@@ -224,16 +266,32 @@ if ($current_lang == 'ar') {
     $lang['no_phone'] = "لا يوجد رقم";
     $lang['quantity'] = "الكمية:";
 
-    // كلمات صفحة الطلبات (Orders Page)
-    $lang['filter_rejected'] = "ملغي";
-    $lang['status_processing'] = "هل أنت متأكد من قبول الطلب وبدء تجهيزه؟";
-    $lang['status_rejected'] = "هل أنت متأكد من إلغاء هذا الطلب؟";
+    // تنبيهات إدارة الطلبات | Orders Page Javascript Alerts
+    $lang['rejection_reason_title'] = "سبب إلغاء الطلب:";
+    $lang['controlled_meds_rx'] = "أدوية مراقبة (Rx)";
+    $lang['rx_verification_required'] = "يلزم التحقق من الوصفة";
+    $lang['extra_attachment_rx'] = "مرفق إضافي (وصفة)";
+    $lang['security_alert'] = "تنبيه أمني";
+    $lang['rx_review_required_alert'] = "يجب مراجعة الوصفة الطبية وإقرار صحتها قبل قبول الطلب.";
+    $lang['reject_order_title'] = "رفض الطلب؟";
+    $lang['reject_order_text'] = "يرجى كتابة سبب الرفض (سيظهر للمريض):";
+    $lang['reject_order_placeholder'] = "مثال: الدواء غير متوفر حالياً...";
+    $lang['confirm_reject'] = "تأكيد الرفض";
+    $lang['reject_reason_required'] = "يجب كتابة سبب الرفض لإشعار المريض!";
+    $lang['canceled_without_reason'] = "تم الإلغاء بدون كتابة سبب";
+    $lang['accept_order_title'] = "قبول الطلب؟";
+    $lang['accept_order_text'] = "سيتم إشعار المريض بأنك تقوم بتجهيز الطلب.";
+    $lang['yes_accept'] = "نعم، أقبل";
+    $lang['confirm_delivery_title'] = "تأكيد التسليم؟";
+    $lang['confirm_delivery_text'] = "هل تم تسليم الطلب للعميل؟";
+    $lang['yes_delivered'] = "نعم، تم التسليم";
+
+    $lang['filter_rejected'] = "مرفوض";
     $lang['delivery_location'] = "موقع التوصيل (الخريطة)";
     $lang['verify_rx_btn'] = "اعتماد الوصفة";
     $lang['reject_rx_btn'] = "رفض الوصفة";
     $lang['no_location_provided'] = "لم يقم المريض بتحديد موقعه على الخريطة";
-
-    $lang['all_orders'] = "جميع الطلبات";
+    $lang['all_orders'] = "الكل";
     $lang['search_order_patient'] = "ابحث برقم الطلب أو المريض...";
     $lang['customer_contact'] = "العميل / الاتصال";
     $lang['address_col'] = "العنوان";
@@ -242,7 +300,7 @@ if ($current_lang == 'ar') {
 
 } else {
 
-    // Login Page
+    // تسجيل الدخول | Login Page
     $lang['login_title'] = "Login";
     $lang['login_subtitle'] = "Your gateway to professional pharmacy management";
     $lang['email'] = "Email Address";
@@ -251,7 +309,7 @@ if ($current_lang == 'ar') {
     $lang['new_account'] = "New Pharmacy?";
     $lang['register_link'] = "Submit Join Request";
 
-    //register page
+    // تسجيل صيدلية جديدة | Register Page
     $lang['email_exists_error'] = "Sorry, this email is already registered!";
     $lang['location_error'] = "Please select the pharmacy location accurately on the map.";
     $lang['registration_success'] = "Your join request has been submitted successfully! Please wait for admin approval.";
@@ -264,8 +322,6 @@ if ($current_lang == 'ar') {
     $lang['first_name'] = "First Name";
     $lang['last_name'] = "Last Name";
     $lang['phone'] = "Phone Number";
-    $lang['email'] = "Email Address";
-    $lang['password'] = "Password";
     $lang['pharmacy_info'] = "Pharmacy Information";
     $lang['pharmacy_name'] = "Official Pharmacy Name";
     $lang['license_num'] = "License Number from Ministry of Health";
@@ -282,7 +338,7 @@ if ($current_lang == 'ar') {
     $lang['success'] = "Request completed!";
     $lang['error'] = "Error";
 
-    // أخطاء تسجيل الدخول (إنجليزي)
+    // أخطاء تسجيل الدخول | Login Errors
     $lang['err_patient'] = "Sorry, Web system is for Pharmacists & Admin only. Please use the mobile app.";
     $lang['err_pending'] = "Your account is pending, please wait for admin approval.";
     $lang['err_pass'] = "Incorrect password.";
@@ -290,8 +346,7 @@ if ($current_lang == 'ar') {
     $lang['err_title'] = "Login Error";
     $lang['ok_btn'] = "OK";
 
-
-    // General
+    // عام ومصطلحات متكررة | General & Common Terms
     $lang['dashboard'] = "Dashboard";
     $lang['pharmacies'] = "Pharmacies";
     $lang['patients'] = "Patients";
@@ -305,9 +360,7 @@ if ($current_lang == 'ar') {
     $lang['switch_lang_text'] = "عربي";
     $lang['switch_lang_code'] = "ar";
 
-    // Admin Pages
-
-    // Dashboard
+    // لوحة التحكم (المدير) | Admin Dashboard
     $lang['admin_panel'] = "Admin Panel";
     $lang['pharmacy_system'] = "Pharmacy Management System";
     $lang['active_pharma'] = "Active Pharmacies";
@@ -322,7 +375,7 @@ if ($current_lang == 'ar') {
     $lang['pharma_info'] = "Pharmacy Info";
     $lang['click_map'] = "Click on any point on the map to view details.";
 
-    // Pharmacy Info (JS)
+    // معلومات الصيدلية في الخريطة | Pharmacy Info (JS Map)
     $lang['pharmacist_name'] = "Pharmacist Name";
     $lang['address'] = "Address";
     $lang['working_hours'] = " Working Hours";
@@ -330,30 +383,38 @@ if ($current_lang == 'ar') {
     $lang['license_num'] = "License Number";
     $lang['not_available'] = "N/A";
 
-    // Pharmacies Table
+    // جدول إدارة الصيدليات (الأدمن) | Pharmacies Table (Admin)
     $lang['pharmacy_name'] = "Pharmacy";
     $lang['owner'] = "Owner";
-    $lang['phone'] = "Phone";
+    $lang['contact_info'] = "Contact";
     $lang['location_work'] = "Location / Hours";
     $lang['join_date'] = "Join Date";
     $lang['active'] = "Active";
     $lang['pending'] = "Pending";
     $lang['search_pharmacy'] = "Search pharmacy by name...";
+    $lang['approve_activate'] = "Approve & Activate";
+    $lang['reject_request'] = "Reject Request";
+    $lang['suspend_temp'] = "Suspend Temporarily";
+    $lang['delete_permanently'] = "Delete Permanently";
+    $lang['no_matching_pharmacies'] = "No matching pharmacies found";
+    $lang['try_changing_search'] = "Try changing the search keyword or selecting another filter.";
 
-    // Patients Table
+    // جدول إدارة المرضى | Patients Table
     $lang['patient_name'] = "Patient";
-    $lang['contact_info'] = "Contact Info";
     $lang['age'] = "Age";
     $lang['years'] = "years";
     $lang['not_specified'] = "Not specified";
     $lang['search_patient'] = "Search patient by name...";
     $lang['no_data'] = "No data available";
+    $lang['delete_patient'] = "Delete Patient";
+    $lang['no_matching_patients'] = "No matching patients found";
+    $lang['check_patient_name'] = "Make sure the name is spelled correctly.";
 
-    // Admin vs Pharmacist
+    // الأدوار | Roles
     $lang['admin'] = "Admin";
     $lang['pharmacist'] = "Pharmacist";
 
-    // SweetAlert Translations
+    // تنبيهات الحذف والإيقاف | SweetAlert Translations
     $lang['swal_title'] = "Are you sure?";
     $lang['swal_text'] = "You won't be able to revert this!";
     $lang['swal_confirm'] = "Yes, delete it!";
@@ -361,13 +422,12 @@ if ($current_lang == 'ar') {
     $lang['suspend_title'] = "Suspend Account?";
     $lang['suspend_text'] = "Pharmacy will be temporarily paused.";
     $lang['suspend_confirm'] = "Yes, Suspend";
+    $lang['coming_soon_title'] = "Coming Soon!";
 
-    // Pharmacy Pages
-
-    // Dashboard
+    // لوحة التحكم (الصيدلي) | Pharmacist Dashboard
     $lang['todays_sales'] = "Today's Sales";
-    $lang['currency'] = "₪"; 
-    $lang['pending_orders'] = "Pending"; // تم التعديل لحل مشكلة الفلتر
+    $lang['currency'] = "₪";
+    $lang['pending_orders'] = "Pending";
     $lang['low_stock_items'] = "Low Stock Items";
     $lang['expiring_soon'] = "Expiring Soon";
     $lang['recent_orders'] = "Recent Orders";
@@ -384,11 +444,23 @@ if ($current_lang == 'ar') {
     $lang['stock_excellent'] = "Stock is excellent, no shortages!";
     $lang['manage_inventory'] = "Manage Inventory";
     $lang['no_low_stock_items'] = "No low stock items in inventory.";
+    $lang['new_badge'] = "New";
+    $lang['needs_your_approval'] = "Needs your approval!";
+    $lang['no_pending_orders_now'] = "No pending orders at the moment.";
+    $lang['items_word'] = "Items";
+    $lang['qty_word'] = "Qty";
+    $lang['update_qty'] = "Update Qty";
+    $lang['expiry_alerts'] = "Expiry Alerts";
+    $lang['expired_word'] = "Expired";
+    $lang['soon_word'] = "Soon";
+    $lang['update_expiry'] = "Update Expiry";
+    $lang['all_meds_valid'] = "All medicines are perfectly valid";
 
-    // Medicines & Stock Page
+    // صفحة الأدوية والمخزون | Medicines & Stock Page
     $lang['product_inventory'] = "Product Inventory";
-    $lang['add_product'] = "Add Product";
-    $lang['search_product'] = "Search products by name...";
+    $lang['search_inventory_placeholder'] = "Search your inventory (Name, Barcode)...";
+    $lang['add_med_to_stock'] = "Add Med to Stock";
+    $lang['add_new_med_to_stock'] = "Add New Med to Stock";
     $lang['product'] = "Product";
     $lang['category'] = "Category";
     $lang['stock'] = "Stock";
@@ -396,42 +468,67 @@ if ($current_lang == 'ar') {
     $lang['cost'] = "Cost";
     $lang['margin'] = "Margin";
     $lang['expiry'] = "Expiry Date";
-    $lang['add_new_product'] = "Add New Product";
-    $lang['edit_product'] = "Edit Product";
-    $lang['product_name'] = "Product Name";
-    $lang['min_stock'] = "Minimum Stock";
-    $lang['description'] = "Description / Notes";
-    $lang['product_image'] = "Product Image";
-    $lang['is_controlled'] = "Controlled Med (Requires Prescription)";
-    $lang['cancel'] = "Cancel";
-    $lang['confirm'] = "Confirm";
     $lang['uncategorized'] = "Uncategorized";
-    $lang['select_category'] = "Select a category...";
-    $lang['controlled_description'] = "This is a controlled medicine and requires a prescription.";
-    $lang['no_medicines'] = "No medicines in stock currently";
-    $lang['no_medicines_description'] = "Start by adding your first medicine to your inventory using the button above to start receiving orders.";
-    $lang['select_image'] = "Select Image";
-    $lang['file_selected'] = "File selected:";
-    $lang['select_file'] = "Select File";
+    $lang['no_matching_meds'] = "No matching medicines in your inventory";
+    $lang['try_different_search_add'] = "Try a different name or add a new medicine to your stock.";
+    $lang['edit_price_qty'] = "Edit Price/Quantity";
+    $lang['remove_from_stock'] = "Remove from Stock";
+    $lang['expired_since'] = "Expired since ";
+    $lang['expires_today'] = "Expires today!";
+    $lang['remaining'] = "Remaining ";
+    $lang['day_s'] = " days";
 
-    // -----------------------------------------
-    // إضافة: صفحة إدارة الطلبات (Orders Page)
-    // -----------------------------------------
+    // نافذة إضافة وتعديل الدواء | Modal Add/Edit Stock
+    $lang['med_exists_error'] = "This medicine already exists in your inventory! You can edit its quantity instead of adding it again.";
+    $lang['search_in_catalog'] = "1. Search for medicine in the unified catalog:";
+    $lang['scan_barcode_manual'] = "Scan Barcode / Add Manually";
+    $lang['all_categories'] = "All Categories";
+    $lang['search_med_name_scientific'] = "Type brand or scientific name...";
+    $lang['suggested_meds'] = "Suggested Medicines:";
+    $lang['latest_added_meds'] = "Latest medicines added to catalog:";
+    $lang['custom_search_results'] = "Custom search results:";
+    $lang['cost_price_val'] = "Cost: ";
+    $lang['no_matching_meds_catalog'] = "No matching medicines found.";
+    $lang['check_name_manual_soon'] = "Check the name, manual feature will be available soon.";
+    $lang['stock_price_alerts_settings'] = "Stock, Price, & Alerts Settings";
+    $lang['cost_price_ils'] = "Cost Price (₪)";
+    $lang['profit_0'] = "Profit: 0%";
+    $lang['cost_determined_admin'] = "Cost is determined by admin";
+    $lang['sell_price_public'] = "Selling Price (₪)";
+    $lang['current_qty'] = "Current Available Quantity";
+    $lang['low_stock_alert_limit'] = "Low Stock Alert Limit";
+    $lang['expiry_date_label'] = "Expiry Date";
+    $lang['expiry_alert_months_label'] = "Expiry Alert Before (Months)";
+    $lang['months'] = "Months";
+    $lang['close_window'] = "Close Window";
+    $lang['back_to_search'] = "Back to Search";
+    $lang['save_to_stock'] = "Save to Stock";
+    $lang['edit_stock_data'] = "Edit Stock Data";
+    $lang['profit'] = "Profit: ";
+    $lang['loss'] = "Loss!";
+    $lang['remove_med_title'] = "Remove Medicine from Stock?";
+    $lang['remove_med_text'] = "You won't be able to revert this, and it will be removed from your patient-facing list. If present in previous orders, their prices will be adjusted.";
+    $lang['yes_remove'] = "Yes, Remove";
+    $lang['barcode_feature_soon'] = "The 'Barcode Scan & Manual Add' feature is currently under development. It will be available soon to easily add unlisted medicines using the camera.";
+
+    // إدارة الطلبات | Orders Page
     $lang['manage_orders'] = "Orders Management";
     $lang['filter_processing'] = "Processing";
     $lang['filter_delivered'] = "Delivered";
-    $lang['status_pending'] = "Awaiting Approval";
-    $lang['status_processing'] = "Processing & Delivery";
-    $lang['status_delivered'] = "Delivered";
+    $lang['status_pending'] = "Pending";
+    $lang['status_processing'] = "Processing";
+    $lang['status_delivered'] = "Completed";
     $lang['status_rejected'] = "Rejected";
     $lang['order_number'] = "Order ID";
+    $lang['order_date'] = "Order Date";
     $lang['rx_alert'] = "Contains Controlled Meds (Rx Review Required)";
     $lang['details_btn'] = "Details";
     $lang['delivered_btn'] = "Delivered";
     $lang['no_orders'] = "No Orders Found";
     $lang['no_orders_desc'] = "No orders match the current filter criteria.";
+    $lang['try_changing_search'] = "Try changing the search keyword or selecting another filter.";
 
-    // Order Details Modal
+    // نافذة تفاصيل الطلب | Order Details Modal
     $lang['order_details'] = "Order Details";
     $lang['customer_info'] = "Customer Info";
     $lang['payment_summary'] = "Payment Summary";
@@ -442,12 +539,12 @@ if ($current_lang == 'ar') {
     $lang['item_total'] = "Total";
     $lang['attached_rx'] = "Attached Prescription (Required)";
     $lang['rx_protocol'] = "Based on health protocols, please verify the following before accepting:";
-    $lang['rx_verify_check'] = "I have reviewed the prescription and assume professional responsibility.";
+    $lang['rx_verify_check'] = "I have reviewed and verified the prescription.";
     $lang['close'] = "Close";
     $lang['accept_prepare'] = "Accept & Prepare";
     $lang['confirm_delivery'] = "Confirm Delivery";
 
-    // كلمات إضافية للنافذة (Modal Translations)
+    // كلمات إضافية للنافذة | Extra Modal Translations
     $lang['order_summary'] = "Order Summary";
     $lang['purchases'] = "Purchases";
     $lang['prescription_rx'] = "Prescription (Rx)";
@@ -459,20 +556,38 @@ if ($current_lang == 'ar') {
     $lang['no_phone'] = "No phone number";
     $lang['quantity'] = "Qty:";
 
-    // Orders Page Translations
+    // تنبيهات إدارة الطلبات | Orders Page Javascript Alerts
+    $lang['rejection_reason_title'] = "Reason for Cancellation:";
+    $lang['controlled_meds_rx'] = "Controlled Meds (Rx)";
+    $lang['rx_verification_required'] = "Prescription verification required";
+    $lang['extra_attachment_rx'] = "Extra Attachment (Prescription)";
+    $lang['security_alert'] = "Security Alert";
+    $lang['rx_review_required_alert'] = "You must review and verify the prescription before accepting the order.";
+    $lang['reject_order_title'] = "Reject Order?";
+    $lang['reject_order_text'] = "Please write the reason for rejection (will be shown to the patient):";
+    $lang['reject_order_placeholder'] = "e.g., Medicine is currently out of stock...";
+    $lang['confirm_reject'] = "Confirm Rejection";
+    $lang['reject_reason_required'] = "You must provide a reason for rejection to notify the patient!";
+    $lang['canceled_without_reason'] = "Canceled without providing a reason";
+    $lang['accept_order_title'] = "Accept Order?";
+    $lang['accept_order_text'] = "The patient will be notified that you are preparing the order.";
+    $lang['yes_accept'] = "Yes, Accept";
+    $lang['confirm_delivery_title'] = "Confirm Delivery?";
+    $lang['confirm_delivery_text'] = "Has the order been delivered to the customer?";
+    $lang['yes_delivered'] = "Yes, Delivered";
+
     $lang['filter_rejected'] = "Rejected";
-    $lang['status_processing'] = "Are you sure you want to accept and prepare this order?";
-    $lang['status_rejected'] = "Are you sure you want to reject this order?";
     $lang['delivery_location'] = "Delivery Location (Map)";
     $lang['verify_rx_btn'] = "Approve Rx";
     $lang['reject_rx_btn'] = "Reject Rx";
     $lang['no_location_provided'] = "Patient did not provide a map location";
-
-    $lang['all_orders'] = "All Orders";
+    $lang['all_orders'] = "All";
     $lang['search_order_patient'] = "Search by Order ID or Patient...";
     $lang['customer_contact'] = "Customer / Contact";
     $lang['address_col'] = "Address";
     $lang['items_col'] = "Items";
     $lang['total_amount'] = "Total";
+
 }
+
 ?>
