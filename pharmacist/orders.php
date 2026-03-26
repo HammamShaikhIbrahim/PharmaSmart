@@ -759,6 +759,7 @@ include('../includes/sidebar.php');
         const order = JSON.parse(jsonString);
         currentOrderData = order;
 
+        
         document.getElementById('modalOrderId').innerText = `#${order.id}`;
         document.getElementById('modalOrderDate').innerText = order.date;
         document.getElementById('modalPatientName').innerText = order.patient;

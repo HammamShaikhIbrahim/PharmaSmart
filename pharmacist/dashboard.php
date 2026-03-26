@@ -9,6 +9,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role_id'] != 2) {
     exit();
 }
 
+
 $pharmacist_id = $_SESSION['user_id'];
 
 // ==========================================

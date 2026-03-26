@@ -585,6 +585,7 @@ include('../includes/sidebar.php');
     let fetchTimeoutId;
     let searchSysTimeoutId;
 
+    
     // 💡 الدالة الجديدة للتنبيه
     function showBarcodeComingSoon() {
         Swal.fire({
