@@ -224,6 +224,9 @@ include('../includes/sidebar.php');
     html[dir="rtl"] #filter-pending:checked~.glass-glider { transform: translateX(-200%); }
 </style>
 
+
+
+
 <main class="flex-1 p-8 bg-blue-50 dark:bg-slate-900 h-full overflow-y-auto transition-colors duration-300 relative">
     <?php include('../includes/topbar.php'); ?>
 

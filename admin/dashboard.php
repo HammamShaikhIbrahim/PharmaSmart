@@ -427,5 +427,7 @@ html[dir="rtl"] #filter-pending:checked ~ .glass-glider {
     lucide.createIcons();
 </script>
 
+
+
 <!-- استدعاء ملف الفوتر -->
 <?php include('../includes/footer.php'); ?>
