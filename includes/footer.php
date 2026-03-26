@@ -13,5 +13,6 @@
 
         isDark: document.documentElement.classList.contains('dark')
     };
+    
     lucide.createIcons();
 </script>

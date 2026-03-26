@@ -1,4 +1,5 @@
 <?php
+
 // تحديد الصفحة الحالية
 $current_page = basename($_SERVER['PHP_SELF']);
 
@@ -85,10 +86,10 @@ if ($role_id == 1) {
             <a href="#" onclick="event.preventDefault(); showComingSoon('admin_catalog');" class="<?php echo $link_classes; ?> justify-between opacity-80 hover:opacity-100 border border-transparent hover:border-amber-500/30">
                 <div class="flex items-center gap-3">
                     <i data-lucide="database" class="flex-shrink-0 text-amber-400"></i>
-                    <span><?php echo isset($lang['system_medicines']) ? $lang['system_medicines'] : 'مخزون الأدوية'; ?></span>
+                    <span><?php echo $lang['system_medicines']; ?></span>
                 </div>
                 <span class="bg-amber-500/20 text-amber-300 text-[9px] font-black px-2 py-0.5 rounded-full border border-amber-500/30 flex-shrink-0 uppercase tracking-widest">
-                    <?php echo (isset($dir) && $dir == 'rtl') ? 'قريباً' : 'SOON'; ?>
+                    <?php echo $lang['coming_soon_badge']; ?>
                 </span>
             </a>
 
@@ -96,10 +97,10 @@ if ($role_id == 1) {
             <a href="#" onclick="event.preventDefault(); showComingSoon('admin_reports');" class="<?php echo $link_classes; ?> justify-between opacity-80 hover:opacity-100 border border-transparent hover:border-amber-500/30">
                 <div class="flex items-center gap-3">
                     <i data-lucide="chart-line" class="flex-shrink-0 text-amber-400"></i>
-                    <span><?php echo isset($lang['reports']) ? $lang['reports'] : 'التقارير '; ?></span>
+                    <span><?php echo $lang['reports']; ?></span>
                 </div>
                 <span class="bg-amber-500/20 text-amber-300 text-[9px] font-black px-2 py-0.5 rounded-full border border-amber-500/30 flex-shrink-0 uppercase tracking-widest">
-                    <?php echo (isset($dir) && $dir == 'rtl') ? 'قريباً' : 'SOON'; ?>
+                    <?php echo $lang['coming_soon_badge']; ?>
                 </span>
             </a>
 
@@ -117,47 +118,50 @@ if ($role_id == 1) {
             </a>
 
             <a href="../pharmacist/orders.php" class="<?php echo ($current_page == 'orders.php') ? $active_classes : $link_classes; ?>">
-                <i data-lucide="shopping-bag" class="flex-shrink-0"></i> <span><?php echo isset($lang['orders']) ? $lang['orders'] : 'الطلبات'; ?></span>
+                <i data-lucide="shopping-bag" class="flex-shrink-0"></i> <span><?php echo $lang['orders']; ?></span>
             </a>
 
             <!-- 🚀 ميزة المحادثات (قريباً) -->
             <a href="#" onclick="event.preventDefault(); showComingSoon('chat');" class="<?php echo $link_classes; ?> justify-between opacity-80 hover:opacity-100 border border-transparent hover:border-amber-500/30">
                 <div class="flex items-center gap-3">
                     <i data-lucide="message-square" class="flex-shrink-0 text-amber-400"></i>
-                    <span><?php echo isset($lang['chats']) ? $lang['chats'] : 'المحادثات'; ?></span>
+                    <span><?php echo $lang['chats']; ?></span>
                 </div>
                 <span class="bg-amber-500/20 text-amber-300 text-[9px] font-black px-2 py-0.5 rounded-full border border-amber-500/30 flex-shrink-0 uppercase tracking-widest">
-                    <?php echo (isset($dir) && $dir == 'rtl') ? 'قريباً' : 'SOON'; ?>
+                    <?php echo $lang['coming_soon_badge']; ?>
                 </span>
             </a>
+            
             <!-- 🚀 التقارير الشاملة للصيدلية (قريباً) -->
             <a href="#" onclick="event.preventDefault(); showComingSoon('pharmacist_reports');" class="<?php echo $link_classes; ?> justify-between opacity-80 hover:opacity-100 border border-transparent hover:border-amber-500/30">
                 <div class="flex items-center gap-3">
                     <i data-lucide="chart-line" class="flex-shrink-0 text-amber-400"></i>
-                    <span><?php echo isset($lang['reports']) ? $lang['reports'] : 'التقارير '; ?></span>
+                    <span><?php echo $lang['reports']; ?></span>
                 </div>
                 <span class="bg-amber-500/20 text-amber-300 text-[9px] font-black px-2 py-0.5 rounded-full border border-amber-500/30 flex-shrink-0 uppercase tracking-widest">
-                    <?php echo (isset($dir) && $dir == 'rtl') ? 'قريباً' : 'SOON'; ?>
+                    <?php echo $lang['coming_soon_badge']; ?>
                 </span>
             </a>
+            
             <!-- 🚀  المبيعات-->
             <a href="#" onclick="event.preventDefault(); showComingSoon('sales');" class="<?php echo $link_classes; ?> justify-between opacity-80 hover:opacity-100 border border-transparent hover:border-amber-500/30">
                 <div class="flex items-center gap-3">
                     <i data-lucide="calculator" class="flex-shrink-0 text-amber-400"></i>
-                    <span><?php echo isset($lang['sales']) ? $lang['sales'] : 'المبيعات'; ?></span>
+                    <span><?php echo $lang['sales']; ?></span>
                 </div>
                 <span class="bg-amber-500/20 text-amber-300 text-[9px] font-black px-2 py-0.5 rounded-full border border-amber-500/30 flex-shrink-0 uppercase tracking-widest">
-                    <?php echo (isset($dir) && $dir == 'rtl') ? 'قريباً' : 'SOON'; ?>
+                    <?php echo $lang['coming_soon_badge']; ?>
                 </span>
             </a>
+            
             <!-- 🚀 الموردين -->
             <a href="#" onclick="event.preventDefault(); showComingSoon('suppliers');" class="<?php echo $link_classes; ?> justify-between opacity-80 hover:opacity-100 border border-transparent hover:border-amber-500/30">
                 <div class="flex items-center gap-3">
                     <i data-lucide="truck" class="flex-shrink-0 text-amber-400"></i>
-                    <span><?php echo isset($lang['suppliers']) ? $lang['suppliers'] : 'الموردين'; ?></span>
+                    <span><?php echo $lang['suppliers']; ?></span>
                 </div>
                 <span class="bg-amber-500/20 text-amber-300 text-[9px] font-black px-2 py-0.5 rounded-full border border-amber-500/30 flex-shrink-0 uppercase tracking-widest">
-                    <?php echo (isset($dir) && $dir == 'rtl') ? 'قريباً' : 'SOON'; ?>
+                    <?php echo $lang['coming_soon_badge']; ?>
                 </span>
             </a>
 
@@ -175,42 +179,29 @@ if ($role_id == 1) {
 <!-- سكربت رسائل (قريباً) الديناميكي -->
 <script>
     function showComingSoon(feature) {
-        const isRtl = document.documentElement.dir === 'rtl' || document.documentElement.lang === 'ar';
-        const titleText = isRtl ? 'قريباً جداً!' : 'Coming Soon!';
-        const btnText = isRtl ? 'حسناً' : 'OK';
+        const titleText = "<?php echo $lang['coming_soon_title']; ?>";
+        const btnText = "<?php echo $lang['ok_btn']; ?>";
 
         // 💡 تحديد لون الزر بناءً على دور المستخدم (أزرق للأدمن، أخضر للصيدلاني)
         const isPharmacist = <?php echo ($role_id == 2) ? 'true' : 'false'; ?>;
         const btnColor = isPharmacist ? '#0A7A48' : '#048AC1';
         let bodyText = '';
 
-        // تحديد الرسالة بناءً على الزر المضغوط
+        // تحديد الرسالة بناءً على الزر المضغوط باستخدام متغيرات اللغة
         if (feature === 'admin_catalog') {
-            bodyText = isRtl ?
-                'جاري العمل على واجهة إدارة "الكتالوج الموحد" والتي ستمكنك من (إضافة، تعديل، إخفاء) الأدوية والتصنيفات المركزية للمنصة.' :
-                'The System Medicines Catalog management is under development.';
+            bodyText = "<?php echo $lang['msg_admin_catalog']; ?>";
         } else if (feature === 'admin_reports') {
-            bodyText = isRtl ?
-                'نعمل على تصميم لوحة "التقارير الشاملة" لتعرض لك إحصائيات المبيعات، نمو المنصة، والمنتجات الأكثر طلباً في رسوم بيانية تفاعلية.' :
-                'Global Reports and Analytics dashboard is under development.';
+            bodyText = "<?php echo $lang['msg_admin_reports']; ?>";
         } else if (feature === 'chat') {
-            bodyText = isRtl ?
-                'ميزة المحادثات المباشرة قيد التطوير وسيتم إتاحتها قريباً لتسهيل تواصلك المباشر والآمن مع المرضى.' :
-                'The chat feature is under development and will be available soon to help you communicate with patients.';
+            bodyText = "<?php echo $lang['msg_chat']; ?>";
         } else if (feature === 'pharmacist_reports') {
-            bodyText = isRtl ?
-                'نعمل على تصميم لوحة "التقارير الشاملة" لتعرض لك إحصائيات المبيعات، نمو الصيدلية والمنتجات الأكثر طلباً في رسوم بيانية تفاعلية.' :
-                'Pharmacist Reports and Analytics dashboard is under development.';
+            bodyText = "<?php echo $lang['msg_pharmacist_reports']; ?>";
         } else if (feature === 'sales') {
-            bodyText = isRtl ?
-                'ميزة إدارة المشتريات والمبيعات قيد التطوير وسيتم إتاحتها قريباً لتسهيل تتبع عمليات البيع والشراء في الصيدلية.' :
-                'The sales management feature is under development and will be available soon to help you track sales and purchases in your pharmacy.';
+            bodyText = "<?php echo $lang['msg_sales']; ?>";
         } else if (feature === 'suppliers') {
-            bodyText = isRtl ?
-                'ميزة إدارة الموردين قيد التطوير وسيتم إتاحتها قريباً لتسهيل تتبع معلومات الموردين والتعاملات معهم.' :
-                'The suppliers management feature is under development and will be available soon to help you track supplier information and interactions.';
+            bodyText = "<?php echo $lang['msg_suppliers']; ?>";
         } else {
-            bodyText = isRtl ? 'هذه الميزة قيد التطوير وسيتم إتاحتها قريباً.' : 'This feature is under development.';
+            bodyText = "<?php echo $lang['msg_feature_default']; ?>";
         }
 
         if (typeof Swal !== 'undefined') {

@@ -16,6 +16,7 @@ $fullname = $user_data['Fname'] . ' ' . $user_data['Lname'];
 
 
 
+
 // إعدادات افتراضية (للأدمن)
 
 $display_name = $fullname;
