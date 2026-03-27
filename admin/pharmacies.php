@@ -1,5 +1,6 @@
 <?php
 
+
 // ==========================================
 // 1. الإعدادات الأساسية والحماية
 // ==========================================
@@ -61,10 +62,10 @@ if (isset($_GET['ajax'])) {
     ob_start();
     if (mysqli_num_rows($result) > 0) {
         while ($row = mysqli_fetch_assoc($result)) { ?>
-            <tr class="hover:bg-blue-50 dark:hover:bg-[#011C3B]/50 transition-colors duration-200 group cursor-pointer border-b border-transparent hover:border-gray-100 dark:hover:border-slate-700">
+            <tr class="hover:bg-blue-50 dark:hover:bg-[#011C3B]/50 transition-colors duration-200 group border-transparent hover:border-gray-100 dark:hover:border-slate-700">
                 <td class="p-6">
                     <div class="flex items-center gap-3">
-                        <img src="../uploads/<?php echo $row['Logo'] ? $row['Logo'] : 'default.png'; ?>" class="w-12 h-12 rounded-xl border border-gray-200 dark:border-slate-600 object-cover shadow-sm bg-white">
+                        <img src="../uploads/logos/<?php echo $row['Logo'] ? $row['Logo'] : 'default.png'; ?>" class="w-12 h-12 rounded-xl border border-gray-200 dark:border-slate-600 object-cover shadow-sm bg-white">
                         <span class="font-bold text-gray-800 dark:text-white"><?php echo htmlspecialchars($row['PharmacyName']); ?></span>
                     </div>
                 </td>
@@ -182,9 +183,17 @@ include('../includes/sidebar.php');
         color: #94a3b8;
     }
 
-    label[for="filter-all"]:hover { color: #048AC1; }
-    label[for="filter-active"]:hover { color: #10b981; }
-    label[for="filter-pending"]:hover { color: #f59e0b; }
+    label[for="filter-all"]:hover {
+        color: #048AC1;
+    }
+
+    label[for="filter-active"]:hover {
+        color: #10b981;
+    }
+
+    label[for="filter-pending"]:hover {
+        color: #f59e0b;
+    }
 
     .glass-radio-group input:checked+label {
         color: #ffffff !important;
@@ -217,11 +226,16 @@ include('../includes/sidebar.php');
         transform: translateX(200%);
         background: #f59e0b;
         box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);
-    } 
-    
+    }
 
-    html[dir="rtl"] #filter-active:checked~.glass-glider { transform: translateX(-100%); }
-    html[dir="rtl"] #filter-pending:checked~.glass-glider { transform: translateX(-200%); }
+
+    html[dir="rtl"] #filter-active:checked~.glass-glider {
+        transform: translateX(-100%);
+    }
+
+    html[dir="rtl"] #filter-pending:checked~.glass-glider {
+        transform: translateX(-200%);
+    }
 </style>
 
 
@@ -284,7 +298,7 @@ include('../includes/sidebar.php');
                     </tr>
                 </thead>
                 <!-- 💡 محتوى الجدول الذي سيتم تحديثه عبر الـ AJAX -->
-                <tbody id="pharmaciesBody" class="divide-y divide-gray-100 dark:divide-slate-700/50 <?php echo ($dir == 'rtl') ? 'text-right' : 'text-left'; ?>">
+                <tbody id="pharmaciesBody" class="divide-y divide-gray-200 dark:divide-slate-700/50 <?php echo ($dir == 'rtl') ? 'text-right' : 'text-left'; ?>">
                     <!-- سيتم ملؤه بواسطة الجافاسكربت فور تحميل الصفحة -->
                 </tbody>
             </table>

@@ -47,7 +47,7 @@ if (isset($_GET['ajax'])) {
     ob_start();
     if (mysqli_num_rows($result) > 0) {
         while ($row = mysqli_fetch_assoc($result)) { ?>
-            <tr class="hover:bg-[#F0F7FA] dark:hover:bg-[#011C3B]/50 transition-colors duration-200 border-b border-transparent hover:border-gray-100 dark:hover:border-slate-700">
+            <tr class="hover:bg-[#F0F7FA] dark:hover:bg-[#011C3B]/50 transition-colors duration-200 border-transparent hover:border-gray-100 dark:hover:border-slate-700">
                 <td class="p-6">
                     <div class="font-bold text-gray-800 dark:text-white"><?php echo htmlspecialchars($row['Fname'] . ' ' . $row['Lname']); ?></div>
                     <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -201,7 +201,7 @@ include('../includes/sidebar.php');
                     </tr>
                 </thead>
                 <!-- سيتم ملؤه بواسطة الـ AJAX -->
-                <tbody id="patientsBody" class="divide-y divide-gray-100 dark:divide-slate-700/50 <?php echo ($dir == 'rtl') ? 'text-right' : 'text-left'; ?>">
+                <tbody id="patientsBody" class="divide-y divide-gray-200 dark:divide-slate-700/50 <?php echo ($dir == 'rtl') ? 'text-right' : 'text-left'; ?>">
                     <!-- الفراغ يعبأ عبر الجافاسكربت -->
                 </tbody>
             </table>
@@ -253,6 +253,7 @@ include('../includes/sidebar.php');
             }
         }, 300);
     }
+    
 
     // جلب البيانات فور تحميل الصفحة لأول مرة
     document.addEventListener('DOMContentLoaded', fetchTableData);
