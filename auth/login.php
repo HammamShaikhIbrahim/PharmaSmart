@@ -9,26 +9,57 @@ if (isset($_POST['login'])) {
     $email = mysqli_real_escape_string($conn, $_POST['email']);
     $password = $_POST['password'];
 
-    $query = "SELECT u.UserID, u.RoleID, u.Password, p.IsApproved
+    // جلب بيانات المستخدم، تم استخدام COALESCE لحل مشكلة أن الأدمن لا يملك IsApproved
+    $query = "SELECT u.UserID, u.RoleID, u.Password, COALESCE(p.IsApproved, -1) AS IsApproved
               FROM User u
               LEFT JOIN Pharmacist p ON u.UserID = p.PharmacistID
               WHERE u.Email = '$email'";
 
     $result = mysqli_query($conn, $query);
 
-    if (mysqli_num_rows($result) == 1) {
+    if ($result && mysqli_num_rows($result) == 1) {
         $user = mysqli_fetch_assoc($result);
-        if ($password === $user['Password']) {
-            if ($user['RoleID'] == 3) {
+
+        // ==================================================
+        // 🚀 بداية آلية التشفير الذكية
+        // ==================================================
+        $isPasswordCorrect = false;
+
+        // 1. التحقق إذا كانت مشفرة بالنظام الجديد
+        if (password_verify($password, $user['Password'])) {
+            $isPasswordCorrect = true;
+        }
+        // 2. التحقق إذا كانت بالنظام القديم (غير مشفرة)، ثم تشفيرها فوراً
+        elseif ($password === $user['Password']) {
+            $isPasswordCorrect = true;
+            $newHash = password_hash($password, PASSWORD_DEFAULT);
+            $uid = (int)$user['UserID'];
+            mysqli_query($conn, "UPDATE User SET Password = '$newHash' WHERE UserID = $uid");
+        }
+        // ==================================================
+        // 🔚 نهاية الآلية
+        // ==================================================
+
+        if ($isPasswordCorrect) {
+            $roleID = (int)$user['RoleID'];
+            $isApproved = (int)$user['IsApproved'];
+
+            if ($roleID == 3) {
                 $error = $lang['err_patient'];
-            } elseif ($user['RoleID'] == 2 && $user['IsApproved'] == 0) {
+            } elseif ($roleID == 2 && $isApproved == 0) {
                 $error = $lang['err_pending'];
+            } elseif ($roleID == 2 && $isApproved == -1) {
+                // 💡 تم استبدال النص الثابت بمتغير اللغة
+                $error = $lang['err_incomplete_account'];
             } else {
                 $_SESSION['user_id'] = $user['UserID'];
-                $_SESSION['role_id'] = $user['RoleID'];
+                $_SESSION['role_id'] = $roleID;
 
-                if ($user['RoleID'] == 1) header("Location: ../admin/dashboard.php");
-                else header("Location: ../pharmacist/dashboard.php");
+                if ($roleID == 1) {
+                    header("Location: ../admin/dashboard.php");
+                } else {
+                    header("Location: ../pharmacist/dashboard.php");
+                }
                 exit();
             }
         } else {
@@ -271,7 +302,6 @@ if (isset($_POST['login'])) {
             }
         }
     </script>
-
 
 </body>
 
