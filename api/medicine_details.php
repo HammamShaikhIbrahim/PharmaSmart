@@ -1,9 +1,7 @@
 <?php
 // ==========================================
-// ملف API لعرض تفاصيل الدواء والصيدليات المتوفر فيها
-// يُوضع في: PharmaSmart_Web/api/medicine_details.php
+// تفاصيل الدواء والصيدليات المتوفر فيها | Medicine Details & Available Pharmacies
 // ==========================================
-// 💡 تم تحديثه ليُرجع StockID و PharmacistID اللذان تحتاجهما السلة
 
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
@@ -17,10 +15,12 @@ if ($id <= 0) {
     exit();
 }
 
-// 1. جلب تفاصيل الدواء من الكتالوج الموحد
-$medQuery = "SELECT sm.*, c.NameAR AS CategoryName 
-             FROM SystemMedicine sm 
-             LEFT JOIN Category c ON sm.CategoryID = c.CategoryID 
+// ==========================================
+// 1. جلب تفاصيل الدواء من الكتالوج | Fetch Medicine from Catalog
+// ==========================================
+$medQuery = "SELECT sm.*, c.NameAR AS CategoryName
+             FROM SystemMedicine sm
+             LEFT JOIN Category c ON sm.CategoryID = c.CategoryID
              WHERE sm.SystemMedID = $id";
 
 $medResult = mysqli_query($conn, $medQuery);
@@ -32,8 +32,10 @@ if (mysqli_num_rows($medResult) == 0) {
 
 $details = mysqli_fetch_assoc($medResult);
 
-// 2. جلب الصيدليات التي يتوفر فيها هذا الدواء (مع StockID و PharmacistID)
-$phQuery = "SELECT 
+// ==========================================
+// 2. جلب الصيدليات التي يتوفر فيها الدواء | Fetch Pharmacies having this stock
+// ==========================================
+$phQuery = "SELECT
                 ps.StockID,
                 ps.PharmacistID,
                 ps.Price,
@@ -45,7 +47,7 @@ $phQuery = "SELECT
                 ph.Logo
             FROM PharmacyStock ps
             JOIN Pharmacist ph ON ps.PharmacistID = ph.PharmacistID
-            WHERE ps.SystemMedID = $id 
+            WHERE ps.SystemMedID = $id
               AND ps.Stock > 0
             ORDER BY ps.Price ASC";
 

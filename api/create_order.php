@@ -1,6 +1,6 @@
 <?php
 // ==========================================
-// ملف API لإنشاء طلب جديد (create_order.php)
+// ملف إنشاء طلب جديد | Create New Order API
 // ==========================================
 
 header("Access-Control-Allow-Origin: *");
@@ -8,10 +8,19 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
+// ==========================================
+// الاتصال بقاعدة البيانات | Database Connection
+// ==========================================
 include_once '../config/database.php';
 
+// ==========================================
+// استلام البيانات كـ JSON | Get JSON Payload
+// ==========================================
 $data = json_decode(file_get_contents("php://input"));
 
+// ==========================================
+// التحقق من صحة البيانات الأساسية | Validate Basic Data
+// ==========================================
 if (
     !empty($data->patient_id) &&
     isset($data->total_amount) &&
@@ -21,14 +30,16 @@ if (
     $patient_id = (int)$data->patient_id;
     $total_amount = (float)$data->total_amount;
 
-    // 💡 1. استلام العنوان النصي الذي كتبه المريض بيده
+    // ==========================================
+    // معالجة عنوان التوصيل | Handle Delivery Address
+    // ==========================================
     $delivery_address = isset($data->delivery_address) ? mysqli_real_escape_string($conn, $data->delivery_address) : '';
-
-    // 💡 2. استلام قرار المريض: هل يريد موقعه المسجل أم موقع جديد؟
     $use_saved_location = isset($data->use_saved_location) ? $data->use_saved_location : false;
 
     if ($use_saved_location) {
-        // إذا اختار موقعه القديم، نجلبه من قاعدة البيانات
+        // ==========================================
+        // جلب الموقع المحفوظ للمريض | Fetch Saved Location
+        // ==========================================
         $patQuery = mysqli_query($conn, "SELECT Latitude, Longitude FROM Patient WHERE PatientID = $patient_id");
         if ($patQuery && mysqli_num_rows($patQuery) > 0) {
             $patData = mysqli_fetch_assoc($patQuery);
@@ -39,17 +50,24 @@ if (
             $delivery_lng = "NULL";
         }
     } else {
-        // إذا اختار موقع جديد، نأخذه من الموبايل
+        // ==========================================
+        // استخدام الموقع الجديد الممرر | Use New Location
+        // ==========================================
         $delivery_lat = (isset($data->delivery_lat) && $data->delivery_lat !== null) ? (float)$data->delivery_lat : "NULL";
         $delivery_lng = (isset($data->delivery_lng) && $data->delivery_lng !== null) ? (float)$data->delivery_lng : "NULL";
     }
 
     $prescription_base64 = isset($data->prescription_image) ? $data->prescription_image : null;
 
+    // ==========================================
+    // بدء معاملة قاعدة البيانات | Begin Transaction
+    // ==========================================
     mysqli_begin_transaction($conn);
 
     try {
-        // إدخال الطلب
+        // ==========================================
+        // إدخال الطلب الأساسي | Insert Main Order
+        // ==========================================
         $orderQuery = "INSERT INTO `Order` (PatientID, TotalAmount, PaymentMethod, DeliveryAddress, DeliveryLatitude, DeliveryLongitude, Status)
                        VALUES ($patient_id, $total_amount, 'COD', '$delivery_address', $delivery_lat, $delivery_lng, 'Pending')";
 
@@ -59,7 +77,9 @@ if (
 
         $order_id = mysqli_insert_id($conn);
 
-        // إدخال الأدوية
+        // ==========================================
+        // إدخال عناصر الطلب (الأدوية) | Insert Order Items
+        // ==========================================
         foreach ($data->items as $item) {
             $stock_id = (int)$item->stock_id;
             $quantity = (int)$item->quantity;
@@ -73,7 +93,9 @@ if (
             }
         }
 
-        // معالجة الوصفة الطبية
+        // ==========================================
+        // معالجة وحفظ صورة الوصفة الطبية | Handle Prescription Image
+        // ==========================================
         if ($prescription_base64 != null && !empty($prescription_base64)) {
             $image_parts = explode(";base64,", $prescription_base64);
             $image_base64 = base64_decode(count($image_parts) > 1 ? $image_parts[1] : $image_parts[0]);
@@ -97,6 +119,9 @@ if (
             }
         }
 
+        // ==========================================
+        // تأكيد وحفظ جميع العمليات | Commit Transaction
+        // ==========================================
         mysqli_commit($conn);
 
         echo json_encode([
@@ -105,6 +130,9 @@ if (
             "order_id" => $order_id
         ]);
     } catch (Exception $e) {
+        // ==========================================
+        // التراجع عن التغييرات في حال الخطأ | Rollback on Error
+        // ==========================================
         mysqli_rollback($conn);
         echo json_encode([
             "status" => "error",
@@ -117,3 +145,4 @@ if (
         "message" => "بيانات الطلب غير مكتملة"
     ]);
 }
+?>

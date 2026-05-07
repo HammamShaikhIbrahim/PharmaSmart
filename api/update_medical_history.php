@@ -1,6 +1,6 @@
 <?php
 // ==========================================
-// تحديث السجل المرضي للمريض
+// تحديث السجل المرضي | Update Medical History API
 // ==========================================
 
 header("Access-Control-Allow-Origin: *");
@@ -12,12 +12,13 @@ include_once '../config/database.php';
 
 $data = json_decode(file_get_contents("php://input"));
 
+// ==========================================
+// التحقق من المستخدم والتحديث | Validate User and Update
+// ==========================================
 if (!empty($data->user_id)) {
     $user_id = (int)$data->user_id;
-    // استلام السجل المرضي (قد يكون فارغاً إذا أراد مسحه)
     $medical_history = isset($data->medical_history) ? mysqli_real_escape_string($conn, $data->medical_history) : '';
 
-    // التحديث في جدول Patient بناءً على الـ ID
     $sql = "UPDATE Patient SET MedicalHistory='$medical_history' WHERE PatientID=$user_id";
 
     if (mysqli_query($conn, $sql)) {

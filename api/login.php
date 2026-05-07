@@ -1,20 +1,20 @@
 <?php
 // ==========================================
-// 1. إعدادات السماحيات (CORS & Headers)
+// تسجيل الدخول الخاص بالمريض | Patient Login API
 // ==========================================
+
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
-// ==========================================
-// 2. الاتصال بقاعدة البيانات
-// ==========================================
 include_once '../config/database.php';
 
-// استلام البيانات من الموبايل
 $data = json_decode(file_get_contents("php://input"));
 
+// ==========================================
+// التحقق من صحة مدخلات تسجيل الدخول | Validate Login Credentials
+// ==========================================
 if (!empty($data->email) && !empty($data->password)) {
 
     $email = mysqli_real_escape_string($conn, $data->email);
@@ -27,10 +27,10 @@ if (!empty($data->email) && !empty($data->password)) {
     if (mysqli_num_rows($result) > 0) {
         $user = mysqli_fetch_assoc($result);
 
-        // التحقق من صحة كلمة المرور (سواء كانت مشفرة أو نص عادي للتوافق)
+        // ==========================================
+        // التحقق من كلمة المرور | Verify Password
+        // ==========================================
         if (password_verify($password, $user['Password']) || $password === $user['Password']) {
-
-            // الرد بالنجاح مع إرسال بيانات المريض للتطبيق ليحفظها
             echo json_encode([
                 "status" => "success",
                 "message" => "تم تسجيل الدخول بنجاح",
@@ -51,3 +51,4 @@ if (!empty($data->email) && !empty($data->password)) {
 } else {
     echo json_encode(["status" => "error", "message" => "الرجاء إدخال البريد الإلكتروني وكلمة المرور!"]);
 }
+?>

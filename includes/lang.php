@@ -30,7 +30,7 @@ if ($current_lang == 'ar') {
     $lang['register_title'] = "تسجيل صيدلية جديدة - PharmaSmart";
     $lang['register_title_short'] = "تسجيل صيدلية جديدة";
     $lang['register_subtitle'] = "قم بملء بياناتك بدقة ليتم مراجعتها من قبل الإدارة";
-    
+
     // خطوات التسجيل | Registration Steps
     $lang['personal_info_step'] = "بيانات شخصية";
     $lang['pharmacy_info_step'] = "بيانات الصيدلية";
@@ -110,7 +110,7 @@ if ($current_lang == 'ar') {
     $lang['live_update'] = "تحديث مباشر";
     $lang['pharma_info'] = "معلومات الصيدلية";
     $lang['click_map'] = "اضغط على أي نقطة في الخريطة لعرض التفاصيل.";
-    
+
     // معلومات الصيدلية في الخريطة | Pharmacy Info (JS Map)
     $lang['pharmacist_name'] = "الصيدلاني";
     $lang['address'] = "العنوان";
@@ -323,6 +323,8 @@ if ($current_lang == 'ar') {
     $lang['items_col'] = "الأصناف";
     $lang['total_amount'] = "الإجمالي";
 
+    $lang['patient_order_history'] = "السجل التاريخي لطلبات هذا العميل";
+    $lang['previous_orders'] = "طلبات سابقة";
 } else {
 
     // تسجيل الدخول | Login Page
@@ -345,7 +347,7 @@ if ($current_lang == 'ar') {
     $lang['register_title'] = "New Pharmacy Registration - PharmaSmart";
     $lang['register_title_short'] = "New Pharmacy Registration";
     $lang['register_subtitle'] = "Please fill in your details accurately for review by the administration.";
-    
+
     // خطوات التسجيل | Registration Steps
     $lang['personal_info_step'] = "Personal Info";
     $lang['pharmacy_info_step'] = "Pharmacy Info";
@@ -639,6 +641,6 @@ if ($current_lang == 'ar') {
     $lang['items_col'] = "Items";
     $lang['total_amount'] = "Total";
 
+    $lang['patient_order_history'] = "Patient's Order History";
+    $lang['previous_orders'] = "Previous Orders";
 }
-
-?>

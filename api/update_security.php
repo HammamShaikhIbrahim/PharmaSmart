@@ -1,6 +1,6 @@
 <?php
 // ==========================================
-// خانة الخصوصية والامان (مع رقم الهاتف)
+// تحديث الأمان والخصوصية | Update Security Info API
 // ==========================================
 
 header("Access-Control-Allow-Origin: *");
@@ -22,6 +22,9 @@ $email   = mysqli_real_escape_string($conn, $data->email);
 $phone   = isset($data->phone) ? mysqli_real_escape_string($conn, $data->phone) : '';
 $old_pass = $data->old_pass;
 
+// ==========================================
+// جلب المستخدم والتحقق من كلمة المرور | Fetch User & Verify Password
+// ==========================================
 $res  = mysqli_query($conn, "SELECT Password FROM User WHERE UserID=$user_id AND RoleID=3");
 $user = mysqli_fetch_assoc($res);
 
@@ -42,6 +45,9 @@ if (!$isPasswordCorrect) {
     exit();
 }
 
+// ==========================================
+// تحديث البيانات وكلمة المرور إذا طلُب ذلك | Update Data & Password if requested
+// ==========================================
 if (!empty($data->new_pass)) {
     $newHash = password_hash($data->new_pass, PASSWORD_DEFAULT);
     $sql = "UPDATE User SET Email='$email', Phone='$phone', Password='$newHash' WHERE UserID=$user_id";
