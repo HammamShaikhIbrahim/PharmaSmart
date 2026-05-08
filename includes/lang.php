@@ -325,6 +325,13 @@ if ($current_lang == 'ar') {
 
     $lang['patient_order_history'] = "السجل التاريخي لطلبات هذا العميل";
     $lang['previous_orders'] = "طلبات سابقة";
+
+
+    // --- متغيرات الفوتر (عربي) ---
+    $lang['all_rights_reserved'] = "جميع الحقوق محفوظة.";
+    $lang['made_with'] = "صُنع بـ";
+    $lang['for_healthcare'] = "لتطوير الرعاية الصحية";
+    
 } else {
 
     // تسجيل الدخول | Login Page
@@ -643,4 +650,11 @@ if ($current_lang == 'ar') {
 
     $lang['patient_order_history'] = "Patient's Order History";
     $lang['previous_orders'] = "Previous Orders";
+
+
+
+    // --- متغيرات الفوتر (إنجليزي) ---
+    $lang['all_rights_reserved'] = "All rights reserved.";
+    $lang['made_with'] = "Made with";
+    $lang['for_healthcare'] = "to advance healthcare";
 }
