@@ -278,5 +278,5 @@ include('../includes/sidebar.php');
         });
     }
 </script>
-
+// استدعاء ملف الفوتر 
 <?php include('../includes/footer.php'); ?>
