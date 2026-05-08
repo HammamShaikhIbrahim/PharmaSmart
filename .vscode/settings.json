@@ -1,0 +1,4 @@
+{
+  "intelephense.environment.documentRoot": "${workspaceFolder}",
+  "intelephense.diagnostics.undefinedVariables": "off"
+}

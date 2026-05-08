@@ -1,9 +1,7 @@
 <?php
 // ==========================================
-// ملف API لعرض مخزون صيدلية معينة
-// يُوضع في: PharmaSmart_Web/api/pharmacy_inventory.php
+// جلب مخزون صيدلية معينة | Fetch Specific Pharmacy Inventory API
 // ==========================================
-// 💡 تم تحديثه ليُرجع StockID, SystemMedID, IsControlled اللازمة للسلة
 
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
@@ -17,7 +15,10 @@ if ($pharmacy_id <= 0) {
     exit();
 }
 
-$query = "SELECT 
+// ==========================================
+// استعلام جلب الأدوية المتوفرة للصيدلية | Fetch Available Medicines for Pharmacy
+// ==========================================
+$query = "SELECT
               ps.StockID,
               ps.SystemMedID,
               ps.Price,
@@ -46,3 +47,4 @@ echo json_encode([
     "status" => "success",
     "items" => $items
 ]);
+?>

@@ -1,4 +1,7 @@
 <?php
+// ==========================================
+// جلب سجل طلبات المريض | Fetch Patient Orders History
+// ==========================================
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 include_once '../config/database.php';
@@ -6,13 +9,14 @@ include_once '../config/database.php';
 $patient_id = isset($_GET['patient_id']) ? (int)$_GET['patient_id'] : 0;
 
 if ($patient_id > 0) {
-    // 1. جلب الطلبات الأساسية لهذا المريض
+    // ==========================================
+    // 1. جلب الطلبات الأساسية | Fetch Base Orders
+    // ==========================================
     $orderQuery = "
-        SELECT 
+        SELECT
             o.OrderID, o.OrderDate, o.Status, o.TotalAmount, o.RejectionReason,
             ph.PharmacyName, ph.Logo
         FROM `Order` o
-        -- لمعرفة اسم الصيدلية، نربط الطلب بأول دواء فيه، ومن الدواء نعرف الصيدلية
         JOIN OrderItems oi ON o.OrderID = oi.OrderID
         JOIN PharmacyStock ps ON oi.StockID = ps.StockID
         JOIN Pharmacist ph ON ps.PharmacistID = ph.PharmacistID
@@ -28,10 +32,12 @@ if ($patient_id > 0) {
         while ($orderRow = mysqli_fetch_assoc($orderResult)) {
             $order_id = $orderRow['OrderID'];
 
-            // 2. جلب الأدوية (العناصر) داخل هذا الطلب
+            // ==========================================
+            // 2. جلب الأدوية لكل طلب | Fetch Order Items
+            // ==========================================
             $itemsQuery = "
-                SELECT 
-                    oi.Quantity, oi.SoldPrice, 
+                SELECT
+                    oi.Quantity, oi.SoldPrice,
                     sm.Name as MedicineName, sm.Image
                 FROM OrderItems oi
                 JOIN PharmacyStock ps ON oi.StockID = ps.StockID
@@ -44,7 +50,7 @@ if ($patient_id > 0) {
                 $items[] = $itemRow;
             }
 
-            // إضافة الأدوية كقائمة فرعية داخل الطلب
+            // إضافة الأدوية للقائمة الفرعية للطلب
             $orderRow['items'] = $items;
             $orders[] = $orderRow;
         }

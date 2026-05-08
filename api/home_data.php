@@ -1,6 +1,11 @@
 <?php
+// ==========================================
+// جلب بيانات الصفحة الرئيسية | Fetch Home Screen Data API
+// ==========================================
+
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
+
 include_once '../config/database.php';
 
 $response = [
@@ -10,13 +15,17 @@ $response = [
 ];
 
 try {
-    // 1. جلب التصنيفات
+    // ==========================================
+    // 1. جلب تصنيفات الأدوية | Fetch Medicine Categories
+    // ==========================================
     $catResult = mysqli_query($conn, "SELECT CategoryID, NameAR FROM Category");
     while ($row = mysqli_fetch_assoc($catResult)) {
         $response['categories'][] = $row;
     }
 
-    // 2. جلب الصيدليات (تمت إضافة WorkingHours هنا لحل المشكلة!)
+    // ==========================================
+    // 2. جلب الصيدليات المعتمدة | Fetch Approved Pharmacies
+    // ==========================================
     $pharQuery = "
         SELECT p.PharmacistID, p.PharmacyName, p.Location, p.WorkingHours, p.Latitude, p.Longitude, p.Logo,
                u.Fname, u.Lname, u.Phone
@@ -33,3 +42,4 @@ try {
 } catch (Exception $e) {
     echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
 }
+?>
