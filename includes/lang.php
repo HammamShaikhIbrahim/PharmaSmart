@@ -657,8 +657,6 @@ $lang['available_on'] = "حمل تطبيقنا الآن";
 
 
    // --- متغيرات الفوتر (إنجليزي) ---
-
-
   // Footer Variables
 $lang['footer_brand'] = "PharmaSmart";
 $lang['footer_copyright'] = "All Rights Reserved.";
