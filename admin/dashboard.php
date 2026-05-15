@@ -35,7 +35,7 @@ $patientsCount = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as c FR
 // 3. جلب بيانات الصيدليات لعرضها على الخريطة
 // ==========================================
 
-// 💡 تعديل الاستعلام: بنجيب كل الصيدليات (المفعلة والمعلقة) اللي عندها إحداثيات (Latitude مش فاضي)
+//  تعديل الاستعلام: بنجيب كل الصيدليات (المفعلة والمعلقة) اللي عندها إحداثيات (Latitude مش فاضي)
 // عشان نرسمهم على الخريطة، وبعدين بنفلترهم بالجافاسكربت (أخضر للمفعل، أصفر للمعلق)
 $query = "SELECT u.Fname, u.Lname, u.Phone, p.PharmacyName, p.Location, p.WorkingHours, p.LicenseNumber, p.Latitude, p.Longitude, p.IsApproved
           FROM Pharmacist p JOIN User u ON p.PharmacistID = u.UserID
@@ -74,7 +74,7 @@ if ($dir == 'rtl') {
 <style>
 /* =========================================
    تصميم فلتر الخريطة (Pill Design)
-   يدعم Light Mode & Dark Mode بامتياز 🌓
+   يدعم Light Mode & Dark Mode بامتياز 
    ========================================= */
 
 /* 1. الحاوية الأساسية (الوضع النهاري افتراضياً) */
@@ -124,7 +124,7 @@ if ($dir == 'rtl') {
     color: #94a3b8; /* رمادي فاتح لليلي */
 }
 
-/* 🎨 تلوين النصوص عند التأشير (Hover) للوضعين */
+/*  تلوين النصوص عند التأشير (Hover) للوضعين */
 label[for="filter-all"]:hover { color: #048AC1; } /* أزرق */
 label[for="filter-active"]:hover { color: #10b981; } /* أخضر */
 label[for="filter-pending"]:hover { color: #f59e0b; } /* برتقالي */
@@ -133,7 +133,7 @@ label[for="filter-pending"]:hover { color: #f59e0b; } /* برتقالي */
 .dark label[for="filter-active"]:hover { text-shadow: 0 0 8px rgba(16,185,129,0.5); }
 .dark label[for="filter-pending"]:hover { text-shadow: 0 0 8px rgba(245,158,11,0.5); }
 
-/* ⚪️ النص المختار دائماً أبيض في كلا الوضعين */
+/*  النص المختار دائماً أبيض في كلا الوضعين */
 .glass-radio-group input:checked + label {
     color: #ffffff !important;
     text-shadow: none !important;
@@ -169,7 +169,7 @@ label[for="filter-pending"]:hover { color: #f59e0b; } /* برتقالي */
     box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);
 }
 
-/* 💡 دعم اللغة العربية RTL - عكس اتجاه حركة المزلاج */
+/*  دعم اللغة العربية RTL - عكس اتجاه حركة المزلاج */
 html[dir="rtl"] #filter-active:checked ~ .glass-glider {
     transform: translateX(-100%);
 }
@@ -242,7 +242,7 @@ html[dir="rtl"] #filter-pending:checked ~ .glass-glider {
                 <i data-lucide="map" class="text-[#048AC1]"></i> <?php echo $lang['map_title']; ?>
             </h2>
 
-            <!-- 💡 فلتر الخريطة الجديد الداكن (Pill Design) -->
+            <!--  فلتر الخريطة الجديد الداكن (Pill Design) -->
             <div class="glass-radio-group">
                 <input type="radio" name="map-filter" id="filter-all" onchange="drawMarkers('all')" checked />
                 <label for="filter-all"><?php echo $lang['filter_all']; ?></label>
@@ -346,7 +346,7 @@ html[dir="rtl"] #filter-pending:checked ~ .glass-glider {
         let headerBg = pharma.IsApproved == 1 ? 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-200' : 'bg-amber-50 dark:bg-amber-900/30 border-amber-200';
         let headerText = pharma.IsApproved == 1 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400';
 
-        // 💡 تم توحيد أيقونات الكرت لتصبح زرقاء (#048AC1) لتعكس ثيم الإدارة
+        //  تم توحيد أيقونات الكرت لتصبح زرقاء (#048AC1) لتعكس ثيم الإدارة
         detailsContainer.innerHTML = `
             <div class="w-full flex flex-col pt-4 h-full">
                 <div class="${headerBg} ${headerText} py-3 px-4 rounded-xl mb-6 text-center border dark:border-slate-700 shadow-sm">

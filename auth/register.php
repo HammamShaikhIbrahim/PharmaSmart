@@ -35,7 +35,7 @@ if (isset($_POST['register'])) {
     if (mysqli_num_rows($checkEmail) > 0) {
         $error = $lang['email_exists_error'];
     } elseif (mysqli_num_rows($checkLicense) > 0) {
-        // 💡 تم استبدال الشرط المضمن بمتغير اللغة
+        //  تم استبدال الشرط المضمن بمتغير اللغة
         $error = $lang['license_exists_error'];
     } elseif ($lat == 0 || $lng == 0) {
         $error = $lang['location_error'];
@@ -43,7 +43,7 @@ if (isset($_POST['register'])) {
 
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-        // 💡 بدء الـ Transaction (المعاملة) لمنع حفظ بيانات يتيمة
+        // ` بدء الـ Transaction (المعاملة) لمنع حفظ بيانات يتيمة
         mysqli_begin_transaction($conn);
 
         try {
@@ -60,20 +60,20 @@ if (isset($_POST['register'])) {
 
             mysqli_query($conn, $sqlPhar);
 
-            // 💡 إذا وصلنا هنا بنجاح دون أخطاء، نقوم بتأكيد الحفظ (Commit)
+            // ` إذا وصلنا هنا بنجاح دون أخطاء، نقوم بتأكيد الحفظ (Commit)
             mysqli_commit($conn);
             $message = $lang['registration_success'];
         } catch (mysqli_sql_exception $e) {
-            // 💡 إذا حدث أي خطأ أثناء الإدخالين، نتراجع عن كل شيء (Rollback) ليتم مسح المستخدم الذي أُدخل!
+            //  إذا حدث أي خطأ أثناء الإدخالين، نتراجع عن كل شيء (Rollback) ليتم مسح المستخدم الذي أُدخل!
             mysqli_rollback($conn);
 
             if (strpos($e->getMessage(), 'LicenseNumber') !== false || strpos($e->getMessage(), 'Duplicate entry') !== false) {
-                // 💡 تم استبدال الشرط المضمن بمتغير اللغة
+                //  تم استبدال الشرط المضمن بمتغير اللغة
                 $error = $lang['license_exists_error'];
             } elseif (strpos($e->getMessage(), 'Email') !== false) {
                 $error = $lang['email_exists_error'];
             } else {
-                // 💡 تم استبدال النص الثابت بمتغير اللغة
+                //  تم استبدال النص الثابت بمتغير اللغة
                 $error = $lang['db_error'] . " " . $e->getMessage();
             }
         }

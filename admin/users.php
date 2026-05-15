@@ -32,7 +32,7 @@ if (isset($_GET['delete_id'])) {
 
 $search = mysqli_real_escape_string($conn, $_GET['search'] ?? '');
 
-// 💡 استخدمنا CONCAT لدمج الاسم الأول والأخير معاً ليتمكن الأدمن من البحث بالاسم الكامل
+//  استخدمنا CONCAT لدمج الاسم الأول والأخير معاً ليتمكن الأدمن من البحث بالاسم الكامل
 $query = "SELECT u.*, p.Address,
             TIMESTAMPDIFF(YEAR, p.DOB, CURDATE()) AS Age
             FROM User u
@@ -42,7 +42,7 @@ $query = "SELECT u.*, p.Address,
 
 $result = mysqli_query($conn, $query);
 
-// 🚀 معالجة طلب AJAX للبحث المباشر
+//  معالجة طلب AJAX للبحث المباشر
 if (isset($_GET['ajax'])) {
     ob_start();
     if (mysqli_num_rows($result) > 0) {
@@ -92,7 +92,7 @@ if (isset($_GET['ajax'])) {
             </tr>
         <?php }
     } else { ?>
-        <!-- 🚀 Empty State متحرك مستوحى من Uiverse (بالثيم الأزرق للأدمن) -->
+        <!--  Empty State متحرك مستوحى من Uiverse (بالثيم الأزرق للأدمن) -->
         <tr>
             <td colspan="5" class="p-20">
                 <div class="flex flex-col items-center justify-center text-center">
@@ -178,7 +178,7 @@ include('../includes/sidebar.php');
         <!-- شريط البحث السريع (AJAX Live Search) -->
         <div class="w-full md:w-80">
             <div class="relative group">
-                <!-- 💡 حدث oninput للبحث الحي -->
+                <!--  حدث oninput للبحث الحي -->
                 <input type="text" id="searchInput" oninput="fetchTableData()" placeholder="<?php echo $lang['search_patient']; ?>" value="<?php echo htmlspecialchars($search); ?>"
                     class="w-full p-3 rounded-2xl border border-gray-200 dark:bg-slate-800 dark:border-slate-700 dark:text-white shadow-sm focus:ring-2 focus:ring-[#048AC1] focus:border-[#048AC1] outline-none transition-all text-sm">
                 <i data-lucide="search" class="top-3.5 text-gray-400 group-focus-within:text-[#048AC1] transition-colors <?php echo ($dir == 'rtl') ? 'absolute left-4' : 'absolute right-4'; ?> w-5 h-5"></i>
@@ -187,7 +187,7 @@ include('../includes/sidebar.php');
 
     </div>
 
-    <!-- 💡 الجدول ديناميكي الحجم (بدون min-h-[500px]) ليناسب النتائج تماماً -->
+    <!--  الجدول ديناميكي الحجم (بدون min-h-[500px]) ليناسب النتائج تماماً -->
     <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-md border border-gray-200 dark:border-slate-700 overflow-hidden mb-6">
         <div class="overflow-x-auto" id="tableContainer" style="transition: opacity 0.3s ease;">
             <table class="w-full border-collapse min-w-[800px]">
@@ -216,7 +216,7 @@ include('../includes/sidebar.php');
 <script>
     let fetchTimeoutId;
 
-    // 🚀 دالة جلب بيانات الجدول عبر AJAX بدون Reload
+    //  دالة جلب بيانات الجدول عبر AJAX بدون Reload
     async function fetchTableData() {
         const body = document.getElementById('patientsBody');
         const header = document.getElementById('tableHeader');
@@ -258,7 +258,7 @@ include('../includes/sidebar.php');
     // جلب البيانات فور تحميل الصفحة لأول مرة
     document.addEventListener('DOMContentLoaded', fetchTableData);
 
-    // 🚀 دالة التأكيد (SweetAlert)
+    //  دالة التأكيد (SweetAlert)
     function confirmDelete(id) {
         Swal.fire({
             title: Lang.title,

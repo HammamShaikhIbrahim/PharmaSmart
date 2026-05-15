@@ -327,14 +327,7 @@ if ($current_lang == 'ar') {
     $lang['previous_orders'] = "طلبات سابقة";
 
 
-  // --- متغيرات الفوتر (عربي) ---
  
-// متغيرات الفوتر المحدثة
-  // متغيرات الفوتر
-$lang['footer_brand'] = "PharmaSmart";
-$lang['footer_copyright'] = "جميع الحقوق محفوظة.";
-$lang['download_app'] = "تطبيق الموبايل";
-$lang['available_on'] = "حمل تطبيقنا الآن";
 } else {
 
     // تسجيل الدخول | Login Page
@@ -654,12 +647,4 @@ $lang['available_on'] = "حمل تطبيقنا الآن";
     $lang['patient_order_history'] = "Patient's Order History";
     $lang['previous_orders'] = "Previous Orders";
 
-
-
-   // --- متغيرات الفوتر (إنجليزي) ---
-  // Footer Variables
-$lang['footer_brand'] = "PharmaSmart";
-$lang['footer_copyright'] = "All Rights Reserved.";
-$lang['download_app'] = "Mobile App";
-$lang['available_on'] = "Download our app";
 }
