@@ -31,4 +31,3 @@ if (!empty($data->user_id) && !empty($data->fname) && !empty($data->lname)) {
 } else {
     echo json_encode(["status" => "error", "message" => "بيانات ناقصة"]);
 }
-?>

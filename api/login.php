@@ -51,4 +51,3 @@ if (!empty($data->email) && !empty($data->password)) {
 } else {
     echo json_encode(["status" => "error", "message" => "الرجاء إدخال البريد الإلكتروني وكلمة المرور!"]);
 }
-?>

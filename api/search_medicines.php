@@ -69,4 +69,3 @@ if ($result) {
 }
 
 echo json_encode(["status" => "success", "results" => $search_results]);
-?>

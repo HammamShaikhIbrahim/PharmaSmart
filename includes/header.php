@@ -35,19 +35,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
 
     <script>
-
         tailwind.config = {
 
             darkMode: 'class', // الاعتماد على class="dark" في <html>
 
         }
-
     </script>
 
     <!-- سكربت منع الوميض الأبيض (يعمل فورا) -->
 
     <script>
-
         if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
 
             document.documentElement.classList.add('dark');
@@ -81,11 +78,9 @@
             }
 
         }
-
     </script>
 
     <style>
-
         /* إخفاء سكرول الشاشة الرئيسي، السكرول سيكون داخل الـ main فقط */
 
         body,
@@ -131,7 +126,6 @@
             transition: background-color 0.3s ease;
 
         }
-
     </style>
 
 </head>
