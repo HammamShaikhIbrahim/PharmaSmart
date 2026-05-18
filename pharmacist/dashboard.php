@@ -26,7 +26,7 @@ $lowStockQuery = "SELECT COUNT(*) as LowStockCount FROM PharmacyStock WHERE Phar
 $lowStockCount = mysqli_fetch_assoc(mysqli_query($conn, $lowStockQuery))['LowStockCount'];
 
 // ==========================================
-// 💡 فصلنا إحصائيات الصلاحية إلى قسمين (قريباً + منتهي فعلياً)
+//  فصلنا إحصائيات الصلاحية إلى قسمين (قريباً + منتهي فعلياً)
 // ==========================================
 
 // 1. الأدوية التي ستنتهي قريباً (لون برتقالي)
@@ -82,7 +82,7 @@ $pendingListResult = mysqli_query($conn, $pendingListQ);
 // ==========================================
 // 4. تنبيهات النواقص والصلاحية
 // ==========================================
-// 💡 أضفنا جلب StockID لتمريره في الرابط للتعديل الذكي
+//  أضفنا جلب StockID لتمريره في الرابط للتعديل الذكي
 $lowStockListQ = "SELECT ps.StockID, sm.Name, ps.Stock, ps.MinimumStock
                   FROM PharmacyStock ps
                   JOIN SystemMedicine sm ON ps.SystemMedID = sm.SystemMedID

@@ -145,7 +145,7 @@ if ($has_orders) {
         $has_multiple = $total_orders > 1;
         $group_id = 'user_group_' . $user_id;
 
-        // 💡 1. الطلب الأساسي (الأحدث) الذي سيظهر كصف في الجدول
+        //  1. الطلب الأساسي (الأحدث) الذي سيظهر كصف في الجدول
         $main_order = $user_orders[0];
 
         $current_items = $order_items_data[$main_order['OrderID']] ?? [];
@@ -195,14 +195,14 @@ if ($has_orders) {
         $items_count = count($current_items);
         $order_word = $lang['orders'] ?? 'طلبات';
 
-        // 🎨 زر العين (التفاصيل) 
+        //  زر العين (التفاصيل) 
         $btn_view = '<button class="p-2 bg-gray-100 dark:bg-slate-700/50 rounded-lg text-gray-500 hover:bg-[#0A7A48] hover:text-white dark:hover:bg-[#4ADE80] dark:hover:text-slate-900 transition-colors shadow-sm border border-gray-200 dark:border-slate-600" onclick="event.stopPropagation(); viewOrderDetails(this.closest(\'tr\'))" title="التفاصيل">
                         <i data-lucide="eye" class="w-4 h-4"></i>
                      </button>';
 
         $btn_toggle = '';
         if ($has_multiple) {
-            // 💡 زر الدروب داون أزرق مريح
+            //  زر الدروب داون أزرق مريح
             $btn_toggle = '<button class="px-3 py-1.5 bg-blue-50/80 text-blue-600 border border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20 rounded-lg hover:bg-blue-600 hover:text-white dark:hover:bg-blue-500 transition-all flex items-center justify-center gap-1.5 shadow-sm toggle-drawer-btn" onclick="event.stopPropagation(); toggleOrderDrawer(\'' . $group_id . '\', this)">
                                 <span class="text-[12px] font-black">' . $total_orders . ' ' . $order_word . '</span>
                                 <i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-300 toggle-icon"></i>
@@ -211,7 +211,7 @@ if ($has_orders) {
 
         $action_buttons = "<div class=\"flex justify-center items-center gap-2\">{$btn_toggle}{$btn_view}</div>";
 ?>
-        <!-- 💡 الصف الرئيسي - لون طبيعي ومحايد 100% -->
+        <!--  الصف الرئيسي - لون طبيعي ومحايد 100% -->
         <tr class="bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors duration-200 group cursor-pointer border-b border-gray-100 dark:border-slate-700 relative z-10" data-order="<?php echo $order_json; ?>" onclick="viewOrderDetails(this)">
             <td class="p-5 whitespace-nowrap text-right">
                 <div class="font-black text-gray-800 dark:text-white flex items-center justify-start gap-1.5 w-full" dir="ltr">
@@ -285,12 +285,12 @@ if ($has_orders) {
         </tr>
 
         <?php
-        // 💡 2. درج الكروت للطلبات القديمة (History Drawer)
+        //  2. درج الكروت للطلبات القديمة (History Drawer)
         if ($has_multiple) {
             $history_title = $lang['patient_order_history'] ?? 'السجل التاريخي للطلبات';
             $total_text = $lang['total_amount'] ?? 'الإجمالي';
         ?>
-            <!-- 💡 خلفية الدرج لون محايد جداً ليفصل بين الطلبات -->
+            <!--  خلفية الدرج لون محايد جداً ليفصل بين الطلبات -->
             <tr id="<?php echo $group_id; ?>" class="hidden bg-gray-50/40 dark:bg-slate-900/30">
                 <td colspan="8" class="p-0 border-b border-gray-200 dark:border-slate-700">
                     <div class="p-6 md:p-8 animate-fade-in-down border-t border-gray-100 dark:border-slate-700">
@@ -858,7 +858,7 @@ include('../includes/sidebar.php');
         }, 300);
     }
 
-    // 💡 دالة الجافاسكربت المسؤولة عن فتح أو إغلاق درج البطاقات الأفقية
+    //  دالة الجافاسكربت المسؤولة عن فتح أو إغلاق درج البطاقات الأفقية
     function toggleOrderDrawer(groupId, btn) {
         const drawerRow = document.getElementById(groupId);
         const icon = btn.querySelector('.toggle-icon');

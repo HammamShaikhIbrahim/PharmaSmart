@@ -14,7 +14,7 @@ if (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) {
 }
 
 // ==========================================
-// 💡 إعدادات الألوان والأيقونات العلوية حسب الدور
+//  إعدادات الألوان والأيقونات العلوية حسب الدور
 // ==========================================
 $role_id = isset($_SESSION['role_id']) ? $_SESSION['role_id'] : 0;
 
@@ -82,7 +82,7 @@ if ($role_id == 1) {
                 <i data-lucide="users" class="flex-shrink-0"></i> <span><?php echo $lang['patients']; ?></span>
             </a>
 
-            <!-- 🚀 الكتالوج الموحد للأدوية (قريباً) -->
+            <!--  الكتالوج الموحد للأدوية (قريباً) -->
             <a href="#" onclick="event.preventDefault(); showComingSoon('admin_catalog');" class="<?php echo $link_classes; ?> justify-between opacity-80 hover:opacity-100 border border-transparent hover:border-amber-500/30">
                 <div class="flex items-center gap-3">
                     <i class="fa-solid fa-pills flex-shrink-0 text-amber-400"></i>
@@ -93,7 +93,7 @@ if ($role_id == 1) {
                 </span>
             </a>
 
-            <!-- 🚀 التقارير الشاملة للمنصة (قريباً) -->
+            <!--  التقارير الشاملة للمنصة (قريباً) -->
             <a href="#" onclick="event.preventDefault(); showComingSoon('admin_reports');" class="<?php echo $link_classes; ?> justify-between opacity-80 hover:opacity-100 border border-transparent hover:border-amber-500/30">
                 <div class="flex items-center gap-3">
                     <i data-lucide="chart-line" class="flex-shrink-0 text-amber-400"></i>
@@ -121,7 +121,7 @@ if ($role_id == 1) {
                 <i data-lucide="shopping-bag" class="flex-shrink-0"></i> <span><?php echo $lang['orders']; ?></span>
             </a>
 
-            <!-- 🚀 ميزة المحادثات (قريباً) -->
+            <!-- ميزة المحادثات (قريباً) -->
             <a href="#" onclick="event.preventDefault(); showComingSoon('chat');" class="<?php echo $link_classes; ?> justify-between opacity-80 hover:opacity-100 border border-transparent hover:border-amber-500/30">
                 <div class="flex items-center gap-3">
                     <i data-lucide="message-square" class="flex-shrink-0 text-amber-400"></i>
@@ -132,7 +132,7 @@ if ($role_id == 1) {
                 </span>
             </a>
 
-            <!-- 🚀 التقارير الشاملة للصيدلية (قريباً) -->
+            <!--  التقارير الشاملة للصيدلية (قريباً) -->
             <a href="#" onclick="event.preventDefault(); showComingSoon('pharmacist_reports');" class="<?php echo $link_classes; ?> justify-between opacity-80 hover:opacity-100 border border-transparent hover:border-amber-500/30">
                 <div class="flex items-center gap-3">
                     <i data-lucide="chart-line" class="flex-shrink-0 text-amber-400"></i>
@@ -143,7 +143,7 @@ if ($role_id == 1) {
                 </span>
             </a>
 
-            <!-- 🚀  المبيعات-->
+            <!--   المبيعات-->
             <a href="#" onclick="event.preventDefault(); showComingSoon('sales');" class="<?php echo $link_classes; ?> justify-between opacity-80 hover:opacity-100 border border-transparent hover:border-amber-500/30">
                 <div class="flex items-center gap-3">
                     <i data-lucide="calculator" class="flex-shrink-0 text-amber-400"></i>
@@ -154,7 +154,7 @@ if ($role_id == 1) {
                 </span>
             </a>
 
-            <!-- 🚀 الموردين -->
+            <!--  الموردين -->
             <a href="#" onclick="event.preventDefault(); showComingSoon('suppliers');" class="<?php echo $link_classes; ?> justify-between opacity-80 hover:opacity-100 border border-transparent hover:border-amber-500/30">
                 <div class="flex items-center gap-3">
                     <i data-lucide="truck" class="flex-shrink-0 text-amber-400"></i>
@@ -182,7 +182,7 @@ if ($role_id == 1) {
         const titleText = "<?php echo $lang['coming_soon_title']; ?>";
         const btnText = "<?php echo $lang['ok_btn']; ?>";
 
-        // 💡 تحديد لون الزر بناءً على دور المستخدم (أزرق للأدمن، أخضر للصيدلاني)
+        //  تحديد لون الزر بناءً على دور المستخدم (أزرق للأدمن، أخضر للصيدلاني)
         const isPharmacist = <?php echo ($role_id == 2) ? 'true' : 'false'; ?>;
         const btnColor = isPharmacist ? '#0A7A48' : '#048AC1';
         let bodyText = '';

@@ -21,7 +21,7 @@ if (isset($_POST['login'])) {
         $user = mysqli_fetch_assoc($result);
 
         // ==================================================
-        // 🚀 بداية آلية التشفير الذكية
+        //  بداية آلية التشفير الذكية
         // ==================================================
         $isPasswordCorrect = false;
 
@@ -37,7 +37,7 @@ if (isset($_POST['login'])) {
             mysqli_query($conn, "UPDATE User SET Password = '$newHash' WHERE UserID = $uid");
         }
         // ==================================================
-        // 🔚 نهاية الآلية
+        //  نهاية الآلية
         // ==================================================
 
         if ($isPasswordCorrect) {
@@ -49,7 +49,7 @@ if (isset($_POST['login'])) {
             } elseif ($roleID == 2 && $isApproved == 0) {
                 $error = $lang['err_pending'];
             } elseif ($roleID == 2 && $isApproved == -1) {
-                // 💡 تم استبدال النص الثابت بمتغير اللغة
+                //  تم استبدال النص الثابت بمتغير اللغة
                 $error = $lang['err_incomplete_account'];
             } else {
                 $_SESSION['user_id'] = $user['UserID'];

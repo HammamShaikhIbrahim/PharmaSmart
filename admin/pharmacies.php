@@ -57,7 +57,7 @@ $query = "SELECT u.UserID, u.Fname, u.Lname, u.Phone, u.Email, u.CreatedAt, p.*
 
 $result = mysqli_query($conn, $query);
 
-// 🚀 معالجة طلب AJAX
+//  معالجة طلب AJAX
 if (isset($_GET['ajax'])) {
     ob_start();
     if (mysqli_num_rows($result) > 0) {
@@ -109,7 +109,7 @@ if (isset($_GET['ajax'])) {
     } else { ?>
         <tr>
             <td colspan="6" class="p-20">
-                <!-- 🚀 Empty State متحرك مستوحى من Uiverse (بالثيم الأزرق للأدمن) -->
+                <!--  Empty State متحرك مستوحى من Uiverse (بالثيم الأزرق للأدمن) -->
                 <div class="flex flex-col items-center justify-center text-center">
                     <div class="relative w-24 h-24 mb-6">
                         <!-- دائرة تنبض في الخلفية -->
@@ -254,10 +254,10 @@ include('../includes/sidebar.php');
         <!-- أدوات التحكم (الفلتر + البحث المباشر) -->
         <div class="flex flex-col md:flex-row items-center gap-4 w-full xl:w-auto justify-end">
 
-            <!-- 🚀 البحث السريع (AJAX Live Search) -->
+            <!--  البحث السريع (AJAX Live Search) -->
             <div class="w-full md:w-80">
                 <div class="relative group">
-                    <!-- 💡 استدعاء دالة fetchTableData() عند كل حرف يكتب (oninput) للبحث المباشر الحي -->
+                    <!--  استدعاء دالة fetchTableData() عند كل حرف يكتب (oninput) للبحث المباشر الحي -->
                     <input type="text" id="searchInput" oninput="fetchTableData()" placeholder="<?php echo $lang['search_pharmacy']; ?>" value="<?php echo htmlspecialchars($search); ?>"
                         class="w-full p-3 rounded-2xl border border-gray-200 dark:bg-slate-800 dark:border-slate-700 dark:text-white shadow-sm focus:ring-2 focus:ring-[#048AC1] outline-none transition-all text-sm">
                     <i data-lucide="search" class="top-3.5 text-gray-400 group-focus-within:text-[#048AC1] transition-colors <?php echo ($dir == 'rtl') ? 'absolute left-4' : 'absolute right-4'; ?> w-5 h-5"></i>
@@ -267,7 +267,7 @@ include('../includes/sidebar.php');
             <!-- الفلتر الزجاجي -->
             <div class="overflow-x-auto custom-scrollbar pb-2 -mb-2 w-full md:w-auto">
                 <div class="glass-radio-group shrink-0 mx-auto md:mx-0">
-                    <!-- 💡 يتم استدعاء دالة تحديث الجدول مع تغيير الحالة -->
+                    <!--  يتم استدعاء دالة تحديث الجدول مع تغيير الحالة -->
                     <input type="radio" name="status" id="filter-all" value="all" onchange="fetchTableData()" <?php echo ($status_filter == 'all') ? 'checked' : ''; ?> />
                     <label for="filter-all"><?php echo isset($lang['filter_all']) ? $lang['filter_all'] : 'الكل'; ?></label>
 
@@ -297,7 +297,7 @@ include('../includes/sidebar.php');
                         <th class="p-6 font-bold text-center whitespace-nowrap"><?php echo $lang['actions']; ?></th>
                     </tr>
                 </thead>
-                <!-- 💡 محتوى الجدول الذي سيتم تحديثه عبر الـ AJAX -->
+                <!--  محتوى الجدول الذي سيتم تحديثه عبر الـ AJAX -->
                 <tbody id="pharmaciesBody" class="divide-y divide-gray-200 dark:divide-slate-700/50 <?php echo ($dir == 'rtl') ? 'text-right' : 'text-left'; ?>">
                     <!-- سيتم ملؤه بواسطة الجافاسكربت فور تحميل الصفحة -->
                 </tbody>
@@ -308,7 +308,7 @@ include('../includes/sidebar.php');
 
 <script>
     // ==========================================
-    // 💡 دالة الـ AJAX للبحث المباشر (Live Search) مع Debounce
+    //  دالة الـ AJAX للبحث المباشر (Live Search) مع Debounce
     // ==========================================
     let fetchTimeoutId; // متغير لإيقاف الطلبات المتكررة أثناء الكتابة السريعة
 
@@ -358,7 +358,7 @@ include('../includes/sidebar.php');
     document.addEventListener('DOMContentLoaded', fetchTableData);
 
     // ==========================================
-    // 💡 دوال أزرار الإجراءات (SweetAlert)
+    //  دوال أزرار الإجراءات (SweetAlert)
     // ==========================================
     function confirmAction(id, type) {
         let modalTitle = Lang.title;
