@@ -1,5 +1,5 @@
 <?php
-    
+
 // ==========================================
 // 1. الإعدادات الأساسية والحماية
 // ==========================================
@@ -122,7 +122,7 @@ include('../includes/sidebar.php');
 
 
 
-<style> 
+<style>
     /* ستايل سلة المهملات المتحركة */
     .bin-button {
         display: flex;
@@ -253,7 +253,7 @@ include('../includes/sidebar.php');
             }
         }, 300);
     }
-    
+
 
     // جلب البيانات فور تحميل الصفحة لأول مرة
     document.addEventListener('DOMContentLoaded', fetchTableData);

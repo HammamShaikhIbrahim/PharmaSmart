@@ -325,9 +325,6 @@ if ($current_lang == 'ar') {
 
     $lang['patient_order_history'] = "السجل التاريخي لطلبات هذا العميل";
     $lang['previous_orders'] = "طلبات سابقة";
-
-
- 
 } else {
 
     // تسجيل الدخول | Login Page
@@ -646,5 +643,4 @@ if ($current_lang == 'ar') {
 
     $lang['patient_order_history'] = "Patient's Order History";
     $lang['previous_orders'] = "Previous Orders";
-
 }

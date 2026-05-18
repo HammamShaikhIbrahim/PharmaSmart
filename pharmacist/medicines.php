@@ -109,7 +109,7 @@ if (isset($_GET['search_system_med'])) {
     ";
 
     $sys_res = mysqli_query($conn, $sys_query);
-    $results =[];
+    $results = [];
     while ($row = mysqli_fetch_assoc($sys_res)) {
         $results[] = $row;
     }
@@ -262,10 +262,21 @@ include('../includes/sidebar.php');
         transition: all 0.3s ease;
     }
 
-    .edit-button:hover { background-color: rgba(10, 122, 72, 0.1); }
-    .dark .edit-button:hover { background-color: rgba(74, 222, 128, 0.2); }
-    .bin-button:hover { background-color: rgba(225, 29, 72, 0.1); }
-    .dark .bin-button:hover { background-color: rgba(225, 29, 72, 0.3); }
+    .edit-button:hover {
+        background-color: rgba(10, 122, 72, 0.1);
+    }
+
+    .dark .edit-button:hover {
+        background-color: rgba(74, 222, 128, 0.2);
+    }
+
+    .bin-button:hover {
+        background-color: rgba(225, 29, 72, 0.1);
+    }
+
+    .dark .bin-button:hover {
+        background-color: rgba(225, 29, 72, 0.3);
+    }
 
     input[type="number"]::-webkit-inner-spin-button,
     input[type="number"]::-webkit-outer-spin-button {
@@ -273,8 +284,14 @@ include('../includes/sidebar.php');
         margin: 0;
     }
 
-    .search-dropdown { overflow-y: auto; }
-    .search-dropdown::-webkit-scrollbar { width: 6px; }
+    .search-dropdown {
+        overflow-y: auto;
+    }
+
+    .search-dropdown::-webkit-scrollbar {
+        width: 6px;
+    }
+
     .search-dropdown::-webkit-scrollbar-thumb {
         background-color: rgba(10, 122, 72, 0.3);
         border-radius: 10px;
@@ -297,6 +314,7 @@ include('../includes/sidebar.php');
         gap: 8px;
         box-shadow: 0 4px 15px rgba(10, 122, 72, 0.2);
     }
+
     .btn-uiverse-add::before {
         content: '';
         position: absolute;
@@ -310,12 +328,19 @@ include('../includes/sidebar.php');
         background-color: #044E29;
         transition: all 0.6s cubic-bezier(0.23, 1, 0.320, 1);
     }
-    .btn-uiverse-add:hover::before { scale: 5; }
+
+    .btn-uiverse-add:hover::before {
+        scale: 5;
+    }
+
     .btn-uiverse-add:hover {
         box-shadow: 0 6px 20px rgba(10, 122, 72, 0.4);
         transform: translateY(-2px);
     }
-    .btn-uiverse-add:active { scale: 0.95; }
+
+    .btn-uiverse-add:active {
+        scale: 0.95;
+    }
 
     /* ====== زر مسح الباركود (في المودال) ====== */
     .btn-uiverse-custom {
@@ -335,14 +360,17 @@ include('../includes/sidebar.php');
         overflow: hidden;
         z-index: 1;
     }
+
     .dark .btn-uiverse-custom {
         background: rgba(74, 222, 128, 0.1);
         color: #4ADE80;
     }
+
     .btn-uiverse-custom:hover {
         background: #0A7A48;
         color: white;
     }
+
     .dark .btn-uiverse-custom:hover {
         background: #4ADE80;
         color: #0f172a;
@@ -376,7 +404,11 @@ include('../includes/sidebar.php');
                 <div class="absolute inset-0 flex h-full w-full justify-center [transform:skew(-12deg)_translateX(-150%)] group-hover:duration-1000 group-hover:[transform:skew(-12deg)_translateX(150%)]">
                     <div class="relative h-full w-10 bg-white/20"></div>
                 </div>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="plus-circle" aria-hidden="true" class="lucide lucide-plus-circle relative z-10 w-5 h-5"><circle cx="12" cy="12" r="10"></circle><path d="M8 12h8"></path><path d="M12 8v8"></path></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="plus-circle" aria-hidden="true" class="lucide lucide-plus-circle relative z-10 w-5 h-5">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M8 12h8"></path>
+                    <path d="M12 8v8"></path>
+                </svg>
                 <span class="relative z-10 text-sm"><?php echo $lang['add_med_to_stock']; ?></span>
             </button>
 
@@ -585,7 +617,7 @@ include('../includes/sidebar.php');
     let fetchTimeoutId;
     let searchSysTimeoutId;
 
-    
+
     //  الدالة الجديدة للتنبيه
     function showBarcodeComingSoon() {
         Swal.fire({

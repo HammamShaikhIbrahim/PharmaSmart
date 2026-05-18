@@ -86,7 +86,7 @@ if (isset($_POST['register'])) {
 
 <head>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $lang['register_title']; ?></title>
@@ -106,7 +106,7 @@ if (isset($_POST['register'])) {
             theme: {
                 extend: {
                     fontFamily: {
-                        sans:['Tajawal', 'sans-serif'],
+                        sans: ['Tajawal', 'sans-serif'],
                     }
                 }
             }
@@ -190,7 +190,6 @@ if (isset($_POST['register'])) {
         .dark .step-line {
             background-color: #334155;
         }
-
     </style>
 </head>
 
@@ -217,7 +216,7 @@ if (isset($_POST['register'])) {
             <div class="absolute inset-x-10 inset-y-0 rounded-2xl bg-gradient-to-br from-teal-300 to-cyan-500 dark:from-teal-600 dark:to-cyan-800 shadow-[inset_5px_5px_15px_rgba(255,255,255,0.6),inset_-5px_-5px_15px_rgba(0,0,0,0.2)]"></div>
             <div class="absolute inset-y-10 inset-x-0 rounded-2xl bg-gradient-to-br from-teal-300 to-cyan-500 dark:from-teal-600 dark:to-cyan-800 shadow-[inset_5px_5px_15px_rgba(255,255,255,0.6),inset_-5px_-5px_15px_rgba(0,0,0,0.2)]"></div>
         </div>
-        
+
         <!-- كبسولة صغيرة -->
         <div class="absolute bottom-1/3 right-1/3 w-20 h-40 rounded-full transform -rotate-[40deg] blur-md
                     bg-gradient-to-r from-emerald-400 to-green-300 dark:from-emerald-700 dark:to-green-800
@@ -273,26 +272,28 @@ if (isset($_POST['register'])) {
                 </div>
 
                 <form method="POST" enctype="multipart/form-data" class="space-y-8" onsubmit="return validateForm(event)">
-                                                 
-                                                <div id="section-1" class="bg-white/40 dark:bg-slate-800/60 p-6 md:p-8 rounded-3xl border border-white/60 dark:border-slate-700/50 shadow-sm">
-                                                    <h3 class="text-lg font-black text-gray-900 dark:text-white mb-5 flex items-center gap-2">
-                                                     <i class="fa-solid fa-user-doctor text-emerald-600 dark:text-emerald-400"></i>
-                                                <?php echo $lang['personal_info']; ?>
-                                                    </h3>                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-                                <div><label class="block text-xs font-bold text-gray-800 dark:text-gray-300 mb-1.5 mx-1"><?php echo $lang['first_name']; ?></label> <input type="text" name="fname" required class="glass-input w-full p-3.5 rounded-xl"></div>
-                                <div><label class="block text-xs font-bold text-gray-800 dark:text-gray-300 mb-1.5 mx-1"><?php echo $lang['last_name']; ?></label><input type="text" name="lname" required class="glass-input w-full p-3.5 rounded-xl"></div>
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                                <div class="md:col-span-1"><label class="block text-xs font-bold text-gray-800 dark:text-gray-300 mb-1.5 mx-1"><?php echo $lang['phone']; ?></label><input type="text" name="phone" required class="glass-input w-full p-3.5 rounded-xl text-left" dir="ltr" placeholder="05XXXXXXXX"></div>
-                                <div class="md:col-span-1"><label class="block text-xs font-bold text-gray-800 dark:text-gray-300 mb-1.5 mx-1"><?php echo $lang['email']; ?></label><input type="email" name="email" required class="glass-input w-full p-3.5 rounded-xl text-left" dir="ltr" placeholder="name@pharma.com"></div>
-                                <div class="md:col-span-1"><label class="block text-xs font-bold text-gray-800 dark:text-gray-300 mb-1.5 mx-1"><?php echo $lang['password']; ?></label><input type="password" name="password" required class="glass-input w-full p-3.5 rounded-xl text-left" dir="ltr" placeholder="••••••••"></div>
-                            </div>
-                                             </div>
+
+                    <div id="section-1" class="bg-white/40 dark:bg-slate-800/60 p-6 md:p-8 rounded-3xl border border-white/60 dark:border-slate-700/50 shadow-sm">
+                        <h3 class="text-lg font-black text-gray-900 dark:text-white mb-5 flex items-center gap-2">
+                            <i class="fa-solid fa-user-doctor text-emerald-600 dark:text-emerald-400"></i>
+                            <?php echo $lang['personal_info']; ?>
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                            <div><label class="block text-xs font-bold text-gray-800 dark:text-gray-300 mb-1.5 mx-1"><?php echo $lang['first_name']; ?></label> <input type="text" name="fname" required class="glass-input w-full p-3.5 rounded-xl"></div>
+                            <div><label class="block text-xs font-bold text-gray-800 dark:text-gray-300 mb-1.5 mx-1"><?php echo $lang['last_name']; ?></label><input type="text" name="lname" required class="glass-input w-full p-3.5 rounded-xl"></div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                            <div class="md:col-span-1"><label class="block text-xs font-bold text-gray-800 dark:text-gray-300 mb-1.5 mx-1"><?php echo $lang['phone']; ?></label><input type="text" name="phone" required class="glass-input w-full p-3.5 rounded-xl text-left" dir="ltr" placeholder="05XXXXXXXX"></div>
+                            <div class="md:col-span-1"><label class="block text-xs font-bold text-gray-800 dark:text-gray-300 mb-1.5 mx-1"><?php echo $lang['email']; ?></label><input type="email" name="email" required class="glass-input w-full p-3.5 rounded-xl text-left" dir="ltr" placeholder="name@pharma.com"></div>
+                            <div class="md:col-span-1"><label class="block text-xs font-bold text-gray-800 dark:text-gray-300 mb-1.5 mx-1"><?php echo $lang['password']; ?></label><input type="password" name="password" required class="glass-input w-full p-3.5 rounded-xl text-left" dir="ltr" placeholder="••••••••"></div>
+                        </div>
+                    </div>
 
                     <div id="section-2" class="bg-white/40 dark:bg-slate-800/60 p-6 md:p-8 rounded-3xl border border-white/60 dark:border-slate-700/50 shadow-sm">
                         <h3 class="text-lg font-black text-gray-900 dark:text-white mb-5 flex items-center gap-2">
                             <i class="fa-solid fa-staff-snake text-emerald-600 dark:text-emerald-400"></i><?php echo $lang['pharmacy_info']; ?>
-                        </h3>                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
                             <div><label class="block text-xs font-bold text-gray-800 dark:text-gray-300 mb-1.5 mx-1"><?php echo $lang['pharmacy_name']; ?></label><input type="text" name="pName" required class="glass-input w-full p-3.5 rounded-xl"></div>
                             <div><label class="block text-xs font-bold text-gray-800 dark:text-gray-300 mb-1.5 mx-1"><?php echo $lang['license_num']; ?></label><input type="text" name="license" required class="glass-input w-full p-3.5 rounded-xl text-left" dir="ltr"></div>
                         </div>
@@ -398,7 +399,7 @@ if (isset($_POST['register'])) {
             className: 'custom-leaflet-marker',
             html: `<div class="flex items-center justify-center text-emerald-500 bg-white rounded-full p-1 shadow-lg border-2 border-emerald-500"><i data-lucide="map-pin" class="w-6 h-6"></i></div>`,
             iconSize: [36, 36],
-            iconAnchor:[18, 36],
+            iconAnchor: [18, 36],
         });
 
         var marker;

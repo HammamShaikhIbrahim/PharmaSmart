@@ -42,7 +42,7 @@ $query = "SELECT u.Fname, u.Lname, u.Phone, p.PharmacyName, p.Location, p.Workin
           WHERE p.Latitude IS NOT NULL";
 $result = mysqli_query($conn, $query);
 
-$pharmacies =[]; // بنعمل مصفوفة (Array) فاضية
+$pharmacies = []; // بنعمل مصفوفة (Array) فاضية
 // بنلف على كل النتائج اللي رجعت من الداتابيز ونحطها جوة المصفوفة
 while ($row = mysqli_fetch_assoc($result)) {
     $pharmacies[] = $row;
@@ -72,110 +72,134 @@ if ($dir == 'rtl') {
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <style>
-/* =========================================
+    /* =========================================
    تصميم فلتر الخريطة (Pill Design)
    يدعم Light Mode & Dark Mode بامتياز 
    ========================================= */
 
-/* 1. الحاوية الأساسية (الوضع النهاري افتراضياً) */
-.glass-radio-group {
-    display: flex;
-    position: relative;
-    background-color: #ffffff; /* أبيض للنهاري */
-    border-radius: 1rem;
-    padding: 4px;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05), 0 2px 8px rgba(0, 0, 0, 0.05); /* ظل خفيف */
-    width: fit-content;
-    border: 1px solid #e2e8f0; /* رمادي فاتح للحدود */
-    transition: all 0.3s ease;
-}
+    /* 1. الحاوية الأساسية (الوضع النهاري افتراضياً) */
+    .glass-radio-group {
+        display: flex;
+        position: relative;
+        background-color: #ffffff;
+        /* أبيض للنهاري */
+        border-radius: 1rem;
+        padding: 4px;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05), 0 2px 8px rgba(0, 0, 0, 0.05);
+        /* ظل خفيف */
+        width: fit-content;
+        border: 1px solid #e2e8f0;
+        /* رمادي فاتح للحدود */
+        transition: all 0.3s ease;
+    }
 
-/* الحاوية في الوضع الليلي (Dark Mode) */
-.dark .glass-radio-group {
-    background-color: #0f172a; /* كحلي داكن */
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.1);
-    border-color: #1e293b;
-}
+    /* الحاوية في الوضع الليلي (Dark Mode) */
+    .dark .glass-radio-group {
+        background-color: #0f172a;
+        /* كحلي داكن */
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.1);
+        border-color: #1e293b;
+    }
 
-.glass-radio-group input {
-    display: none;
-}
+    .glass-radio-group input {
+        display: none;
+    }
 
-/* 2. النصوص (الوضع النهاري افتراضياً) */
-.glass-radio-group label {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 90px;
-    font-size: 14px;
-    padding: 0.5rem 1rem;
-    cursor: pointer;
-    font-weight: 800;
-    position: relative;
-    z-index: 2;
-    transition: all 0.3s ease-in-out;
-    border-radius: 0.8rem;
-    color: #64748b; /* لون رمادي مريح للعين في النهاري */
-}
+    /* 2. النصوص (الوضع النهاري افتراضياً) */
+    .glass-radio-group label {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 90px;
+        font-size: 14px;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        font-weight: 800;
+        position: relative;
+        z-index: 2;
+        transition: all 0.3s ease-in-out;
+        border-radius: 0.8rem;
+        color: #64748b;
+        /* لون رمادي مريح للعين في النهاري */
+    }
 
-/* النصوص في الوضع الليلي */
-.dark .glass-radio-group label {
-    color: #94a3b8; /* رمادي فاتح لليلي */
-}
+    /* النصوص في الوضع الليلي */
+    .dark .glass-radio-group label {
+        color: #94a3b8;
+        /* رمادي فاتح لليلي */
+    }
 
-/*  تلوين النصوص عند التأشير (Hover) للوضعين */
-label[for="filter-all"]:hover { color: #048AC1; } /* أزرق */
-label[for="filter-active"]:hover { color: #10b981; } /* أخضر */
-label[for="filter-pending"]:hover { color: #f59e0b; } /* برتقالي */
+    /*  تلوين النصوص عند التأشير (Hover) للوضعين */
+    label[for="filter-all"]:hover {
+        color: #048AC1;
+    }
 
-/* إضافة توهج للنصوص عند الهوفر في الوضع الليلي فقط */
-.dark label[for="filter-active"]:hover { text-shadow: 0 0 8px rgba(16,185,129,0.5); }
-.dark label[for="filter-pending"]:hover { text-shadow: 0 0 8px rgba(245,158,11,0.5); }
+    /* أزرق */
+    label[for="filter-active"]:hover {
+        color: #10b981;
+    }
 
-/*  النص المختار دائماً أبيض في كلا الوضعين */
-.glass-radio-group input:checked + label {
-    color: #ffffff !important;
-    text-shadow: none !important;
-}
+    /* أخضر */
+    label[for="filter-pending"]:hover {
+        color: #f59e0b;
+    }
 
-/* 3. المزلاج (الخلفية الملونة التي تتحرك) */
-.glass-glider {
-    position: absolute;
-    top: 4px;
-    bottom: 4px;
-    width: calc((100% - 8px) / 3);
-    border-radius: 0.7rem;
-    z-index: 1;
-    transition: transform 0.4s cubic-bezier(0.37, 1.95, 0.66, 0.56), background 0.4s ease, box-shadow 0.4s ease;
-}
+    /* برتقالي */
 
-/* ألوان المزلاج والظلال */
-#filter-all:checked ~ .glass-glider {
-    transform: translateX(0%);
-    background: #048AC1;
-    box-shadow: 0 4px 10px rgba(4, 138, 193, 0.3);
-}
+    /* إضافة توهج للنصوص عند الهوفر في الوضع الليلي فقط */
+    .dark label[for="filter-active"]:hover {
+        text-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+    }
 
-#filter-active:checked ~ .glass-glider {
-    transform: translateX(100%);
-    background: #10b981;
-    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
-}
+    .dark label[for="filter-pending"]:hover {
+        text-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
+    }
 
-#filter-pending:checked ~ .glass-glider {
-    transform: translateX(200%);
-    background: #f59e0b;
-    box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);
-}
+    /*  النص المختار دائماً أبيض في كلا الوضعين */
+    .glass-radio-group input:checked+label {
+        color: #ffffff !important;
+        text-shadow: none !important;
+    }
 
-/*  دعم اللغة العربية RTL - عكس اتجاه حركة المزلاج */
-html[dir="rtl"] #filter-active:checked ~ .glass-glider {
-    transform: translateX(-100%);
-}
-html[dir="rtl"] #filter-pending:checked ~ .glass-glider {
-    transform: translateX(-200%);
-}
+    /* 3. المزلاج (الخلفية الملونة التي تتحرك) */
+    .glass-glider {
+        position: absolute;
+        top: 4px;
+        bottom: 4px;
+        width: calc((100% - 8px) / 3);
+        border-radius: 0.7rem;
+        z-index: 1;
+        transition: transform 0.4s cubic-bezier(0.37, 1.95, 0.66, 0.56), background 0.4s ease, box-shadow 0.4s ease;
+    }
+
+    /* ألوان المزلاج والظلال */
+    #filter-all:checked~.glass-glider {
+        transform: translateX(0%);
+        background: #048AC1;
+        box-shadow: 0 4px 10px rgba(4, 138, 193, 0.3);
+    }
+
+    #filter-active:checked~.glass-glider {
+        transform: translateX(100%);
+        background: #10b981;
+        box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+    }
+
+    #filter-pending:checked~.glass-glider {
+        transform: translateX(200%);
+        background: #f59e0b;
+        box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);
+    }
+
+    /*  دعم اللغة العربية RTL - عكس اتجاه حركة المزلاج */
+    html[dir="rtl"] #filter-active:checked~.glass-glider {
+        transform: translateX(-100%);
+    }
+
+    html[dir="rtl"] #filter-pending:checked~.glass-glider {
+        transform: translateX(-200%);
+    }
 </style>
 
 <!-- ==========================================

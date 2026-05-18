@@ -20,72 +20,54 @@ $accentColor = ($role_id == 1) ? '#048AC1' : '#0A7A48';
         const roleColor = "<?php echo $accentColor; ?>";
 
         if (mainElement) {
-            
-            // تصميم نظيف وبسيط يركز على الأسماء واسم المشروع فقط
+
+            // إضافة كلاسات لوسم الـ main ليعمل التثبيت بالأسفل
+            mainElement.classList.add('flex', 'flex-col');
+
             const footerHTML = `
                 <style>
-                    /* الحاوية الأساسية للفوتر */
-                    .signature-footer {
-                        margin-top: 4rem; 
+                    /* 1. عنصر الفراغ الذكي الذي يمنع الالتصاق بالمحتوى */
+                    .footer-spacer {
+                        flex-grow: 1;
+                        min-height: 3.5rem; /* هذه هي المسافة بين الخريطة والفوتر، يمكنك تكبيرها أو تصغيرها */
+                    }
+
+                    .simple-footer {
+                        /* التمدد لعرض الصفحة كاملة (بإلغاء حواف الـ main) */
                         margin-left: -2rem; 
                         margin-right: -2rem;
                         margin-bottom: -2rem;
+                        
+                        /* زوايا دائرية من الأعلى فقط */
+                        border-radius: 2rem 2rem 0 0; 
+                        
+                        /* تصميم بسيط بلون صلب */
                         background-color: #ffffff;
                         border-top: 1px solid #f1f5f9;
-                        padding: 2rem 1rem 1.5rem 1rem;
-                        position: relative;
-                        overflow: hidden; /* لمنع خروج العلامة المائية */
+                        
+                        padding: 1.5rem 2rem;
                         display: flex;
                         flex-direction: column;
                         align-items: center;
                         justify-content: center;
-                        transition: background-color 0.3s ease, border-color 0.3s ease;
+                        gap: 0.5rem;
                         z-index: 10;
+                        transition: background-color 0.3s, border-color 0.3s;
                     }
 
-                    .dark .signature-footer {
-                        background-color: #0f172a;
+                    /* الوضع الليلي البسيط */
+                    .dark .simple-footer {
+                        background-color: #0f172a; 
                         border-top: 1px solid #1e293b;
                     }
 
-                    /*  الشعار كعلامة مائية شفافة في الخلفية */
-                    .footer-watermark {
-                        position: absolute;
-                        top: 50%;
-                        left: 50%;
-                        transform: translate(-50%, -50%);
-                        width: 250px; /* حجم الشعار */
-                        height: auto;
-                        opacity: 0.04; /* شفافية منخفضة جداً ليكون أنيقاً */
-                        pointer-events: none; /* لمنع التفاعل معه */
-                        z-index: 0;
-                    }
-
-                    .dark .footer-watermark {
-                        opacity: 0.02; /* شفافية أقل في الوضع الليلي */
-                    }
-
-                    /* المحتوى الفعلي فوق العلامة المائية */
-                    .footer-content-wrapper {
-                        position: relative;
-                        z-index: 1;
-                        display: flex;
-                        flex-direction: column;
-                        align-items: center;
-                        gap: 1rem; /*  تقليل المسافة بين اسم المشروع والأسماء */
-                    }
-
-                    /* اسم المشروع */
                     .brand-name {
-                        font-size: 2rem; /*  تصغير حجم الخط قليلاً ليتناسب مع النحافة الجديدة */
+                        font-size: 1.25rem; 
                         font-weight: 900;
-                        letter-spacing: 0.05em;
-                        color: ${roleColor}; /* يأخذ لون الدور (أزرق/أخضر) */
+                        color: ${roleColor}; 
                         margin: 0;
-                        line-height: 1;
                     }
 
-                    /* حاوية أسماء المطورين */
                     .team-names {
                         display: flex;
                         flex-wrap: wrap;
@@ -94,24 +76,31 @@ $accentColor = ($role_id == 1) ? '#048AC1' : '#0A7A48';
                         gap: 1rem;
                         color: #64748b;
                         font-weight: 700;
-                        font-size: 1rem; /*  تصغير خط الأسماء درجة واحدة */
+                        font-size: 0.85rem; 
                     }
 
                     .dark .team-names {
                         color: #94a3b8;
                     }
 
-                    /* النقطة الفاصلة بين الأسماء (تختفي في الموبايل) */
                     .name-separator {
-                        color: ${roleColor};
-                        opacity: 0.6;
-                        margin: 0 0.5rem;
+                        color: #cbd5e1;
+                    }
+                    
+                    .dark .name-separator {
+                        color: #334155;
                     }
 
                     @media (max-width: 640px) {
+                        .simple-footer {
+                            margin-left: -1rem; 
+                            margin-right: -1rem;
+                            margin-bottom: -1rem;
+                            border-radius: 1.5rem 1.5rem 0 0;
+                        }
                         .team-names {
                             flex-direction: column;
-                            gap: 0.5rem;
+                            gap: 0.2rem;
                         }
                         .name-separator {
                             display: none;
@@ -119,19 +108,17 @@ $accentColor = ($role_id == 1) ? '#048AC1' : '#0A7A48';
                     }
                 </style>
 
-                <footer class="signature-footer">
-                   
-                    
-                    <div class="footer-content-wrapper">
-                        <h2 class="brand-name">PharmaSmart</h2>
-                        
-                        <div class="team-names" dir="ltr">
-                            <span>Hammam Ibrahim</span>
-                            <span class="name-separator"></span>
-                            <span>Obada Majdobi</span>
-                            <span class="name-separator"></span>
-                            <span>Qais Daraghmeh</span>
-                        </div>
+                <!-- تم إضافة عنصر الفراغ هنا قبل الفوتر -->
+                <div class="footer-spacer"></div>
+                
+                <footer class="simple-footer">
+                    <h2 class="brand-name">PharmaSmart</h2>
+                    <div class="team-names" dir="ltr">
+                        <span>Hammam Ibrahim</span>
+                        <span class="name-separator">|</span>
+                        <span>Obada Majdobi</span>
+                        <span class="name-separator">|</span>
+                        <span>Qais Daraghmeh</span>
                     </div>
                 </footer>
             `;
@@ -140,22 +127,23 @@ $accentColor = ($role_id == 1) ? '#048AC1' : '#0A7A48';
         }
     });
 
-// ========================================================================
-// إعدادات الإشعارات المنبثقة (SweetAlert)
-// ========================================================================
-const Toast = Swal.mixin({
-    toast: true,
-    position: document.dir === 'rtl' ? 'top-start' : 'top-end',
-    showConfirmButton: false,
-    timer: 3000,
-    timerProgressBar: true,
-    background: document.documentElement.classList.contains('dark') ? '#1e293b' : '#ffffff',
-    color: document.documentElement.classList.contains('dark') ? '#f8fafc' : '#1f2937',
-    didOpen: (toast) => {
-        toast.addEventListener('mouseenter', Swal.stopTimer)
-        toast.addEventListener('mouseleave', Swal.resumeTimer)
-    }
-});
+    // ========================================================================
+    // إعدادات الإشعارات المنبثقة (SweetAlert)
+    // ========================================================================
+    const Toast = Swal.mixin({
+        toast: true,
+        position: document.dir === 'rtl' ? 'top-start' : 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        background: document.documentElement.classList.contains('dark') ? '#1e293b' : '#ffffff',
+        color: document.documentElement.classList.contains('dark') ? '#f8fafc' : '#1f2937',
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer)
+            toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+    });
 </script>
 </body>
+
 </html>

@@ -46,4 +46,3 @@ if (!empty($data->user_id)) {
 } else {
     echo json_encode(["status" => "error", "message" => "معرف المستخدم مفقود"]);
 }
-?>
